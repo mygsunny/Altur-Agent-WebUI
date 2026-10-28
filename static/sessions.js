@@ -9262,7 +9262,7 @@ function _sessionDisplayTitle(s){
 
 function _sessionTitleIsDefaultWebUI(rawTitle){
   const title=String(rawTitle||'').replace(/\s+/g,' ').trim();
-  return title==='Hermes WebUI'||title==='Altur-Agent'||/^Hermes WebUI #\d+$/.test(title);
+  return title==='Hermes WebUI'||title==='Altru'||/^Hermes WebUI #\d+$/.test(title);
 }
 
 function _sessionTitleTags(rawTitle){

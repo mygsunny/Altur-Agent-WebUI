@@ -460,7 +460,7 @@ def _patch_task(conn, task_id: str, body: dict):
         if not current:
             raise LookupError("task not found")
         if not hasattr(kb, "schedule_task"):
-            raise RuntimeError("scheduling requires a newer Altur-Agent")
+            raise RuntimeError("scheduling requires a newer Altru")
         reason = body.get("reason") or None
         if not kb.schedule_task(conn, task_id, reason=reason):
             raise ValueError(f"cannot schedule task from status: {current.status}")

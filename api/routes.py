@@ -1767,11 +1767,11 @@ def _run_gateway_lifecycle_command(action: str) -> subprocess.CompletedProcess:
 
     agent_dir = getattr(api_config, "_AGENT_DIR", None)
     if not agent_dir:
-        raise FileNotFoundError("Altur-Agent agent checkout not found")
+        raise FileNotFoundError("Altru agent checkout not found")
     agent_dir = Path(agent_dir).expanduser().resolve()
     main_py = agent_dir / "hermes_cli" / "main.py"
     if not main_py.exists():
-        raise FileNotFoundError("Altur-Agent agent CLI entrypoint not found")
+        raise FileNotFoundError("Altru agent CLI entrypoint not found")
 
     cmd = [str(getattr(api_config, "PYTHON_EXE", sys.executable)), str(main_py)]
     profile_name = ""
@@ -13340,7 +13340,7 @@ button:hover{background:rgba(124,185,255,.25)}
 .err{color:#e94560;font-size:12px;margin-top:10px;display:none}
 </style></head><body>
 <div class="card">
-  <img class="logo" src="static/brand-logo.svg" alt="Altur-Agent logo">
+  <img class="logo" src="static/brand-logo.svg" alt="Altru logo">
   <h1>{{BOT_NAME}}</h1>
   <p class="sub">{{LOGIN_SUBTITLE}}</p>
   <form id="login-form" data-invalid-pw="{{LOGIN_INVALID_PW}}" data-conn-failed="{{LOGIN_CONN_FAILED}}">
@@ -13965,7 +13965,7 @@ def _build_llm_wiki_status() -> dict:
             "path_configured": path_configured,
             "path_source": path_source,
             "toggle_available": False,
-            "toggle_reason": "Altur-Agent exposes WIKI_PATH/wiki.path for location, but no stable on/off config flag is currently available.",
+            "toggle_reason": "Altru exposes WIKI_PATH/wiki.path for location, but no stable on/off config flag is currently available.",
             "docs_url": _LLM_WIKI_DOCS_URL,
         }
         if not wiki_path.exists():
@@ -15411,11 +15411,11 @@ _SHELL_ERROR_HTML = """<!doctype html>
 <head>
   <meta charset=\"utf-8\">
   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
-  <title>Altur-Agent is restarting</title>
+  <title>Altru is restarting</title>
 </head>
 <body style=\"margin:0;padding:2rem;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#111827;color:#e5e7eb;\">
   <main style=\"max-width:40rem;margin:10vh auto;line-height:1.5;\">
-    <h1 style=\"font-size:1.5rem;margin:0 0 0.75rem;\">Altur-Agent is restarting…</h1>
+    <h1 style=\"font-size:1.5rem;margin:0 0 0.75rem;\">Altru is restarting…</h1>
     <p style=\"margin:0;color:#cbd5e1;\">The WebUI shell could not load cleanly. Refresh in a moment if this page does not update automatically.</p>
   </main>
 </body>
@@ -16365,7 +16365,7 @@ def handle_get(handler, parsed) -> bool:
 
     if parsed.path == "/login":
         _settings = load_settings()
-        _bn = _html.escape(_settings.get("bot_name") or "Altur-Agent")
+        _bn = _html.escape(_settings.get("bot_name") or "Altru")
         # `settings.language` is None until the user explicitly picks a locale
         # (#7622). This page is server-rendered, so client-side browser
         # detection has not run yet — honour Accept-Language here too, or the

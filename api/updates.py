@@ -1853,7 +1853,7 @@ def _categorized_summary_bullets_from_text(text: str) -> tuple[list[str], list[s
 def _fallback_update_bullets(details: list[dict]) -> list[str]:
     bullets = []
     for item in details:
-        label = item.get('label') or item.get('name') or 'Altur-Agent'
+        label = item.get('label') or item.get('name') or 'Altru'
         behind = item.get('behind') or 0
         commits = item.get('commits') or []
         if commits:
@@ -1869,7 +1869,7 @@ def _worth_knowing_bullets(details: list[dict]) -> list[str]:
     items = []
     truncated = [item for item in details if item.get('commits_truncated') and item.get('commits_limit')]
     for item in truncated[:2]:
-        label = item.get('label') or item.get('name') or 'Altur-Agent'
+        label = item.get('label') or item.get('name') or 'Altru'
         behind = item.get('behind') or 0
         limit = item.get('commits_limit') or len(item.get('commits') or [])
         items.append(
@@ -1878,7 +1878,7 @@ def _worth_knowing_bullets(details: list[dict]) -> list[str]:
     if items:
         return items
     targets = [
-        f"{item.get('label') or item.get('name') or 'Altur-Agent'} ({item.get('behind') or 0} update{'s' if (item.get('behind') or 0) != 1 else ''})"
+        f"{item.get('label') or item.get('name') or 'Altru'} ({item.get('behind') or 0} update{'s' if (item.get('behind') or 0) != 1 else ''})"
         for item in details
         if item.get('behind')
     ]
@@ -1925,7 +1925,7 @@ def _fallback_update_summary(updates: dict, details: list[dict]) -> str:
 
 def _update_summary_prompt(details: list[dict]) -> tuple[str, str]:
     system = (
-        "You write human-readable release summaries for Altur-Agent users. "
+        "You write human-readable release summaries for Altru users. "
         "Focus on what the user will notice in the product. Keep it simple, specific, and short. "
         "avoid technical jargon, implementation details, SHA names, branch names, and file paths unless necessary. "
         "Return only bullets. Do not include headings, markdown tables, intro paragraphs, or closing notes."

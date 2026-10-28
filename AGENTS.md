@@ -1,4 +1,4 @@
-# Agent instructions for Altur-Agent
+# Agent instructions for Altru
 
 This file is the shared entry point for AI assistants working in this
 repository. Keep it project-specific and safe to publish. Do not put personal
@@ -135,7 +135,7 @@ If verification is blocked, report the blocker rather than claim completion.
 
 ## Local state and secrets
 
-Altur-Agent can read and write real agent state, sessions, workspaces,
+Altru can read and write real agent state, sessions, workspaces,
 credentials, and cron data. Treat local validation as potentially destructive
 unless you have confirmed the active state directories.
 

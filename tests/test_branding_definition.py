@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+NAME = json.loads((ROOT / 'BRANDING.json').read_text())['name']
 
 
 @pytest.fixture
@@ -20,21 +21,21 @@ def settings(tmp_path, monkeypatch):
 
 def test_root_branding_file_has_primary_name_and_logo():
     b = json.loads((ROOT / 'BRANDING.json').read_text())
-    assert b['name'] == 'Altur-Agent'
+    assert b['name'] == NAME
     assert (ROOT / b['logo']).is_file()
 
 
 def test_managed_name_overrides_old_default_without_rewriting_file(settings):
     stored = {'bot_name': 'Hermes', 'theme': 'dark', 'unrelated': 'preserve'}
     settings.SETTINGS_FILE.write_text(json.dumps(stored))
-    assert settings.load_settings()['bot_name'] == 'Altur-Agent'
+    assert settings.load_settings()['bot_name'] == NAME
     assert json.loads(settings.SETTINGS_FILE.read_text()) == stored
 
 
 def test_other_settings_saves_preserve_the_saved_custom_name(settings):
     settings.SETTINGS_FILE.write_text(json.dumps({'bot_name': 'Captain Hermes'}))
-    saved = settings.save_settings({'sound_enabled': True, 'bot_name': 'Altur-Agent'})
-    assert saved['bot_name'] == 'Altur-Agent'
+    saved = settings.save_settings({'sound_enabled': True, 'bot_name': NAME})
+    assert saved['bot_name'] == NAME
     assert json.loads(settings.SETTINGS_FILE.read_text())['bot_name'] == 'Captain Hermes'
 
 

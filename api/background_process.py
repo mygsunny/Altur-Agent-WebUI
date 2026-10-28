@@ -2677,7 +2677,7 @@ def recover_processes_for_webui(process_registry=None, get_session_fn=None) -> i
             # Hermes Agent is optional in isolated WebUI/test environments.
             # The drain loop already treats a missing registry as unavailable;
             # startup recovery must preserve that fail-soft contract.
-            logger.debug("process recovery unavailable: Altur-Agent is not installed")
+            logger.debug("process recovery unavailable: Altru is not installed")
             return 0
     if get_session_fn is None:
         from api.models import get_session as get_session_fn

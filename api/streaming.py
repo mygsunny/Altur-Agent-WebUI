@@ -1453,7 +1453,7 @@ _CANCEL_MARKER_PATTERNS = ('task cancelled', 'task canceled', 'response interrup
 
 _WEBUI_PROGRESS_PROMPT = """
 WebUI progress guidance:
-- Match the normal Altur-Agent messaging style, but do not let long tool-running WebUI turns appear silent.
+- Match the normal Altru messaging style, but do not let long tool-running WebUI turns appear silent.
 - For long multi-step work that uses tools, emit brief user-visible progress updates as normal assistant content, not only as hidden reasoning.
 - Before the first tool batch in a long task, say what you are about to inspect.
 - After each meaningful batch of tool calls, say what you just confirmed and what you will check next before continuing with more tools.
@@ -1954,7 +1954,7 @@ def _preferred_agent_display_name() -> str:
     except Exception:
         logger.debug("Failed to load bot_name for cancellation copy", exc_info=True)
         name = ''
-    return name or 'Altur-Agent'
+    return name or 'Altru'
 
 
 def _preferred_agent_display_name_for_session(session) -> str:
@@ -1965,7 +1965,7 @@ def _preferred_agent_display_name_for_session(session) -> str:
 
 
 def _cancelled_turn_hint(agent_name: str | None = None) -> str:
-    name = str(agent_name or _preferred_agent_display_name()).strip() or 'Altur-Agent'
+    name = str(agent_name or _preferred_agent_display_name()).strip() or 'Altru'
     return f'The run was cancelled by the user before {name} finished. No provider failure occurred.'
 
 
@@ -3782,7 +3782,7 @@ def _set_streaming_hermes_home_override(profile_home: str):
         return _home_override_mod, _token, True
     except Exception:
         logger.debug(
-            "Failed to set streaming Altur-Agent home override; continuing with os.environ mirror",
+            "Failed to set streaming Altru home override; continuing with os.environ mirror",
             exc_info=True,
         )
         return None, None, False
@@ -3795,7 +3795,7 @@ def _reset_streaming_hermes_home_override(override_mod, override_token, override
     try:
         override_mod.reset_hermes_home_override(override_token)
     except Exception:
-        logger.debug("Failed to reset streaming Altur-Agent home override", exc_info=True)
+        logger.debug("Failed to reset streaming Altru home override", exc_info=True)
 
 
 # ── Per-turn session identity (xsession wakeup misroute root fix — Option 1) ─

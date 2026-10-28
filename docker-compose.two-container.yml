@@ -1,4 +1,4 @@
-# Two-container Docker Compose: agent runtime + Altur-Agent
+# Two-container Docker Compose: agent runtime + Altru
 #
 # QUICK START:
 #   docker compose -f docker-compose.two-container.yml up -d

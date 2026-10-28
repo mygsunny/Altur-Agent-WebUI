@@ -28,10 +28,10 @@ from api.config import (
 from api.subprocess_utils import windows_hide_flags
 
 _RESTART_REQUIRED_MESSAGE = (
-    "Altur-Agent was updated while Altur-Agent was running. "
+    "Altru was updated while Altru was running. "
     "WebUI cannot verify that the Agent update completed safely. "
     "Check the Agent update outcome and environment first. "
-    "Restart Altur-Agent manually before retrying this action."
+    "Restart Altru manually before retrying this action."
 )
 _AGENT_UPDATE_MARKER = ".hermes-update-in-progress"
 _AGENT_RECOVERY_MARKERS = (".update-incomplete", ".lazy-refresh-incomplete")

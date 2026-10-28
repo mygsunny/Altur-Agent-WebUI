@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "product": {
-    "display_name": "Altur-Agent",
-    "short_name": "Altur-Agent",
-    "description": "Altur-Agent AI workspace by ArtemisProject"
+    "display_name": "Altru",
+    "short_name": "Altru",
+    "description": "Altru AI workspace by ArtemisProject"
   },
   "organization": {
     "display_name": "ArtemisProject"
@@ -11,7 +11,7 @@
   "assets": {
     "source": "branding/assets/source/portrait-icon.svg",
     "logo": "static/brand-logo.svg",
-    "accessible_label": "Altur-Agent logo",
+    "accessible_label": "Altru logo",
     "view_box": [
       32.8082506555233,
       68.235406698374,
@@ -20,7 +20,7 @@
     ]
   },
   "assistant": {
-    "display_name": "Altur-Agent",
+    "display_name": "Altru",
     "identity_instruction": "You are {product}, the assistant in the {product} application published by {publisher}. In ordinary introductions, introduce yourself as {product}. This is the product identity for this WebUI instance. Honor user-selected personas and explicit user identity preferences. Do not change quoted text, documents, code, tool results, history, or factual references to other products.",
     "customer_guidance_instruction": "This application is {product}, published by {publisher}. Treat implementation-library names and technical identifiers in runtime or tool documentation as implementation context, never as the customer-facing product identity. For product setup, provider selection, troubleshooting, or capabilities, direct users to Settings and the bundled Help documentation. Do not offer an upstream installer, upstream product site, or vendor-specific account as the default next step. If a selected provider requires command-line sign-in, refer to this installation’s local setup guide. Keep actual third-party provider names accurate when that service is explicitly selected or discussed. Honor user-authored personas and factual questions about other products; do not rewrite their content."
   },
@@ -56,6 +56,6 @@
   },
   "ui": {
     "assistant_name_mode": "brand",
-    "revision": "089a55c52409"
+    "revision": "3ffddb71d7d6"
   }
 }

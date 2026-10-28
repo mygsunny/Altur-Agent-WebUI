@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content">
-<title>Altur-Agent</title>
+<title>Altru</title>
 <!-- base href enables subpath mount support; all static paths must stay relative (no leading slash).
      MUST appear before manifest/favicon links so browsers resolve relative URLs against the
      correct base when the page is served from /session/<id> routes. See #2226. -->
@@ -15,7 +15,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Altur-Agent">
+<meta name="apple-mobile-web-app-title" content="Altru">
 <link rel="apple-touch-icon" sizes="512x512" href="static/apple-touch-icon.png">
 <script>(function(){try{var _hadAppearance=localStorage.getItem('hermes-theme')!==null||localStorage.getItem('hermes-skin')!==null;var themes={light:1,dark:1,system:1},skins={codex:1,terracotta:1,default:1,ares:1,mono:1,graphite:1,github:1,slate:1,poseidon:1,sisyphus:1,charizard:1,sienna:1,catppuccin:1,hepburn:1,nous:1,'geist-contrast':1,neon:1,'neon-soft':1,'neon-paint':1,zeus:1,'verdigris':1},legacy={slate:['dark','slate'],solarized:['dark','poseidon'],monokai:['dark','sisyphus'],nord:['dark','slate'],oled:['dark','default']},t=(localStorage.getItem('hermes-theme')||'dark').toLowerCase(),s=(localStorage.getItem('hermes-skin')||'').toLowerCase(),m=legacy[t],theme=m?m[0]:(themes[t]?t:'dark');var pendingExt=s&&s!=='default'&&!skins[s]&&!legacy[s];var skin=skins[s]?s:(pendingExt?s:(m?m[1]:'default'));if(_hadAppearance){localStorage.setItem('hermes-theme',theme);localStorage.setItem('hermes-skin',skin);}if(theme==='system')theme=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';if(theme==='dark')document.documentElement.classList.add('dark');if(skin!=='default')document.documentElement.dataset.skin=skin;}catch(e){document.documentElement.classList.add('dark');}})()</script>
 <script>(function(){try{var fs=localStorage.getItem('hermes-font-size');if(fs&&fs!=='default')document.documentElement.dataset.fontSize=fs;}catch(e){}})()</script>
@@ -118,7 +118,7 @@
       }catch(_){}
     })();
   </script>
-<meta name="description" content="Altur-Agent AI workspace by ArtemisProject">
+<meta name="description" content="Altru AI workspace by ArtemisProject">
 <meta name="author" content="ArtemisProject">
 <script src="static/branding.js?v=__WEBUI_VERSION__"></script>
 </head>
@@ -136,9 +136,9 @@
   </div>
   <div class="app-titlebar-inner">
     <span class="app-titlebar-icon" aria-hidden="true">
-      <img src="static/brand-logo.svg" width="18" height="18" alt="Altur-Agent logo">
+      <img src="static/brand-logo.svg" width="18" height="18" alt="Altru logo">
     </span>
-    <span class="app-titlebar-title" id="appTitlebarTitle">Altur-Agent</span>
+    <span class="app-titlebar-title" id="appTitlebarTitle">Altru</span>
     <span class="app-titlebar-sub" id="appTitlebarSub" hidden></span>
   </div>
   <div class="app-titlebar-spacer" aria-hidden="true"></div>
@@ -473,7 +473,7 @@
             </div>
             <div class="messages" id="messages">
       <div class="empty-state" id="emptyState">
-        <div class="empty-logo"><img src="static/brand-logo.svg" width="80" height="80" alt="Altur-Agent logo"></div>
+        <div class="empty-logo"><img src="static/brand-logo.svg" width="80" height="80" alt="Altru logo"></div>
         <h2 data-i18n="empty_title">What can I help with?</h2>
         <p data-i18n="empty_subtitle">Ask anything, run commands, explore files, or manage your scheduled tasks.</p>
         <div class="suggestion-grid">
@@ -500,18 +500,18 @@
       <div class="offline-copy">
         <strong id="offlineTitle" data-i18n="offline_title">Connection lost</strong>
         <span id="offlineDetails" data-i18n="offline_browser_detail">Your browser reports that this device is offline.</span>
-        <span id="offlineAutorefresh" data-i18n="offline_autorefresh">I will refresh this page automatically when Altur-Agent is reachable again.</span>
+        <span id="offlineAutorefresh" data-i18n="offline_autorefresh">I will refresh this page automatically when Altru is reachable again.</span>
       </div>
       <button class="offline-action" id="offlineCheckNow" type="button" onclick="checkOfflineRecoveryNow()" data-i18n="offline_check_now">Check now</button>
     </div>
     <div class="agent-health-banner" id="agentHealthBanner" role="alert" aria-live="assertive" hidden>
       <div class="agent-health-copy">
-        <strong id="agentHealthTitle">Altur-Agent agent is not responding</strong>
+        <strong id="agentHealthTitle">Altru agent is not responding</strong>
         <span id="agentHealthDetails">The gateway heartbeat failed. Messages may not be delivered until it comes back.</span>
       </div>
       <div class="agent-health-actions">
         <button class="agent-health-restart" id="btnRestartGateway" type="button" onclick="restartGatewayService()">Restart Service</button>
-        <button class="agent-health-dismiss" id="agentHealthDismiss" type="button" onclick="dismissAgentHealthAlert()" aria-label="Dismiss Altur-Agent agent heartbeat alert">Dismiss</button>
+        <button class="agent-health-dismiss" id="agentHealthDismiss" type="button" onclick="dismissAgentHealthAlert()" aria-label="Dismiss Altru agent heartbeat alert">Dismiss</button>
       </div>
     </div>
     <div class="composer-wrap" id="composerWrap">
@@ -626,7 +626,7 @@
           <span class="voice-mode-indicator" id="voiceModeIndicator"></span>
           <span class="voice-mode-label" id="voiceModeLabel"></span>
         </div>
-        <textarea id="msg" rows="1" enterkeyhint="enter" placeholder="Message Altur-Agent…"></textarea>
+        <textarea id="msg" rows="1" enterkeyhint="enter" placeholder="Message Altru…"></textarea>
         <div id="composerWorkspaceContext" class="sr-only"></div>
         <div class="composer-footer">
           <div class="composer-left">
@@ -1199,7 +1199,7 @@
             <div class="settings-section-head">
               <div>
                 <div class="settings-section-title" data-i18n="settings_section_preferences_title">Preferences</div>
-                <div class="settings-section-meta" data-i18n="settings_section_preferences_meta">Defaults and UI behavior for Altur-Agent.</div>
+                <div class="settings-section-meta" data-i18n="settings_section_preferences_meta">Defaults and UI behavior for Altru.</div>
               </div>
             </div>
             <div class="settings-field">
@@ -1287,7 +1287,7 @@
                 <input type="checkbox" id="settingsVoiceModeEnabled" style="width:15px;height:15px;accent-color:var(--accent)">
                 <span data-i18n="settings_label_voice_mode">Hands-free voice mode button</span>
               </label>
-              <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="settings_desc_voice_mode">Show the voice-mode button (audio waveform) next to the dictation mic. Lets you speak naturally — Altur-Agent auto-sends after a pause and reads replies aloud. Requires a browser that supports both speech recognition and TTS.</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="settings_desc_voice_mode">Show the voice-mode button (audio waveform) next to the dictation mic. Lets you speak naturally — Altru auto-sends after a pause and reads replies aloud. Requires a browser that supports both speech recognition and TTS.</div>
             </div>
             <div class="settings-field">
               <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
@@ -1334,7 +1334,7 @@
                 <span id="notificationPermissionButtonWrap" style="display:inline-flex">
                   <button type="button" class="sm-btn" id="notificationPermissionButton" onclick="requestNotificationPermission()" style="padding:5px 10px;font-size:12px" data-i18n="notifications_enable_btn">Enable notifications</button>
                 </span>
-                <button type="button" class="sm-btn" onclick="sendBrowserNotification('Altur-Agent test','Notifications are ready.',{force:true});" style="padding:5px 10px;font-size:12px" data-i18n="notifications_test_btn">Send test</button>
+                <button type="button" class="sm-btn" onclick="sendBrowserNotification('Altru test','Notifications are ready.',{force:true});" style="padding:5px 10px;font-size:12px" data-i18n="notifications_test_btn">Send test</button>
                 <span id="notificationPermissionStatus" style="font-size:11px;color:var(--muted)"></span>
               </div>
             </div>
@@ -1519,7 +1519,7 @@
             <div class="settings-field">
               <label for="settingsBotName" data-i18n="settings_label_bot_name">Default assistant name</label>
               <div style="font-size:11px;color:var(--muted);margin-bottom:6px" data-i18n="settings_desc_bot_name">Used for the default profile only. Other profiles use their own profile names.</div>
-              <input type="text" id="settingsBotName" placeholder="Altur-Agent" maxlength="64" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
+              <input type="text" id="settingsBotName" placeholder="Altru" maxlength="64" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
             </div>
             <button class="sm-btn" onclick="saveSettings()" style="margin-top:12px;width:100%;padding:8px;font-weight:600" data-i18n="settings_save_btn">Save Settings</button>
             <div id="settingsPreferencesAutosaveStatus" class="settings-autosave-status" aria-live="polite"></div>
@@ -1542,14 +1542,14 @@
             <div class="settings-section-head">
               <div>
                 <div class="settings-section-title" data-i18n="settings_plugins_title">Plugins</div>
-                <div class="settings-section-meta" data-i18n="settings_plugins_meta">View installed Altur-Agent plugins and the lifecycle hooks they register. This panel is read-only.</div>
+                <div class="settings-section-meta" data-i18n="settings_plugins_meta">View installed Altru plugins and the lifecycle hooks they register. This panel is read-only.</div>
               </div>
             </div>
             <div id="pluginsList" style="display:flex;flex-direction:column;margin-top:4px">
               <!-- Populated dynamically by loadPluginsPanel() -->
             </div>
             <div id="pluginsEmpty" style="display:none;text-align:center;padding:32px 0;color:var(--muted);font-size:13px" data-i18n="settings_plugins_empty">
-              No Altur-Agent plugins are currently visible. Install or enable plugins from the Altur-Agent CLI/config to see them here.
+              No Altru plugins are currently visible. Install or enable plugins from the Altru CLI/config to see them here.
             </div>
           </div>
           <div class="settings-pane" id="settingsPaneExtensions">
@@ -1645,7 +1645,7 @@
             <button class="sm-btn" id="btnDisableAuth" onclick="disableAuth()" style="margin-top:6px;width:100%;padding:8px;font-weight:600;color:#e8a030;border-color:rgba(232,160,48,.3);display:none" data-i18n="disable_auth">Disable Auth</button>
             <button class="sm-btn" id="btnSignOut" onclick="signOut()" style="margin-top:6px;width:100%;padding:8px;font-weight:600;color:var(--accent);border-color:rgba(233,69,96,.3);display:none" data-i18n="sign_out">Sign Out</button>
             <div class="settings-field" id="shutdownServerBlock" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
-              <label data-i18n="settings_label_shutdown">Stop the Altur-Agent server</label>
+              <label data-i18n="settings_label_shutdown">Stop the Altru server</label>
               <div style="font-size:11px;color:var(--muted);margin-bottom:8px"><span data-i18n="settings_desc_shutdown_before_cmd">Gracefully stops the local WebUI server. Useful if you launched via </span><code>./ctl.sh start</code><span data-i18n="settings_desc_shutdown_between_cmds"> and want to stop without switching to a terminal. You'll need to relaunch the server (</span><code>./ctl.sh start</code><span data-i18n="settings_desc_shutdown_after_cmd"> or the native app) before the WebUI is reachable again.</span></div>
               <button class="sm-btn" id="btnShutdownServer" onclick="shutdownServer()" style="width:100%;padding:8px;font-weight:600;color:#e74c3c;border-color:rgba(231,76,60,.3)" data-i18n="settings_btn_shutdown">Stop server</button>
             </div>
@@ -1671,7 +1671,7 @@
             <!-- Gateway Status Section -->
             <div class="settings-field" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
               <label data-i18n="settings_label_gateway_status">Gateway Status</label>
-              <div style="font-size:11px;color:var(--muted);margin-bottom:8px" data-i18n="settings_desc_gateway_status">Status of the Altur-Agent gateway (Telegram, Discord, Slack, etc.)</div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:8px" data-i18n="settings_desc_gateway_status">Status of the Altru gateway (Telegram, Discord, Slack, etc.)</div>
               <div id="gatewayStatusCard"><span style="color:var(--muted);font-size:12px">Loading…</span></div>
             </div>
             <!-- MCP Servers Section -->
@@ -1679,7 +1679,7 @@
               <label data-i18n="mcp_servers_title">MCP Servers</label>
               <div style="font-size:11px;color:var(--muted);margin-bottom:8px" data-i18n="mcp_servers_desc">View Model Context Protocol servers configured in config.yaml.</div>
               <div id="mcpServerList"></div>
-              <div class="mcp-restart-hint" data-i18n="mcp_restart_hint">Server changes are read-only here for now. Edit config.yaml and restart Altur-Agent for changes to take effect.</div>
+              <div class="mcp-restart-hint" data-i18n="mcp_restart_hint">Server changes are read-only here for now. Edit config.yaml and restart Altru for changes to take effect.</div>
             </div>
             <!-- MCP Tools Section -->
             <div class="settings-field" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
@@ -1697,7 +1697,7 @@
             <div class="settings-section-head">
               <div>
                 <div class="settings-section-title" data-i18n="settings_tab_help">Help</div>
-                <div class="settings-section-meta" data-i18n="settings_help_meta">Resources and support for Altur-Agent.</div>
+                <div class="settings-section-meta" data-i18n="settings_help_meta">Resources and support for Altru.</div>
               </div>
             </div>
             <div class="help-cards">
@@ -1707,7 +1707,7 @@
                 </div>
                 <div class="help-card-body">
                   <div class="help-card-title" data-i18n="settings_help_docs_label">Documentation</div>
-                  <div class="help-card-desc" data-i18n="settings_help_docs_desc">Guides, configuration reference, and the full Altur-Agent README.</div>
+                  <div class="help-card-desc" data-i18n="settings_help_docs_desc">Guides, configuration reference, and the full Altru README.</div>
                   <a href="static/altur-help.html" target="_blank" rel="noopener noreferrer" class="help-card-link">
                     <span data-i18n="settings_help_docs_link">Open Documentation</span>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
@@ -1782,8 +1782,8 @@
     <div class="onboarding-shell">
       <div class="onboarding-sidebar">
         <div class="onboarding-badge" data-i18n="onboarding_badge">FIRST RUN</div>
-        <h2 id="onboardingTitle" data-i18n="onboarding_title">Welcome to Altur-Agent</h2>
-        <p id="onboardingLead" data-i18n="onboarding_lead">A quick guided setup will check your Altur-Agent install, choose a workspace and model, and optionally protect the app with a password.</p>
+        <h2 id="onboardingTitle" data-i18n="onboarding_title">Welcome to Altru</h2>
+        <p id="onboardingLead" data-i18n="onboarding_lead">A quick guided setup will check your Altru install, choose a workspace and model, and optionally protect the app with a password.</p>
         <div class="onboarding-steps" id="onboardingSteps"></div>
       </div>
       <div class="onboarding-main">
@@ -1906,7 +1906,7 @@
       <select id="kanbanTaskModalAssignee">
         <!-- Options populated by _kanbanPopulateAssigneeSelect() at modal open time. -->
       </select>
-      <div class="kanban-modal-hint" id="kanbanTaskModalAssigneeHint" data-i18n="kanban_assignee_hint">Pick a Altur-Agent profile so the dispatcher can claim and run this task. Tasks left as <em>Unassigned</em> will sit in Ready forever.</div>
+      <div class="kanban-modal-hint" id="kanbanTaskModalAssigneeHint" data-i18n="kanban_assignee_hint">Pick a Altru profile so the dispatcher can claim and run this task. Tasks left as <em>Unassigned</em> will sit in Ready forever.</div>
     </div>
     <div class="kanban-modal-row">
       <label for="kanbanTaskModalTenant" data-i18n="kanban_tenant">Tenant</label>

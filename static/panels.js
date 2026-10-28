@@ -3418,7 +3418,7 @@ async function createKanbanTask(){
 // click-on-backdrop closes). The modal markup lives in static/index.html as
 // #kanbanTaskModal — see the section just above </body>.
 //
-// The assignee field auto-completes against the union of (a) live Altur-Agent
+// The assignee field auto-completes against the union of (a) live Altru
 // profile names from /api/profiles and (b) historical assignees on the
 // active board, with an inline hint that explains the dispatcher claim
 // contract — most users will pick a profile name from the dropdown rather
@@ -3506,7 +3506,7 @@ async function _kanbanPopulateAssigneeSelect(currentValue){
   // it last so the default-selected option is the first profile, not "no one".
   let html = '';
   if (profiles.length) {
-    html += `<optgroup label="${esc(t('kanban_assignee_profiles_label') || 'Altur-Agent profiles')}">`;
+    html += `<optgroup label="${esc(t('kanban_assignee_profiles_label') || 'Altru profiles')}">`;
     html += profiles.map(v => `<option value="${esc(v)}"${v === currentValue ? ' selected' : ''}>${esc(v)}</option>`).join('');
     html += '</optgroup>';
   }
@@ -4838,7 +4838,7 @@ function _renderLlmWikiStatus(d) {
   // becomes config-driven. esc() HTML-escapes but doesn't validate URL scheme.
   const docsUrl = /^https?:\/\//i.test(rawDocsUrl) ? rawDocsUrl : '#';
   const toggleNote = status.toggle_available
-    ? 'Toggle available from configured Altur-Agent setting.'
+    ? 'Toggle available from configured Altru setting.'
     : (status.toggle_reason || 'No stable LLM Wiki on/off config flag was detected, so this panel is read-only.');
   const statusNote = isReady
     ? 'LLM Wiki is configured and page metadata is visible without exposing wiki content.'
@@ -10477,7 +10477,7 @@ async function loadSettingsPanel(){
     // Bot name — debounced autosave (text input)
     const botNameField=$('settingsBotName');
     if(botNameField){
-      botNameField.value=settings.bot_name||'Altur-Agent';
+      botNameField.value=settings.bot_name||'Altru';
       botNameField.disabled=!!settings.bot_name_managed;
       botNameField.title=settings.bot_name_managed?'Managed by BRANDING.json':'';
       let botNameTimer=null;
@@ -12906,7 +12906,7 @@ function _applySavedSettingsUi(saved, body, opts){
   if(Object.prototype.hasOwnProperty.call(body,'structured_code_default_view')){
     _applyStructuredCodeViewSettings(body.structured_code_default_view,body.structured_code_auto_tree_lines,false);
   }
-  window._botName=body.bot_name||'Altur-Agent';
+  window._botName=body.bot_name||'Altru';
   if(typeof applyBotName==='function') applyBotName();
   else if(typeof _applyBusyComposerPlaceholder==='function') _applyBusyComposerPlaceholder();
   if(typeof setLocale==='function') setLocale(language);
@@ -13304,7 +13304,7 @@ function _openAuxAdvancedOptions(taskCfg,cfg){
    ? `<label style="display:grid;gap:4px;font-size:12px;color:var(--text)"><span style="font-weight:600">${esc(t('settings_main_advanced_service_tier')||'Service tier')}</span><select id="auxAdvancedServiceTier" style="width:100%;box-sizing:border-box;padding:7px 8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:12px"><option value=""${selectedServiceTier?'':' selected'}>${esc(t('settings_main_advanced_service_tier_default')||'Default / off')}</option><option value="priority"${selectedServiceTier==='priority'?' selected':''}>${esc(t('settings_main_advanced_service_tier_priority')||'Priority (fast)')}</option></select><span style="font-size:10px;color:var(--muted);line-height:1.35">${esc(t('settings_main_advanced_service_tier_desc')||'Optional request setting for OpenAI-family providers.')}</span></label>`
    : '';
   const timingFields=isMain?'':(
-   _auxAdvancedInputHtml('auxAdvancedTimeout',t('settings_aux_advanced_timeout')||'Timeout seconds',_auxAdvancedValue(cfg,'timeout'),t('settings_aux_advanced_timeout_desc')||'Request timeout for this auxiliary task. Blank uses Altur-Agent default.','number','inputmode="numeric" min="1" step="1"')+
+   _auxAdvancedInputHtml('auxAdvancedTimeout',t('settings_aux_advanced_timeout')||'Timeout seconds',_auxAdvancedValue(cfg,'timeout'),t('settings_aux_advanced_timeout_desc')||'Request timeout for this auxiliary task. Blank uses Altru default.','number','inputmode="numeric" min="1" step="1"')+
    _auxAdvancedInputHtml('auxAdvancedDownloadTimeout',t('settings_aux_advanced_download_timeout')||'Download timeout seconds',_auxAdvancedValue(cfg,'download_timeout'),t('settings_aux_advanced_download_timeout_desc')||'Only relevant for tasks that download media/content, e.g. vision. Blank uses default.','number','inputmode="numeric" min="1" step="1"')+
    _auxAdvancedInputHtml('auxAdvancedMaxConcurrency',t('settings_aux_advanced_max_concurrency')||'Max concurrency',_auxAdvancedValue(cfg,'max_concurrency'),t('settings_aux_advanced_max_concurrency_desc')||'Optional per-task concurrency limit. Blank uses default.','number','inputmode="numeric" min="1" step="1"'));
   body.innerHTML=
@@ -13664,7 +13664,7 @@ async function saveSettings(andClose){
   body.default_message_mode=defaultMessageMode;
   body.auto_title_refresh_every=(($('settingsAutoTitleRefresh')||{}).value||'0');
   const botName=(($('settingsBotName')||{}).value||'').trim();
-  body.bot_name=botName||'Altur-Agent';
+  body.bot_name=botName||'Altru';
   // Password: only act if the field has content; blank = leave auth unchanged
   if(pw){
     const currentPwField=$('settingsCurrentPassword');

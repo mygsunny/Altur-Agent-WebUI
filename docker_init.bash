@@ -432,7 +432,7 @@ rm -f $it || error_exit "Failed to delete test file in /app"
 
 ######## Environment variables (consume AFTER the load_env)
 
-echo ""; echo "== Checking required environment variables for Altur-Agent"
+echo ""; echo "== Checking required environment variables for Altru"
 
 echo ""; echo "-- HERMES_WEBUI_STATE_DIR: Where to store sessions, workspaces, and other state (default: ~/.hermes/webui)"
 if [ -z "${HERMES_WEBUI_STATE_DIR+x}" ]; then error_exit "HERMES_WEBUI_STATE_DIR not set"; fi; 
@@ -460,7 +460,7 @@ else
 fi
 
 echo ""; echo "==================="
-echo ""; echo "== Installing uv and creating a new virtual environment for Altur-Agent"
+echo ""; echo "== Installing uv and creating a new virtual environment for Altru"
 
 export PATH="/home/hermeswebui/.local/bin/:$PATH"
 if command -v uv &>/dev/null; then
@@ -584,7 +584,7 @@ install_staged_agent() {
 # normal install below still treats a failure as fatal). set -e does not apply
 # inside a function called as a condition, hence the explicit returns.
 install_venv_dependencies() {
-  echo ""; echo "== Installing Altur-Agent dependencies"
+  echo ""; echo "== Installing Altru dependencies"
   uv pip install -r requirements.txt --trusted-host pypi.org --trusted-host files.pythonhosted.org || return 1
   uv pip install -U pip setuptools --trusted-host pypi.org --trusted-host files.pythonhosted.org || return 1
   test -x /app/venv/bin/pip || return 1
@@ -895,7 +895,7 @@ export VIRTUAL_ENV=/app/venv
 test -d /app/venv
 test -f /app/venv/bin/activate
 
-echo "";echo "== Activating Altur-Agent's virtual environment"
+echo "";echo "== Activating Altru's virtual environment"
 source /app/venv/bin/activate || error_exit "Failed to activate the application virtual environment"
 test -x /app/venv/bin/python3
 
@@ -906,7 +906,7 @@ if [ -f /app/venv/.deps_installed ]; then
     echo ""; echo "== Dependencies already installed — skipping (fast restart)"
   fi
 else
-  install_venv_dependencies || error_exit "Failed to install Altur-Agent dependencies"
+  install_venv_dependencies || error_exit "Failed to install Altru dependencies"
 fi
 
 ensure_hindsight_client_docker_dependency
@@ -970,8 +970,8 @@ export HERMES_BUNDLED_LOCALES="/app/branding/generated-locales"
 export HERMES_MANAGED="altur-agent-webui"
 export GATEWAY_RELAY_DISPLAY_NAME="$(python3 -c 'import json; print(json.load(open("/app/branding/brand.json"))["assistant"]["display_name"])')"
 
-echo ""; echo "== Running Altur-Agent"
-cd /app; python server.py || error_exit "Altur-Agent failed or exited with an error"
+echo ""; echo "== Running Altru"
+cd /app; python server.py || error_exit "Altru failed or exited with an error"
 
 # we should never be here because the server should be running indefinitely, but if we are, we exit safely
 ok_exit "Clean exit"

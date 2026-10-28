@@ -9,7 +9,7 @@ const S={session:null,messages:[],entries:[],busy:false,pendingFiles:[],toolCall
 
 function assistantDisplayName(){
   if(S.activeProfile&&S.activeProfile!=='default') return S.activeProfile.charAt(0).toUpperCase()+S.activeProfile.slice(1);
-  return window.__ALTUR_BRAND__?.assistant_name_mode==='brand' ? window.__ALTUR_BRAND__.name : (window._botName||'Altur-Agent');
+  return window.__ALTUR_BRAND__?.assistant_name_mode==='brand' ? window.__ALTUR_BRAND__.name : (window._botName||'Altru');
 }
 const INFLIGHT={};  // keyed by session_id while request in-flight
 const SESSION_QUEUES={};  // keyed by session_id for queued follow-up turns
@@ -13561,7 +13561,7 @@ else startSystemHealthMonitor();
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_initChatTodos);
   else _initChatTodos();
 
-// ── Altur-Agent agent/gateway heartbeat alert (#716) ──
+// ── Altru agent/gateway heartbeat alert (#716) ──
 const AGENT_HEALTH_INTERVAL_MS=30000;
 const AGENT_HEALTH_DISMISSED_KEY='agent-health-dismissed';
 let _agentHealthTimer=null;
@@ -13587,7 +13587,7 @@ function _showAgentHealthAlert(payload){
   const title=$('agentHealthTitle');
   const details=$('agentHealthDetails');
   if(!banner) return;
-  if(title) title.textContent='Altur-Agent agent is not responding';
+  if(title) title.textContent='Altru agent is not responding';
   const state=payload&&payload.details&&payload.details.gateway_state?` State: ${payload.details.gateway_state}.`:'';
   if(details) details.textContent=`Gateway heartbeat failed.${state} Messages may not be delivered until it comes back.`;
   banner.hidden=false;
@@ -14965,7 +14965,7 @@ function _createAssistantTurn(tsTitle='', tpsText=''){
 }
 function _setLatestAssistantTurnLandmark(turn, isLatest){
   if(!turn) return;
-  const label='Latest Altur-Agent response';
+  const label='Latest Altru response';
   if(isLatest){
     if(typeof document!=='undefined'){
       document.querySelectorAll('.assistant-turn[data-latest-assistant-response="true"]').forEach(el=>{
@@ -16034,7 +16034,7 @@ function _syncTransparentEventControls(turn){
     label.setAttribute('data-transparent-tool-count',String(toolCount));
   }
   bar.setAttribute('data-tool-count',String(toolCount));
-  // Wire the Altur-Agent chat name tag toggle for the live turn.
+  // Wire the Altru chat name tag toggle for the live turn.
   _wireTransparentTurnToggle(turn);
   // Apply recency fade so the newest activity stands out while streaming. The
   // fade helper is internally gated to the live turn, so this no-ops on settled
@@ -16309,7 +16309,7 @@ function _setTransparentRowsExpanded(root, expanded){
     _setTransparentCardOpen(card,!!expanded);
   });
 }
-// ── Transparent turn-level collapse (Altur-Agent chat name tag) ───────────────
+// ── Transparent turn-level collapse (Altru chat name tag) ───────────────
 // In transparent_stream mode the assistant role label is the turn's "name
 // tag". Clicking it collapses the entire event stack underneath so the
 // transcript shows only the final answer (Output only). A chevron on the
@@ -22208,7 +22208,7 @@ function renderMessages(options){
     }catch(e){}
     S.messages.forEach((m,rawIdx)=>{
       if(!m) return;
-      // OpenAI / Altur-Agent CLI format: role=tool with tool_call_id
+      // OpenAI / Altru CLI format: role=tool with tool_call_id
       if(m.role==='tool'){
         const tid=m.tool_call_id||m.tool_use_id||'';
         if(tid) resultsByTid[tid]=_cliToolResultSnippet(m.content);
@@ -22707,7 +22707,7 @@ function renderMessages(options){
       }
     }
   }
-  // Transparent mode per-turn wiring: collapsible Altur-Agent chat name tag, old-event
+  // Transparent mode per-turn wiring: collapsible Altru chat name tag, old-event
   // fading, and the bottom-of-turn footer (elapsed · tokens · TTFT · status).
   // Runs after the per-turn duration block above so the footer can reuse the
   // computed durationText / tokens / TTFT for each settled assistant turn.

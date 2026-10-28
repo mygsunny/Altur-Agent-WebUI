@@ -34,7 +34,7 @@ _CHALLENGE_TTL = 90
 _MAX_CHALLENGES = 128
 _MAX_CHALLENGES_PER_CONTEXT = 8
 _CHALLENGES_LOCK = threading.Lock()
-_RP_NAME = "Altur-Agent"
+_RP_NAME = "Altru"
 
 
 class PasskeyError(ValueError):
@@ -242,7 +242,7 @@ def registration_options(handler) -> dict[str, Any]:
     return {
         "challenge": challenge,
         "rp": {"name": _RP_NAME, "id": rp_id},
-        "user": {"id": _b64u(hashlib.sha256(rp_id.encode()).digest()[:16]), "name": "Altur-Agent", "displayName": "Altur-Agent"},
+        "user": {"id": _b64u(hashlib.sha256(rp_id.encode()).digest()[:16]), "name": "Altru", "displayName": "Altru"},
         "pubKeyCredParams": [{"type": "public-key", "alg": -7}],
         "authenticatorSelection": {"residentKey": "preferred", "userVerification": "preferred"},
         "timeout": 60000,

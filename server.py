@@ -621,7 +621,7 @@ def main() -> None:
 
     ok, missing, errors = verify_hermes_imports()
     if not ok and _HERMES_FOUND:
-        print(f'[!!] Warning: Altur-Agent agent found but missing modules: {missing}', flush=True)
+        print(f'[!!] Warning: Altru agent found but missing modules: {missing}', flush=True)
         for mod, err in errors.items():
             print(f'     {mod}: {err}', flush=True)
         print('     Attempting to install missing dependencies from agent requirements.txt...', flush=True)
@@ -695,7 +695,7 @@ def main() -> None:
             print(f'[!!] WARNING: TLS setup failed ({e}), falling back to HTTP', flush=True)
             scheme = 'http'
 
-    print(f'  Altur-Agent listening on {scheme}://{HOST}:{PORT}', flush=True)
+    print(f'  Altru listening on {scheme}://{HOST}:{PORT}', flush=True)
     if HOST in ('127.0.0.1', '::1') or within_container:
         print(f'  Remote access: ssh -N -L {PORT}:127.0.0.1:{PORT} <user>@<your-server>', flush=True)
     print(f'  Then open:     {scheme}://localhost:{PORT}', flush=True)

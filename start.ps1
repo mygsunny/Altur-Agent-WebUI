@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Native Windows launcher for Altur-Agent - PowerShell equivalent
+    Native Windows launcher for Altru - PowerShell equivalent
     of start.sh, bypassing bootstrap.py's platform refusal.
 
 .DESCRIPTION
@@ -434,7 +434,7 @@ New-Item -ItemType Directory -Force -Path $env:HERMES_HOME | Out-Null
 New-Item -ItemType Directory -Force -Path $env:HERMES_WEBUI_STATE_DIR | Out-Null
 
 # === Launch (foreground, matches start.sh) =============================
-Write-Host "[start.ps1] Altur-Agent native Windows launcher" -ForegroundColor Cyan
+Write-Host "[start.ps1] Altru native Windows launcher" -ForegroundColor Cyan
 Write-Host "[start.ps1] Python:     $Python"
 Write-Host "[start.ps1] Agent dir:  $AgentDir"
 Write-Host "[start.ps1] State dir:  $env:HERMES_WEBUI_STATE_DIR"
@@ -443,7 +443,7 @@ Write-Host ""
 
 $serverPath = Join-Path $RepoRoot 'server.py'
 if (-not (Test-Path $serverPath)) {
-    Write-Error "server.py not found at $serverPath - is this the Altur-Agent repo root?"
+    Write-Error "server.py not found at $serverPath - is this the Altru repo root?"
     exit 1
 }
 

@@ -125,7 +125,7 @@ class _ProfileGoalManager:
         context_api=None,
     ):
         if _NativeGoalManager is None:
-            raise RuntimeError("Altur-Agent goal manager unavailable")
+            raise RuntimeError("Altru goal manager unavailable")
         context_api = context_api or _profile_home_context_api()
         if context_api is None:
             raise RuntimeError("Agent profile context unavailable")
@@ -171,7 +171,7 @@ class _LegacyProfileGoalManager:
 
     def __init__(self, session_id: str, *, profile_home: str | Path, default_max_turns: int = 20):
         if GoalState is None:
-            raise RuntimeError("Altur-Agent goal state unavailable")
+            raise RuntimeError("Altru goal state unavailable")
         self.session_id = session_id
         self.profile_home = Path(profile_home).expanduser().resolve()
         self.default_max_turns = int(default_max_turns or DEFAULT_MAX_TURNS or 20)

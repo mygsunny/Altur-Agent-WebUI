@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Altur-Agent",
-  "short_name": "Altur-Agent",
-  "description": "Altur-Agent AI workspace by ArtemisProject",
+  "name": "Altru",
+  "short_name": "Altru",
+  "description": "Altru AI workspace by ArtemisProject",
   "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",
@@ -22,7 +22,7 @@
     {
       "name": "New conversation",
       "short_name": "New chat",
-      "description": "Open Altur-Agent ready for a new chat",
+      "description": "Open Altru ready for a new chat",
       "url": "./?source=pwa&action=new-chat",
       "icons": [
         {

@@ -7914,9 +7914,9 @@ def agent_session_row_exists(session_id: str, *, profile=None) -> bool:
 
 def _sidebar_title_is_generic_webui(title: str | None) -> bool:
     text = ' '.join(str(title or '').split())
-    if text in ('Hermes WebUI', 'Altur-Agent'):
+    if text in ('Hermes WebUI', 'Altru'):
         return True
-    return any(text.startswith(prefix) and text[len(prefix):].isdigit() for prefix in ('Hermes WebUI #', 'Altur-Agent #'))
+    return any(text.startswith(prefix) and text[len(prefix):].isdigit() for prefix in ('Hermes WebUI #', 'Altru #'))
 
 
 def _read_state_db_sidebar_overrides(

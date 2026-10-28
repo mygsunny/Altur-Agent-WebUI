@@ -4080,7 +4080,7 @@ window._mirrorSpeechSettingsFromServer=_mirrorSpeechSettingsFromServer;
     _applyComposerControlOrder(window._composerControlOrder);
     window._showTitlebarProfile=!!s.show_titlebar_profile;
     _applyTitlebarProfileVisibility();
-    window._botName=s.bot_name||'Altur-Agent';
+    window._botName=s.bot_name||'Altru';
     if(s.default_model_provider) window._activeProvider=s.default_model_provider;
     if(s.default_model){
       window._defaultModel=s.default_model;
@@ -4232,7 +4232,7 @@ window._mirrorSpeechSettingsFromServer=_mirrorSpeechSettingsFromServer;
     window._composerControlVisibility=_composerControlVisibilityFromSettings(null);
     window._composerControlOrder=[];
     _applyComposerControlOrder(window._composerControlOrder);
-    window._botName='Altur-Agent';
+    window._botName='Altru';
     _bootSettings={check_for_updates:false};
     if(typeof setLocale==='function'){
       const _lang=typeof resolvePreferredLocale==='function'
@@ -4718,8 +4718,8 @@ window.addEventListener('pageshow', async (event) => {
 
 async function shutdownServer() {
   const ok = await showConfirmDialog({
-    title: (typeof t === 'function' ? t('settings_shutdown_confirm_title') : 'Stop Altur-Agent'),
-    message: (typeof t === 'function' ? t('settings_shutdown_confirm_message') : 'Stop the Altur-Agent server?'),
+    title: (typeof t === 'function' ? t('settings_shutdown_confirm_title') : 'Stop Altru'),
+    message: (typeof t === 'function' ? t('settings_shutdown_confirm_message') : 'Stop the Altru server?'),
     confirmLabel: (typeof t === 'function' ? t('settings_shutdown_confirm_btn') : 'Stop'),
     danger: true,
   });

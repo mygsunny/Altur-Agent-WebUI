@@ -61,6 +61,8 @@ for filename,entries in catalog.items():
   pattern='|'.join(re.escape(k) for k in sorted(replacements,key=len,reverse=True))
   s=re.sub(pattern,lambda m:replacements[m.group()],s)
  for e in entries:e['rendered']=render(e['template'])
+ if any(e['rendered'] not in s for e in entries):
+  raise SystemExit(f'Overlapping branding slots disagree in {filename}; review catalog templates')
  p.write_text(s)
 catalog_path.write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n')
 source=(ROOT/b['assets']['source']).read_text()
