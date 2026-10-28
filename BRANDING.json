@@ -3,7 +3,6 @@
   "logo": "branding/assets/source/portrait-icon.svg",
   "publisher": "ArtemisProject",
   "description": "{name} AI workspace by {publisher}",
-  "assistant_name_mode": "brand",
   "logo_framing": {
     "source": "branding/assets/source/portrait-icon.svg",
     "view_box": [

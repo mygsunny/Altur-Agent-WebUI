@@ -2,7 +2,7 @@
 
 ## Brand source and desktop relationship
 
-`BRANDING.json` is the canonical editable source for the UI name, publisher, SVG and default assistant name policy. Generated `branding/brand.json` resolves these values alongside distribution destinations and upstream/runtime pins. The schema follows the desktop brand's schema_version/product/organization/assets/distribution/upstream structure. `branding/assets/source/portrait-icon.svg` is copied byte-for-byte from the desktop recipe's maintained SVG; the original Desktop path was unavailable. The desktop crop is recorded as view_box. The artwork is neither traced nor replaced. The web fork and desktop do not automatically synchronize.
+`BRANDING.json` is the canonical editable source for the UI name, publisher, SVG and fallback assistant name. Generated `branding/brand.json` resolves these values alongside distribution destinations and upstream/runtime pins. The schema follows the desktop brand's schema_version/product/organization/assets/distribution/upstream structure. `branding/assets/source/portrait-icon.svg` is copied byte-for-byte from the desktop recipe's maintained SVG; the original Desktop path was unavailable. The desktop crop is recorded as view_box. The artwork is neither traced nor replaced. The web fork and desktop do not automatically synchronize.
 
 Run `python scripts/generate-branding.py` with requirements-branding.txt installed after editing brand inputs. `branding/literals.json` records approved application-owned source literal templates and their generated values, including all locale bundles and fallback strings. It is a source catalog, not a runtime message filter. If upstream changes a slot, generation fails for review rather than silently missing it. SVG framing, rasterization, PNG sizes (16/32/180/192/512), ICO, manifest and service-worker cache namespace are deterministic. Light/dark use the same transparent portrait; opaque icons use a neutral tile and 20% maskable inset.
 
@@ -109,10 +109,18 @@ No user text, conversation history, credentials, storage keys, or profile names
 are rewritten. Branding is build-time configuration, not a public settings API.
 
 `publisher` sets the organization label. `description` supports `{name}` and
-`{publisher}`. `assistant_name_mode: "brand"` makes default assistant labels
-follow the manifest even when older settings contain another name; the saved
-value is preserved. Set it to `"customizable"` to restore per-install naming.
-Non-default profiles retain their explicit names in either mode.
+`{publisher}`. Product branding is separate from the assistant's own identity.
+The server's `bot_name` in its WebUI state `settings.json` controls the default
+profile's assistant name, editable under Settings → Preferences. Explicit names
+such as Tom are shown unchanged; only an absent or blank name falls back to the
+manifest name. Non-default profiles keep their profile names. The assembled
+WebUI identity instruction uses the configured name unless a custom persona was
+supplied. No name is inferred by parsing conversation messages or persona prose.
+
+There is no forced brand-name mode. The former `assistant_name_mode` input is
+obsolete and ignored. Renaming the product does not migrate saved assistant
+names. Correct an installation's old product default in its server-side settings,
+without bulk-replacing user names, persona files, database contents or history.
 
 Keep SVGs self-contained, with a valid `viewBox`. `logo_framing` preserves the
 established portrait framing only while its `source` matches `logo`; a new SVG

@@ -23,13 +23,11 @@ framing=ui.get('logo_framing',{})
 if framing.get('source')==ui['logo']:view_box=framing['view_box']
 if len(view_box)!=4 or view_box[2]<=0 or view_box[3]<=0:
  raise SystemExit('SVG requires a valid viewBox')
-mode=ui.get('assistant_name_mode','brand')
-if mode not in ('brand','customizable'):raise SystemExit('Invalid assistant_name_mode')
 b['product'].update(display_name=ui['name'],short_name=ui['name'],description=ui.get('description','{name} AI workspace by {publisher}').format(name=ui['name'],publisher=ui['publisher']))
 b['organization']['display_name']=ui['publisher']
 b['assistant']['display_name']=ui['name']
 b['assets'].update(source=ui['logo'],accessible_label=ui['name']+' logo',view_box=view_box)
-b['ui']={'assistant_name_mode':mode}
+b['ui']={}
 b['ui']['revision']=hashlib.sha256((json.dumps(b,sort_keys=True)+logo.read_text()).encode()).hexdigest()[:12]
 name=b['product']['display_name']
 values={'@@PRODUCT@@':name,'@@PUBLISHER@@':b['organization']['display_name'],
@@ -107,5 +105,5 @@ if private_runtime.exists():
  sys.path.insert(0,str(ROOT))
  from branding.runtime import apply_runtime_branding
  apply_runtime_branding(private_runtime)
-(ROOT/'static/branding.js').write_text('window.__ALTUR_BRAND__ = '+json.dumps({'name':name,'logo':b['assets']['logo'],'logo_label':b['assets']['accessible_label'],'assistant_name_mode':mode,'revision':b['ui']['revision']}).replace('<','\\u003c')+';\n')
+(ROOT/'static/branding.js').write_text('window.__ALTUR_BRAND__ = '+json.dumps({'name':name,'logo':b['assets']['logo'],'logo_label':b['assets']['accessible_label'],'revision':b['ui']['revision']}).replace('<','\\u003c')+';\n')
 print(f'Generated {name} literals, SVG/PNG/ICO assets and shell cache {digest}')

@@ -1537,10 +1537,12 @@ def _webui_ephemeral_system_prompt(
     config_data: Optional[dict] = None,
 ) -> str:
     """Build WebUI-only runtime instructions that are not persisted to history."""
-    from api.branding import BRAND
+    from api.branding import BRAND, assistant_identity_instruction
     parts = []
     if not personality_prompt:
-        parts.append(BRAND['assistant']['identity_instruction'])
+        profile = str((surface_context or {}).get('profile') or '').strip()
+        name = (profile[:1].upper() + profile[1:]) if profile and profile != 'default' else load_settings().get('bot_name')
+        parts.append(assistant_identity_instruction(name))
     if personality_prompt:
         parts.append(str(personality_prompt).strip())
     parts.append(BRAND['assistant']['customer_guidance_instruction'])

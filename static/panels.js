@@ -10478,8 +10478,6 @@ async function loadSettingsPanel(){
     const botNameField=$('settingsBotName');
     if(botNameField){
       botNameField.value=settings.bot_name||'Altru';
-      botNameField.disabled=!!settings.bot_name_managed;
-      botNameField.title=settings.bot_name_managed?'Managed by BRANDING.json':'';
       let botNameTimer=null;
       botNameField.addEventListener('input',()=>{
         if(botNameTimer) clearTimeout(botNameTimer);

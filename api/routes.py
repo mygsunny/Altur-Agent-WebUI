@@ -16794,8 +16794,6 @@ def handle_get(handler, parsed) -> bool:
 
     if parsed.path == "/api/settings":
         settings = load_settings()
-        from api.branding import assistant_name_managed
-        settings['bot_name_managed'] = assistant_name_managed()
         settings["persisted_speech_keys"] = persisted_speech_settings_keys()
         # Never expose the stored password hash to clients
         settings.pop("password_hash", None)
@@ -20091,14 +20089,9 @@ def handle_post(handler, parsed) -> bool:
             verify_session,
         )
 
-        from api.branding import BRAND, assistant_name_managed
+        from api.branding import resolve_assistant_name
         if "bot_name" in body:
-            if assistant_name_managed():
-                if body['bot_name'] != BRAND['assistant']['display_name']:
-                    return bad(handler, 'Assistant name is managed by BRANDING.json', 409)
-                body.pop('bot_name')
-            else:
-                body["bot_name"] = (str(body["bot_name"]) or "").strip() or BRAND['assistant']['display_name']
+            body['bot_name'] = resolve_assistant_name(body['bot_name'])
 
         auth_enabled_before = is_auth_enabled()
         password_auth_enabled_before = auth_enabled_before and get_password_hash() is not None

@@ -7,7 +7,7 @@
 
 // Cache version is injected by the server at request time (routes.py /sw.js handler).
 // Bumps automatically whenever the git commit changes — no manual edits needed.
-const CACHE_NAME = 'altur-shell-a173b21c51c8-__WEBUI_VERSION__';
+const CACHE_NAME = 'altur-shell-d5a365772a2e-__WEBUI_VERSION__';
 
 // Static assets that form the app shell.
 //

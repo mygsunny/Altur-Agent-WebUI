@@ -9,7 +9,7 @@ const S={session:null,messages:[],entries:[],busy:false,pendingFiles:[],toolCall
 
 function assistantDisplayName(){
   if(S.activeProfile&&S.activeProfile!=='default') return S.activeProfile.charAt(0).toUpperCase()+S.activeProfile.slice(1);
-  return window.__ALTUR_BRAND__?.assistant_name_mode==='brand' ? window.__ALTUR_BRAND__.name : (window._botName||'Altru');
+  return String(window._botName||'').trim()||window.__ALTUR_BRAND__?.name||'Altru';
 }
 const INFLIGHT={};  // keyed by session_id while request in-flight
 const SESSION_QUEUES={};  // keyed by session_id for queued follow-up turns
