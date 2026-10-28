@@ -8086,6 +8086,7 @@ let _settingsPreferencesAutosaveRetryPayload = null;
 const _ALWAYS_VISIBLE_TABS = new Set(['chat','settings']);
 const _HIDDEN_TABS_LS_KEY = 'hermes-webui-hidden-tabs';
 const _TAB_ORDER_LS_KEY = 'hermes-webui-tab-order';
+let _tabOrderSaveQueue=Promise.resolve();
 const _COMPOSER_CONTROL_ORDER_LS_KEY = 'hermes-webui-composer-control-order';
 let _tabVisibilityDragSuppressUntil = 0;
 let _composerControlDragSuppressUntil = 0;
@@ -8139,21 +8140,33 @@ if(typeof window!=='undefined'&&window.addEventListener){
   });
 }
 
+function _sanitizeTabOrderList(panels){
+  if(!Array.isArray(panels)) return [];
+  var out=[];
+  panels.forEach(function(panel){
+    if(typeof panel!=='string') return;
+    panel=panel.trim();
+    if(panel&&panel!=='settings'&&out.indexOf(panel)===-1) out.push(panel);
+  });
+  return out;
+}
+
 function _getTabOrder(){
-  try{var h=localStorage.getItem(_TAB_ORDER_LS_KEY);if(h)return _sanitizeTabPanelList(JSON.parse(h));}catch(e){}
+  try{var h=localStorage.getItem(_TAB_ORDER_LS_KEY);if(h)return _sanitizeTabOrderList(JSON.parse(h));}catch(e){}
   return[];
 }
 
 function _setTabOrder(panels){
-  try{localStorage.setItem(_TAB_ORDER_LS_KEY,JSON.stringify(_sanitizeTabPanelList(panels)));}catch(e){}
+  try{localStorage.setItem(_TAB_ORDER_LS_KEY,JSON.stringify(_sanitizeTabOrderList(panels)));}catch(e){}
 }
 
 function _availableSidebarPanels(){
   var out=[];
+  if(document.getElementById('btnRailNewChat')) out.push('__new_chat__');
   var tabs=document.querySelectorAll('.rail .rail-btn.nav-tab[data-panel], .sidebar-nav .nav-tab[data-panel]');
   tabs.forEach(function(tab){
     var panel=tab.dataset.panel;
-    if(!panel||_ALWAYS_VISIBLE_TABS.has(panel)) return;
+    if(!panel||panel==='settings') return;
     if(tab.classList.contains('dashboard-link')||tab.hasAttribute('data-dashboard-link')) return;
     if(out.indexOf(panel)===-1) out.push(panel);
   });
@@ -8162,7 +8175,10 @@ function _availableSidebarPanels(){
 
 function _orderedSidebarPanels(order){
   var available=_availableSidebarPanels();
-  var requested=_sanitizeTabPanelList(Array.isArray(order)?order:_getTabOrder());
+  var requested=_sanitizeTabOrderList(Array.isArray(order)?order:_getTabOrder());
+  // Old preferences never contained Chat: preserve their Chat-first placement.
+  if(requested.indexOf('chat')===-1) requested.unshift('chat');
+  if(requested.indexOf('__new_chat__')===-1) requested.unshift('__new_chat__');
   var out=[];
   requested.forEach(function(panel){ if(available.indexOf(panel)!==-1&&out.indexOf(panel)===-1) out.push(panel); });
   available.forEach(function(panel){ if(out.indexOf(panel)===-1) out.push(panel); });
@@ -8209,7 +8225,7 @@ function _applyTabOrder(order){
       return child.dataset&&child.dataset.panel==='settings';
     });
     ordered.forEach(function(panel){
-      var node=container.querySelector('.nav-tab[data-panel="'+panel+'"]');
+      var node=panel==='__new_chat__'?container.querySelector('#btnRailNewChat'):container.querySelector('.nav-tab[data-panel="'+panel+'"]');
       if(node) container.insertBefore(node,anchor||null);
     });
   });
@@ -8256,6 +8272,7 @@ function _renderTabVisibilityChips(){
   var panels=_orderedSidebarPanels();
   container.innerHTML='';
   panels.forEach(function(panel){
+    if(panel==='__new_chat__') return; // Action can move, but is not a hideable navigation tab.
     var tab=document.querySelector('.rail .rail-btn.nav-tab[data-panel="'+panel+'"]')
       ||document.querySelector('.sidebar-nav .nav-tab[data-panel="'+panel+'"]');
     var label=(tab&&(tab.dataset.tooltip||tab.dataset.label))||panel;
@@ -8312,7 +8329,15 @@ function _moveTabOrderPanel(sourcePanel,targetPanel){
   _setTabOrder(order);
   _applyTabOrder(order);
   _renderTabVisibilityChips();
-  _scheduleAppearanceAutosave();
+  // This action is available before Settings is hydrated: persist only its owned field.
+  var profile=(typeof S!=='undefined'&&S&&S.activeProfile)||'default';
+  _tabOrderSaveQueue=_tabOrderSaveQueue.catch(function(){}).then(function(){
+    if(((typeof S!=='undefined'&&S&&S.activeProfile)||'default')!==profile) return;
+    return api('/api/settings',{method:'POST',body:JSON.stringify({tab_order:order})});
+  }).catch(function(error){
+    console.error('Could not save navigation order',error);
+    if(typeof toast==='function') toast('Could not save navigation order. Please try again.','error');
+  });
   return true;
 }
 
@@ -9751,6 +9776,9 @@ function _syncSettingsMaxTokensPlaceholder(field, fallbackValue){
 
 async function loadSettingsPanel(){
   try{
+    // A just-completed rail gesture owns a pending order-only write. Read after it,
+    // so opening Settings cannot hydrate the previous order over the new one.
+    await _tabOrderSaveQueue;
     const settings=await api('/api/settings');
     checkWebUIVersionSkew(settings);
     // Populate the version badges from the server — keeps them in sync with git
