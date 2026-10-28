@@ -4,6 +4,8 @@ This log tracks accepted fork changes. Keep it current with each related feature
 
 ## Navigation and New chat
 
+Tracking: [pull request #1](https://github.com/mygsunny/Altur-Agent-WebUI/pull/1), branch `ui/sidebar-new-chat`. Published as a reviewable feature branch; not merged into `altur-branding`. Local checks passed; GitHub reported no checks for the branch.
+
 ### Added
 - A theme-aware **New chat** row immediately below conversation search and above date-grouped conversations, with the supplied rounded pencil-in-square icon.
 - A matching compose action in the far-left navigation rail. It starts at the top by default, but is movable along with Chat and the ordinary navigation tabs.
