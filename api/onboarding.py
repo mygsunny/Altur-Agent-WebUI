@@ -229,9 +229,9 @@ _PROVIDER_CATEGORIES = [
 ]
 
 _UNSUPPORTED_PROVIDER_NOTE = (
-    "Advanced provider flows such as Nous Portal and GitHub Copilot are still "
-    "terminal-first. OpenAI Codex and Anthropic Claude Code can be authenticated in this onboarding flow "
-    "when your Hermes config selects the corresponding provider."
+    "Some providers require command-line sign-in. Follow this installation’s local setup guide "
+    "for those providers. OpenAI Codex and Anthropic Claude Code support sign-in here "
+    "when the corresponding provider is selected in the application configuration."
 )
 
 
@@ -280,7 +280,7 @@ def _save_yaml_config(config_path: Path, config: dict) -> None:
     try:
         from api import yaml_compat as _yaml
     except ImportError as exc:
-        raise RuntimeError("PyYAML is required to write Hermes config.yaml") from exc
+        raise RuntimeError("PyYAML is required to write the application config.yaml") from exc
 
     config_path.parent.mkdir(parents=True, exist_ok=True)
     _atomic_write_text(
@@ -771,8 +771,8 @@ def _status_from_runtime(cfg: dict, imports_ok: bool) -> dict:
         state = "agent_unavailable"
         note_key = "onboarding_notice_system_unavailable"
         note = (
-            "Altur-Agent is not fully importable from the Web UI yet. Finish bootstrap or fix the "
-            "agent install before provider setup will work."
+            "Altur-Agent runtime is unavailable. Follow this fork’s local setup guide "
+            "before configuring a provider."
         )
     elif chat_ready:
         state = "ready"
@@ -796,8 +796,8 @@ def _status_from_runtime(cfg: dict, imports_ok: bool) -> dict:
             # OAuth / unsupported provider: avoid misleading "API key" wording.
             note = (
                 f"Provider '{provider}' is configured but not yet authenticated. "
-                "Run 'hermes auth' or 'hermes model' in a terminal to complete "
-                "setup, then reload the Web UI."
+                "Complete command-line sign-in using this installation’s local "
+                "setup guide, then reload the application."
             )
         else:
             note_key = "onboarding_notice_provider_api_key_required"

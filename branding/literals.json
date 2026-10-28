@@ -45,6 +45,18 @@
     {
       "template": "{name:'@@PUBLISHER@@', value:'nous',",
       "rendered": "{name:'ArtemisProject', value:'nous',"
+    },
+    {
+      "template": "  a.download=`@@EXPORT_PREFIX@@-${S.session.session_id}.md`;a.click();URL.revokeObjectURL(a.href);\n",
+      "rendered": "  a.download=`altur-agent-${S.session.session_id}.md`;a.click();URL.revokeObjectURL(a.href);\n"
+    },
+    {
+      "template": "  a.download=`@@EXPORT_PREFIX@@-${S.session.session_id}.json`;a.click();\n",
+      "rendered": "  a.download=`altur-agent-${S.session.session_id}.json`;a.click();\n"
+    },
+    {
+      "template": "  a.download=`@@EXPORT_PREFIX@@-${sid}.html`;a.click();\n",
+      "rendered": "  a.download=`altur-agent-${sid}.html`;a.click();\n"
     }
   ],
   "static/ui.js": [
@@ -127,8 +139,8 @@
       "rendered": "`;\n        voices.forEach(v=>{\n          const opt=document.createElement('option');\n          opt.value=v.name;opt.textContent=v.name+(v.lang?' ('+v.lang+')':'');\n          if(v.name===current) opt.selected=true;\n          ttsVoiceSel.appendChild(opt);\n        });\n      }\n    };\n    if(ttsVoiceSel&&'speechSynthesis' in window){\n      window._populateTtsVoices();\n      speechSynthesis.addEventListener('voiceschanged',function(){\n        const engine=localStorage.getItem('hermes-tts-engine')||'browser';\n        if(engine==='browser') window._populateTtsVoices();\n      },{once:false});\n      ttsVoiceSel.onchange=function(){_markSpeechPreferenceChanged('tts_voice');localStorage.setItem('hermes-tts-voice',this.value);_schedulePreferencesAutosave();};\n    }\n    // TTS rate/pitch sliders\n    const ttsRateSlider=$('settingsTtsRate');\n    const ttsRateValue=$('settingsTtsRateValue');\n    if(ttsRateSlider){\n      const savedRate=_speechSetting('tts_rate','hermes-tts-rate',1);\n      ttsRateSlider.value=(savedRate===null||savedRate===undefined)?'1':String(savedRate);\n      if(ttsRateValue) ttsRateValue.textContent=parseFloat(ttsRateSlider.value).toFixed(1)+'x';\n      _syncSpeechPreferenceCache('tts_rate',ttsRateSlider.value);\n      ttsRateSlider.oninput=function(){_markSpeechPreferenceChanged('tts_rate');if(ttsRateValue)ttsRateValue.textContent=parseFloat(this.value).toFixed(1)+'x';localStorage.setItem('hermes-tts-rate',this.value);_schedulePreferencesAutosave();};\n    }\n    const ttsPitchSlider=$('settingsTtsPitch');\n    const ttsPitchValue=$('settingsTtsPitchValue');\n    if(ttsPitchSlider){\n      const savedPitch=_speechSetting('tts_pitch','hermes-tts-pitch',1);\n      ttsPitchSlider.value=(savedPitch===null||savedPitch===undefined)?'1':String(savedPitch);\n      if(ttsPitchValue) ttsPitchValue.textContent=parseFloat(ttsPitchSlider.value).toFixed(1);\n      _syncSpeechPreferenceCache('tts_pitch',ttsPitchSlider.value);\n      ttsPitchSlider.oninput=function(){_markSpeechPreferenceChanged('tts_pitch');if(ttsPitchValue)ttsPitchValue.textContent=parseFloat(this.value).toFixed(1);localStorage.setItem('hermes-tts-pitch',this.value);_schedulePreferencesAutosave();};\n    }\n    const notifCb=$('settingsNotificationsEnabled');\n    if(notifCb){notifCb.checked=!!settings.notifications_enabled;notifCb.addEventListener('change',_schedulePreferencesAutosave,{once:false});}\n    // show_thinking has no settings panel checkbox — controlled via /reasoning show|hide\n    const sidebarDensitySel=$('settingsSidebarDensity');\n    if(sidebarDensitySel){\n      sidebarDensitySel.value=settings.sidebar_density==='detailed'?'detailed':'compact';\n      sidebarDensitySel.addEventListener('change',_schedulePreferencesAutosave,{once:false});\n    }\n    const autoTitleRefreshSel=$('settingsAutoTitleRefresh');\n    if(autoTitleRefreshSel){\n      const val=String(settings.auto_title_refresh_every||'0');\n      autoTitleRefreshSel.value=['0','5','10','20'].includes(val)?val:'0';\n      autoTitleRefreshSel.addEventListener('change',_schedulePreferencesAutosave,{once:false});\n    }\n    // Default message mode\n    const defaultMessageModeSel=$('settingsDefaultMessageMode');\n    if(defaultMessageModeSel){\n      const val=String(settings.default_message_mode||settings.busy_input_mode||'steer');\n      defaultMessageModeSel.value=['queue','interrupt','steer'].includes(val)?val:'steer';\n      // #5170 mirror write on panel load, under the #5145 rename.\n      window._defaultMessageMode=(typeof _persistDefaultMessageMode==='function')?_persistDefaultMessageMode(defaultMessageModeSel.value):defaultMessageModeSel.value;\n      defaultMessageModeSel.addEventListener('change',_schedulePreferencesAutosave,{once:false});\n    }\n    const showBusyPlaceholderHintCb=$('settingsShowBusyPlaceholderHint');\n    if(showBusyPlaceholderHintCb){\n      showBusyPlaceholderHintCb.checked=!!settings.show_busy_placeholder_hint;\n      window._showBusyPlaceholderHint=showBusyPlaceholderHintCb.checked;\n      showBusyPlaceholderHintCb.addEventListener('change',_schedulePreferencesAutosave,{once:false});\n    }\n    if(typeof _applyBusyComposerPlaceholder==='function') _applyBusyComposerPlaceholder();\n    const newChatOnWorkspaceSwitchCb=$('settingsNewChatOnWorkspaceSwitch');\n    if(newChatOnWorkspaceSwitchCb){\n      newChatOnWorkspaceSwitchCb.checked=!!settings.new_chat_on_workspace_switch;\n      window._newChatOnWorkspaceSwitch=newChatOnWorkspaceSwitchCb.checked;\n      newChatOnWorkspaceSwitchCb.addEventListener('change',_schedulePreferencesAutosave,{once:false});\n    }\n    // Bot name — debounced autosave (text input)\n    const botNameField=$('settingsBotName');\n    if(botNameField){\n      botNameField.value=settings.bot_name||'Altur-Agent';\n      let botNameTimer=null;\n      botNameField.addEventListener('input',()=>{\n        if(botNameTimer) clearTimeout(botNameTimer);\n        botNameTimer=setTimeout(_schedulePreferencesAutosave,500);\n      },{once:false});\n    }\n    // Password field: always blank (we don't send hash back)\n    const pwField=$('settingsPassword');\n    if(pwField){pwField.value='';pwField.addEventListener('input',_markSettingsDirty,{once:false});}\n    // #1560: when HERMES_WEBUI_PASSWORD env var is set, the settings password\n    // field silently no-ops. Disable it + reveal the lock banner so the UI\n    // tells the truth before a user tries (and the backend now also returns\n    // 409 as defense-in-depth).\n    const pwEnvLocked=!!settings.password_env_var;\n    _settingsPasswordEnvLocked=pwEnvLocked;\n    const pwLockBanner=$('settingsPasswordEnvLock');\n    if(pwField){\n      pwField.disabled=pwEnvLocked;\n      if(pwEnvLocked){\n        pwField.value='';\n        pwField.placeholder=t('password_env_var_locked_placeholder')||pwField.placeholder;\n      }\n    }\n    if(pwLockBanner) pwLockBanner.style.display=pwEnvLocked?'block':'none';\n    // Show auth buttons only when auth is active\n    try{\n      const authStatus=await api('/api/auth/status');\n      _settingsPasswordAuthEnabled=!!authStatus.password_auth_enabled;\n      _setSettingsAuthButtonsVisible(!!authStatus.auth_enabled);\n      _syncPasswordlessButton(authStatus);\n      _renderSettingsAuthStatus(authStatus);\n      _updateCurrentPasswordVisibility();\n      _updateAuthWarningBadge(authStatus);\n      _updateAuthDisabledWarning(authStatus);\n    }catch(e){}\n    loadPasskeys();\n    // #1560: env-var-locked password also disables the Disable Auth button —\n    // clearing settings.password_hash is silent no-op when the env var is set,\n    // and the backend now returns 409 anyway, so don't offer the action.\n    // Sign Out remains available since it only clears the session cookie.\n    if(pwEnvLocked){\n      const disableBtn=$('btnDisableAuth');\n      if(disableBtn) disableBtn.style.display='none';\n    }\n    _syncHermesPanelSessionActions();\n    if(typeof loadDashboardSettings==='function') loadDashboardSettings();\n    loadProvidersPanel(); // load provider cards in background\n    loadPluginsPanel(); // load plugin/hook visibility in background\n    loadExtensionsPanel(); // load extension diagnostics in background\n    switchSettingsSection(_settingsSection);\n  }catch(e){\n    showToast(t('settings_load_failed')+e.message);\n  }\n}\n\n\n// ── Extensions panel (browser-origin diagnostics + local enable controls) ──\n\nfunction _extensionStatusLabel(value){\n  return value ? t('plugins_enabled') : t('plugins_disabled');\n}\n\nfunction _extensionBooleanBadge(value){\n  const cls=value?'extension-status-badge-on':'extension-status-badge-off';\n  return `"
     },
     {
-      "template": "`;\n}\n\nfunction _renderLlmWikiStatus(d) {\n  const status = d || {status:'error'};\n  const isReady = status.available && status.status === 'ready';\n  const isEmpty = status.available && status.status === 'empty';\n  const isError = status.status === 'error';\n  const badgeClass = isReady ? 'ok' : isError ? 'err' : isEmpty ? 'warn' : 'muted';\n  const badgeText = isReady ? 'Available' : isError ? 'Error' : isEmpty ? 'Empty' : 'Unavailable';\n  const rawDocsUrl = status.docs_url || 'https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/research/research-llm-wiki';\n  // Guard against unsafe URL schemes (e.g. js: / data:) if docs_url ever\n  // becomes config-driven. esc() HTML-escapes but doesn't validate URL scheme.\n  const docsUrl = /^https?:\\/\\//i.test(rawDocsUrl) ? rawDocsUrl : '#';\n  const toggleNote = status.toggle_available\n    ? 'Toggle available from configured @@PRODUCT@@ Agent setting.'\n    : (status.toggle_reason || 'No stable LLM Wiki on/off config flag was detected, so this panel is read-only.');\n  const statusNote = isReady\n    ? 'LLM Wiki is configured and page metadata is visible without exposing wiki content.'\n    : isEmpty\n      ? 'LLM Wiki exists but has no entity, concept, comparison, or query pages yet.'\n      : isError\n        ? `",
-      "rendered": "`;\n}\n\nfunction _renderLlmWikiStatus(d) {\n  const status = d || {status:'error'};\n  const isReady = status.available && status.status === 'ready';\n  const isEmpty = status.available && status.status === 'empty';\n  const isError = status.status === 'error';\n  const badgeClass = isReady ? 'ok' : isError ? 'err' : isEmpty ? 'warn' : 'muted';\n  const badgeText = isReady ? 'Available' : isError ? 'Error' : isEmpty ? 'Empty' : 'Unavailable';\n  const rawDocsUrl = status.docs_url || 'https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/research/research-llm-wiki';\n  // Guard against unsafe URL schemes (e.g. js: / data:) if docs_url ever\n  // becomes config-driven. esc() HTML-escapes but doesn't validate URL scheme.\n  const docsUrl = /^https?:\\/\\//i.test(rawDocsUrl) ? rawDocsUrl : '#';\n  const toggleNote = status.toggle_available\n    ? 'Toggle available from configured Altur-Agent Agent setting.'\n    : (status.toggle_reason || 'No stable LLM Wiki on/off config flag was detected, so this panel is read-only.');\n  const statusNote = isReady\n    ? 'LLM Wiki is configured and page metadata is visible without exposing wiki content.'\n    : isEmpty\n      ? 'LLM Wiki exists but has no entity, concept, comparison, or query pages yet.'\n      : isError\n        ? `"
+      "template": "`;\n}\n\nfunction _renderLlmWikiStatus(d) {\n  const status = d || {status:'error'};\n  const isReady = status.available && status.status === 'ready';\n  const isEmpty = status.available && status.status === 'empty';\n  const isError = status.status === 'error';\n  const badgeClass = isReady ? 'ok' : isError ? 'err' : isEmpty ? 'warn' : 'muted';\n  const badgeText = isReady ? 'Available' : isError ? 'Error' : isEmpty ? 'Empty' : 'Unavailable';\n  const rawDocsUrl = status.docs_url || 'https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/research/research-llm-wiki';\n  // Guard against unsafe URL schemes (e.g. js: / data:) if docs_url ever\n  // becomes config-driven. esc() HTML-escapes but doesn't validate URL scheme.\n  const docsUrl = /^https?:\\/\\//i.test(rawDocsUrl) ? rawDocsUrl : '#';\n  const toggleNote = status.toggle_available\n    ? 'Toggle available from configured @@PRODUCT@@ setting.'\n    : (status.toggle_reason || 'No stable LLM Wiki on/off config flag was detected, so this panel is read-only.');\n  const statusNote = isReady\n    ? 'LLM Wiki is configured and page metadata is visible without exposing wiki content.'\n    : isEmpty\n      ? 'LLM Wiki exists but has no entity, concept, comparison, or query pages yet.'\n      : isError\n        ? `",
+      "rendered": "`;\n}\n\nfunction _renderLlmWikiStatus(d) {\n  const status = d || {status:'error'};\n  const isReady = status.available && status.status === 'ready';\n  const isEmpty = status.available && status.status === 'empty';\n  const isError = status.status === 'error';\n  const badgeClass = isReady ? 'ok' : isError ? 'err' : isEmpty ? 'warn' : 'muted';\n  const badgeText = isReady ? 'Available' : isError ? 'Error' : isEmpty ? 'Empty' : 'Unavailable';\n  const rawDocsUrl = status.docs_url || 'https://hermes-agent.nousresearch.com/docs/user-guide/skills/bundled/research/research-llm-wiki';\n  // Guard against unsafe URL schemes (e.g. js: / data:) if docs_url ever\n  // becomes config-driven. esc() HTML-escapes but doesn't validate URL scheme.\n  const docsUrl = /^https?:\\/\\//i.test(rawDocsUrl) ? rawDocsUrl : '#';\n  const toggleNote = status.toggle_available\n    ? 'Toggle available from configured Altur-Agent setting.'\n    : (status.toggle_reason || 'No stable LLM Wiki on/off config flag was detected, so this panel is read-only.');\n  const statusNote = isReady\n    ? 'LLM Wiki is configured and page metadata is visible without exposing wiki content.'\n    : isEmpty\n      ? 'LLM Wiki exists but has no entity, concept, comparison, or query pages yet.'\n      : isError\n        ? `"
     },
     {
       "template": "\"${esc(t('kanban_assignee_profiles_label') || '@@PRODUCT@@ profiles')}\"",
@@ -139,20 +151,11 @@
       "rendered": "` shell as openKanbanCreateBoard() so the two\n// flows look and behave identically (centered card, dim backdrop, ESC closes,\n// click-on-backdrop closes). The modal markup lives in static/index.html as\n// #kanbanTaskModal — see the section just above </body>.\n//\n// The assignee field auto-completes against the union of (a) live Altur-Agent\n// profile names from /api/profiles and (b) historical assignees on the\n// active board, with an inline hint that explains the dispatcher claim\n// contract — most users will pick a profile name from the dropdown rather\n// than type one.\n// ────────────────────────────────────────────────────────────────────────────\n\nlet _kanbanTaskModalMode = 'create';   // 'create' | 'edit'\nlet _kanbanTaskModalEditingId = null;  // task id when mode === 'edit'\nlet _kanbanProfileNamesCache = null;   // populated lazily on first modal open\nlet _kanbanProfileNamesCacheAt = 0;\nconst _KANBAN_PROFILE_NAMES_CACHE_TTL_MS = 30000;\nfunction _invalidateKanbanProfileCache() {\n  _kanbanProfileNamesCache = null;\n  _kanbanProfileNamesCacheAt = 0;\n}\nlet _kanbanTaskModalFocusCleanup = null;\n// Status the modal *displayed* on edit-mode open.  If the user doesn't touch\n// the dropdown, we must NOT send `"
     },
     {
-      "template": "'In @@PRODUCT@@, scheduled jobs require the Hermes gateway daemon to be running. Start the gateway container or `hermes gateway` before relying on offline scheduled runs.'",
-      "rendered": "'In Altur-Agent, scheduled jobs require the Hermes gateway daemon to be running. Start the gateway container or `hermes gateway` before relying on offline scheduled runs.'"
-    },
-    {
-      "template": "'In @@PRODUCT@@, scheduled jobs require the Hermes gateway daemon. If this is a single-container Docker install, jobs can be created and run manually here, but scheduled ticks need a gateway container or `hermes gateway` running outside the WebUI.'",
-      "rendered": "'In Altur-Agent, scheduled jobs require the Hermes gateway daemon. If this is a single-container Docker install, jobs can be created and run manually here, but scheduled ticks need a gateway container or `hermes gateway` running outside the WebUI.'"
+      "template": "  const docsHref = '@@HELP_PATH@@#scheduled-jobs';\n",
+      "rendered": "  const docsHref = 'static/altur-help.html#scheduled-jobs';\n"
     }
   ],
-  "static/commands.js": [
-    {
-      "template": "`\\`/${name}\\` is a @@PRODUCT@@ CLI-only command and cannot run inside the WebUI.${detail}${extra}`",
-      "rendered": "`\\`/${name}\\` is a Altur-Agent CLI-only command and cannot run inside the WebUI.${detail}${extra}`"
-    }
-  ],
+  "static/commands.js": [],
   "static/i18n.js": [
     {
       "template": "    offline_network_detail: '@@PRODUCT@@ is unreachable from this browser right now.',\n",
@@ -211,24 +214,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Request timeout for this auxiliary task. Blank uses Altur-Agent default.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Official @@PRODUCT@@ Dashboard',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Official Altur-Agent Dashboard',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: 'Status of the @@PRODUCT@@ gateway (Telegram, Discord, Slack, etc.)',\n",
       "rendered": "    settings_desc_gateway_status: 'Status of the Altur-Agent gateway (Telegram, Discord, Slack, etc.)',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
-      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
+      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
+      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: '@@PRODUCT@@ profiles',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Altur-Agent profiles',\n"
-    },
-    {
-      "template": "    tab_dashboard: '@@PRODUCT@@ Dashboard',\n",
-      "rendered": "    tab_dashboard: 'Altur-Agent Dashboard',\n"
     },
     {
       "template": "    settings_desc_voice_mode: 'Show the voice-mode button (audio waveform) next to the dictation mic. Lets you speak naturally — @@PRODUCT@@ auto-sends after a pause and reads replies aloud. Requires a browser that supports both speech recognition and TTS.',\n",
@@ -259,28 +254,24 @@
       "rendered": "    onboarding_open: 'Open Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: 'Verify @@PRODUCT@@ Agent and config visibility.',\n",
-      "rendered": "    onboarding_step_system_desc: 'Verify Altur-Agent Agent and config visibility.',\n"
+      "template": "    onboarding_step_system_desc: 'Verify @@PRODUCT@@ and config visibility.',\n",
+      "rendered": "    onboarding_step_system_desc: 'Verify Altur-Agent and config visibility.',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: 'Save the minimum @@PRODUCT@@ provider config.',\n",
       "rendered": "    onboarding_step_setup_desc: 'Save the minimum Altur-Agent provider config.',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent looks reachable from the Web UI.',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent looks reachable from the Web UI.',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ looks reachable from the Web UI.',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent looks reachable from the Web UI.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent is not fully available yet. Bootstrap can install it, but provider setup may still require a terminal.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent is not fully available yet. Bootstrap can install it, but provider setup may still require a terminal.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"@@PRODUCT@@ 실행 환경을 사용할 수 없습니다. 이 포크의 로컬 설정 가이드를 따르세요. 제공업체 로그인에는 터미널이 필요할 수 있습니다.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Altur-Agent 실행 환경을 사용할 수 없습니다. 이 포크의 로컬 설정 가이드를 따르세요. 제공업체 로그인에는 터미널이 필요할 수 있습니다.\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Choose a simple provider path here. Advanced OAuth flows still belong in the @@PRODUCT@@ CLI for now.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Choose a simple provider path here. Advanced OAuth flows still belong in the Altur-Agent CLI for now.',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ is installed, but you still need to choose a provider and save working credentials.',\n",
@@ -367,24 +358,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Request timeout for this auxiliary task. Blank uses Altur-Agent default.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Dashboard ufficiale @@PRODUCT@@',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Dashboard ufficiale Altur-Agent',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: 'Stato del gateway @@PRODUCT@@ (Telegram, Discord, Slack, ecc.)',\n",
       "rendered": "    settings_desc_gateway_status: 'Stato del gateway Altur-Agent (Telegram, Discord, Slack, ecc.)',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: 'Questa è la coda di lavoro di @@PRODUCT@@ Agent. Crea o classifica un task, assegnalo, spostalo in Pronto, poi lascia che il dispatcher lo reclami.',\n",
-      "rendered": "    kanban_work_queue_hint: 'Questa è la coda di lavoro di Altur-Agent Agent. Crea o classifica un task, assegnalo, spostalo in Pronto, poi lascia che il dispatcher lo reclami.',\n"
+      "template": "    kanban_work_queue_hint: 'Questa è la coda di lavoro di @@PRODUCT@@. Crea o classifica un task, assegnalo, spostalo in Pronto, poi lascia che il dispatcher lo reclami.',\n",
+      "rendered": "    kanban_work_queue_hint: 'Questa è la coda di lavoro di Altur-Agent. Crea o classifica un task, assegnalo, spostalo in Pronto, poi lascia che il dispatcher lo reclami.',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: 'Profili @@PRODUCT@@',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Profili Altur-Agent',\n"
-    },
-    {
-      "template": "    tab_dashboard: 'Dashboard @@PRODUCT@@',\n",
-      "rendered": "    tab_dashboard: 'Dashboard Altur-Agent',\n"
     },
     {
       "template": "    settings_desc_voice_mode: 'Mostra il pulsante modalità vocale (forma d\\'onda audio) accanto al microfono di dettatura. Ti permette di parlare naturalmente — @@PRODUCT@@ invia automaticamente dopo una pausa e legge le risposte ad alta voce. Richiede un browser che supporti sia il riconoscimento vocale che la sintesi vocale.',\n",
@@ -415,28 +398,24 @@
       "rendered": "    onboarding_open: 'Apri Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: 'Verifica @@PRODUCT@@ Agent e visibilità configurazione.',\n",
-      "rendered": "    onboarding_step_system_desc: 'Verifica Altur-Agent Agent e visibilità configurazione.',\n"
+      "template": "    onboarding_step_system_desc: 'Verifica @@PRODUCT@@ e visibilità configurazione.',\n",
+      "rendered": "    onboarding_step_system_desc: 'Verifica Altur-Agent e visibilità configurazione.',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: 'Salva la configurazione minima provider @@PRODUCT@@.',\n",
       "rendered": "    onboarding_step_setup_desc: 'Salva la configurazione minima provider Altur-Agent.',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent sembra raggiungibile dalla Web UI.',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent sembra raggiungibile dalla Web UI.',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ sembra raggiungibile dalla Web UI.',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent sembra raggiungibile dalla Web UI.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent non è ancora completamente disponibile. Bootstrap può installarlo, ma la configurazione provider potrebbe richiedere un terminale.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent non è ancora completamente disponibile. Bootstrap può installarlo, ma la configurazione provider potrebbe richiedere un terminale.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"Il runtime di @@PRODUCT@@ non è disponibile. Segui la guida di configurazione locale di questo fork. L’accesso al provider potrebbe richiedere un terminale.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Il runtime di Altur-Agent non è disponibile. Segui la guida di configurazione locale di questo fork. L’accesso al provider potrebbe richiedere un terminale.\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Scegli un percorso provider semplice qui. I flussi OAuth avanzati rimangono nella CLI di @@PRODUCT@@ per ora.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Scegli un percorso provider semplice qui. I flussi OAuth avanzati rimangono nella CLI di Altur-Agent per ora.',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ è installato, ma devi ancora scegliere un provider e salvare credenziali funzionanti.',\n",
@@ -523,24 +502,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'この補助タスクのリクエストタイムアウト時間。空欄の場合は Altur-Agent のデフォルト値が適用されます。',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: '公式@@PRODUCT@@ダッシュボード',\n",
-      "rendered": "    settings_label_dashboard_mode: '公式Altur-Agentダッシュボード',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: '@@PRODUCT@@ゲートウェイのステータス（Telegram、Discord、Slackなど）',\n",
       "rendered": "    settings_desc_gateway_status: 'Altur-Agentゲートウェイのステータス（Telegram、Discord、Slackなど）',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: 'これは @@PRODUCT@@ Agent のワークキューです。タスクを作成またはトリアージし、担当者を割り当て、Ready に移動すると、ディスパッチャーがそれをクレームします。',\n",
-      "rendered": "    kanban_work_queue_hint: 'これは Altur-Agent Agent のワークキューです。タスクを作成またはトリアージし、担当者を割り当て、Ready に移動すると、ディスパッチャーがそれをクレームします。',\n"
+      "template": "    kanban_work_queue_hint: 'これは @@PRODUCT@@ のワークキューです。タスクを作成またはトリアージし、担当者を割り当て、Ready に移動すると、ディスパッチャーがそれをクレームします。',\n",
+      "rendered": "    kanban_work_queue_hint: 'これは Altur-Agent のワークキューです。タスクを作成またはトリアージし、担当者を割り当て、Ready に移動すると、ディスパッチャーがそれをクレームします。',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: '@@PRODUCT@@ プロファイル',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Altur-Agent プロファイル',\n"
-    },
-    {
-      "template": "    tab_dashboard: '@@PRODUCT@@ ダッシュボード',\n",
-      "rendered": "    tab_dashboard: 'Altur-Agent ダッシュボード',\n"
     },
     {
       "template": "    settings_label_shutdown: '@@PRODUCT@@ サーバーを停止',\n",
@@ -567,28 +538,24 @@
       "rendered": "    onboarding_open: 'Altur-Agent を開く',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: '@@PRODUCT@@ Agent と設定の可視性を確認します。',\n",
-      "rendered": "    onboarding_step_system_desc: 'Altur-Agent Agent と設定の可視性を確認します。',\n"
+      "template": "    onboarding_step_system_desc: '@@PRODUCT@@ と設定の可視性を確認します。',\n",
+      "rendered": "    onboarding_step_system_desc: 'Altur-Agent と設定の可視性を確認します。',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: '最低限の @@PRODUCT@@ プロバイダ設定を保存します。',\n",
       "rendered": "    onboarding_step_setup_desc: '最低限の Altur-Agent プロバイダ設定を保存します。',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: 'Web UI から @@PRODUCT@@ Agent へ到達できそうです。',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Web UI から Altur-Agent Agent へ到達できそうです。',\n"
+      "template": "    onboarding_notice_system_ready: 'Web UI から @@PRODUCT@@ へ到達できそうです。',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Web UI から Altur-Agent へ到達できそうです。',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent はまだ完全には利用できません。Bootstrap でインストールできますが、プロバイダ設定にはターミナルが必要な場合があります。',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent はまだ完全には利用できません。Bootstrap でインストールできますが、プロバイダ設定にはターミナルが必要な場合があります。',\n"
+      "template": "    onboarding_notice_system_unavailable: \"@@PRODUCT@@ の実行環境を利用できません。このフォークのローカルセットアップガイドに従ってください。プロバイダーへのサインインにはターミナルが必要な場合があります。\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Altur-Agent の実行環境を利用できません。このフォークのローカルセットアップガイドに従ってください。プロバイダーへのサインインにはターミナルが必要な場合があります。\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'シンプルなプロバイダ経路をここで選んでください。高度な OAuth フローは現状 @@PRODUCT@@ CLI 側で扱います。',\n",
-      "rendered": "    onboarding_notice_setup_required: 'シンプルなプロバイダ経路をここで選んでください。高度な OAuth フローは現状 Altur-Agent CLI 側で扱います。',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ はインストール済みですが、プロバイダを選び、有効な認証情報を保存する必要があります。',\n",
@@ -651,24 +618,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Тайм-аут запроса для этой вспомогательной задачи. Пустое значение использует настройку Altur-Agent по умолчанию.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Официальная панель @@PRODUCT@@',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Официальная панель Altur-Agent',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: 'Статус шлюза @@PRODUCT@@ (Telegram, Discord, Slack и т.д.)',\n",
       "rendered": "    settings_desc_gateway_status: 'Статус шлюза Altur-Agent (Telegram, Discord, Slack и т.д.)',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: 'Это рабочая очередь @@PRODUCT@@ Agent. Создайте или отсортируйте задачу, назначьте исполнителя, переведите её в Ready, затем дайте диспетчеру забрать её.',\n",
-      "rendered": "    kanban_work_queue_hint: 'Это рабочая очередь Altur-Agent Agent. Создайте или отсортируйте задачу, назначьте исполнителя, переведите её в Ready, затем дайте диспетчеру забрать её.',\n"
+      "template": "    kanban_work_queue_hint: 'Это рабочая очередь @@PRODUCT@@. Создайте или отсортируйте задачу, назначьте исполнителя, переведите её в Ready, затем дайте диспетчеру забрать её.',\n",
+      "rendered": "    kanban_work_queue_hint: 'Это рабочая очередь Altur-Agent. Создайте или отсортируйте задачу, назначьте исполнителя, переведите её в Ready, затем дайте диспетчеру забрать её.',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: 'Профили @@PRODUCT@@',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Профили Altur-Agent',\n"
-    },
-    {
-      "template": "    tab_dashboard: 'Панель @@PRODUCT@@',\n",
-      "rendered": "    tab_dashboard: 'Панель Altur-Agent',\n"
     },
     {
       "template": "    settings_label_shutdown: 'Остановить сервер @@PRODUCT@@',\n",
@@ -695,28 +654,24 @@
       "rendered": "    onboarding_open: 'Открыть Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: 'Проверить @@PRODUCT@@ Agent и видимость конфигурации.',\n",
-      "rendered": "    onboarding_step_system_desc: 'Проверить Altur-Agent Agent и видимость конфигурации.',\n"
+      "template": "    onboarding_step_system_desc: 'Проверить @@PRODUCT@@ и видимость конфигурации.',\n",
+      "rendered": "    onboarding_step_system_desc: 'Проверить Altur-Agent и видимость конфигурации.',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: 'Сохранить минимальную рабочую конфигурацию провайдера @@PRODUCT@@.',\n",
       "rendered": "    onboarding_step_setup_desc: 'Сохранить минимальную рабочую конфигурацию провайдера Altur-Agent.',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent, похоже, доступен из Web UI.',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent, похоже, доступен из Web UI.',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@, похоже, доступен из Web UI.',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent, похоже, доступен из Web UI.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent ещё не полностью доступен. Bootstrap может установить его, но для настройки провайдера всё ещё может понадобиться терминал.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent ещё не полностью доступен. Bootstrap может установить его, но для настройки провайдера всё ещё может понадобиться терминал.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"Среда выполнения @@PRODUCT@@ недоступна. Следуйте локальному руководству по настройке этого форка. Для входа в учётную запись провайдера может понадобиться терминал.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Среда выполнения Altur-Agent недоступна. Следуйте локальному руководству по настройке этого форка. Для входа в учётную запись провайдера может понадобиться терминал.\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Выберите здесь простой путь настройки провайдера. Продвинутые OAuth-сценарии пока остаются в @@PRODUCT@@ CLI.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Выберите здесь простой путь настройки провайдера. Продвинутые OAuth-сценарии пока остаются в Altur-Agent CLI.',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ установлен, но нужно выбрать провайдера и сохранить рабочие учётные данные.',\n",
@@ -807,24 +762,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Request timeout for this auxiliary task. Blank uses Altur-Agent default.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Panel oficial de @@PRODUCT@@',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Panel oficial de Altur-Agent',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: 'Estado del gateway de @@PRODUCT@@ (Telegram, Discord, Slack, etc.)',\n",
       "rendered": "    settings_desc_gateway_status: 'Estado del gateway de Altur-Agent (Telegram, Discord, Slack, etc.)',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
-      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
+      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
+      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: 'Perfiles @@PRODUCT@@',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Perfiles Altur-Agent',\n"
-    },
-    {
-      "template": "    tab_dashboard: 'Panel de @@PRODUCT@@',\n",
-      "rendered": "    tab_dashboard: 'Panel de Altur-Agent',\n"
     },
     {
       "template": "    settings_label_shutdown: 'Detener el servidor @@PRODUCT@@',\n",
@@ -851,28 +798,24 @@
       "rendered": "    onboarding_open: 'Abrir Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: 'Verifica @@PRODUCT@@ Agent y la visibilidad de la configuración.',\n",
-      "rendered": "    onboarding_step_system_desc: 'Verifica Altur-Agent Agent y la visibilidad de la configuración.',\n"
+      "template": "    onboarding_step_system_desc: 'Verifica @@PRODUCT@@ y la visibilidad de la configuración.',\n",
+      "rendered": "    onboarding_step_system_desc: 'Verifica Altur-Agent y la visibilidad de la configuración.',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: 'Guarda la configuración mínima real de @@PRODUCT@@.',\n",
       "rendered": "    onboarding_step_setup_desc: 'Guarda la configuración mínima real de Altur-Agent.',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: 'Parece que @@PRODUCT@@ Agent está accesible desde la Web UI.',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Parece que Altur-Agent Agent está accesible desde la Web UI.',\n"
+      "template": "    onboarding_notice_system_ready: 'Parece que @@PRODUCT@@ está accesible desde la Web UI.',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Parece que Altur-Agent está accesible desde la Web UI.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent todavía no está totalmente disponible. Bootstrap puede instalarlo, pero la configuración del proveedor quizá aún requiera una terminal.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent todavía no está totalmente disponible. Bootstrap puede instalarlo, pero la configuración del proveedor quizá aún requiera una terminal.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"El entorno de ejecución de @@PRODUCT@@ no está disponible. Sigue la guía de configuración local de esta versión. Para iniciar sesión con el proveedor, puede que necesites una terminal.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"El entorno de ejecución de Altur-Agent no está disponible. Sigue la guía de configuración local de esta versión. Para iniciar sesión con el proveedor, puede que necesites una terminal.\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Elige aquí una ruta simple de proveedor. Los flujos OAuth avanzados siguen siendo del CLI de @@PRODUCT@@ por ahora.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Elige aquí una ruta simple de proveedor. Los flujos OAuth avanzados siguen siendo del CLI de Altur-Agent por ahora.',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ está instalado, pero aún debes elegir un proveedor y guardar credenciales válidas.',\n",
@@ -963,28 +906,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Request-Timeout für diese Hilfsaufgabe. Leer nutzt den Altur-Agent-Standard.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Offizielles @@PRODUCT@@-Dashboard',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Offizielles Altur-Agent-Dashboard',\n"
-    },
-    {
-      "template": "    settings_desc_dashboard_mode: 'Zeigt einen Link in der Navigationsleiste an, wenn das offizielle @@PRODUCT@@-Dashboard erreichbar ist. Öffentliche Reverse-Proxy-URLs werden nur als Browser-Links gespeichert und nie vom Server geprüft.',\n",
-      "rendered": "    settings_desc_dashboard_mode: 'Zeigt einen Link in der Navigationsleiste an, wenn das offizielle Altur-Agent-Dashboard erreichbar ist. Öffentliche Reverse-Proxy-URLs werden nur als Browser-Links gespeichert und nie vom Server geprüft.',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: 'Status des @@PRODUCT@@-Gateways (Telegram, Discord, Slack, usw.)',\n",
       "rendered": "    settings_desc_gateway_status: 'Status des Altur-Agent-Gateways (Telegram, Discord, Slack, usw.)',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
-      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
+      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
+      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: '@@PRODUCT@@-Profile',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Altur-Agent-Profile',\n"
-    },
-    {
-      "template": "    tab_dashboard: '@@PRODUCT@@-Dashboard',\n",
-      "rendered": "    tab_dashboard: 'Altur-Agent-Dashboard',\n"
     },
     {
       "template": "    settings_label_shutdown: '@@PRODUCT@@ WebUI-Server stoppen',\n",
@@ -1027,12 +958,12 @@
       "rendered": "    onboarding_title: 'Willkommen bei Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: '@@PRODUCT@@ Agent muss installiert und erreichbar sein.',\n",
-      "rendered": "    onboarding_step_system_desc: 'Altur-Agent Agent muss installiert und erreichbar sein.',\n"
+      "template": "    onboarding_step_system_desc: '@@PRODUCT@@ muss installiert und erreichbar sein.',\n",
+      "rendered": "    onboarding_step_system_desc: 'Altur-Agent muss installiert und erreichbar sein.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: 'Agent nicht erreichbar. Bitte starten Sie @@PRODUCT@@ Agent.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Agent nicht erreichbar. Bitte starten Sie Altur-Agent Agent.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"Die Laufzeitumgebung von @@PRODUCT@@ ist nicht verfügbar. Folge der lokalen Einrichtungsanleitung dieses Forks. Für die Anmeldung beim Anbieter kann ein Terminal erforderlich sein.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Die Laufzeitumgebung von Altur-Agent ist nicht verfügbar. Folge der lokalen Einrichtungsanleitung dieses Forks. Für die Anmeldung beim Anbieter kann ein Terminal erforderlich sein.\",\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ ist installiert, aber Sie müssen noch einen Anbieter wählen und funktionierende Zugangsdaten speichern.',\n",
@@ -1091,24 +1022,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: '此辅助任务的请求超时时间。留空则使用Altur-Agent默认设置。',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: '官方 @@PRODUCT@@ 仪表盘',\n",
-      "rendered": "    settings_label_dashboard_mode: '官方 Altur-Agent 仪表盘',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: '@@PRODUCT@@ 网关状态（Telegram、Discord、Slack 等）',\n",
       "rendered": "    settings_desc_gateway_status: 'Altur-Agent 网关状态（Telegram、Discord、Slack 等）',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: '这是 @@PRODUCT@@ Agent 的工作队列。创建或分类任务，分配任务，将其移至”就绪”状态，然后让调度员认领任务。',\n",
-      "rendered": "    kanban_work_queue_hint: '这是 Altur-Agent Agent 的工作队列。创建或分类任务，分配任务，将其移至”就绪”状态，然后让调度员认领任务。',\n"
+      "template": "    kanban_work_queue_hint: '这是 @@PRODUCT@@ 的工作队列。创建或分类任务，分配任务，将其移至”就绪”状态，然后让调度员认领任务。',\n",
+      "rendered": "    kanban_work_queue_hint: '这是 Altur-Agent 的工作队列。创建或分类任务，分配任务，将其移至”就绪”状态，然后让调度员认领任务。',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: '@@PRODUCT@@ 配置',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Altur-Agent 配置',\n"
-    },
-    {
-      "template": "    tab_dashboard: '@@PRODUCT@@ 仪表盘',\n",
-      "rendered": "    tab_dashboard: 'Altur-Agent 仪表盘',\n"
     },
     {
       "template": "    settings_label_shutdown: '停止 @@PRODUCT@@ 服务器',\n",
@@ -1135,28 +1058,24 @@
       "rendered": "    onboarding_open: '打开 Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: '验证 @@PRODUCT@@ Agent 与配置可见性。',\n",
-      "rendered": "    onboarding_step_system_desc: '验证 Altur-Agent Agent 与配置可见性。',\n"
+      "template": "    onboarding_step_system_desc: '验证 @@PRODUCT@@ 与配置可见性。',\n",
+      "rendered": "    onboarding_step_system_desc: '验证 Altur-Agent 与配置可见性。',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: '保存最小可用的 @@PRODUCT@@ 提供商配置。',\n",
       "rendered": "    onboarding_step_setup_desc: '保存最小可用的 Altur-Agent 提供商配置。',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent 看起来可从 Web UI 访问。',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent 看起来可从 Web UI 访问。',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ 看起来可从 Web UI 访问。',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent 看起来可从 Web UI 访问。',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent 尚未完全可用。Bootstrap 可以安装它，但提供商设置可能仍需要终端。',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent 尚未完全可用。Bootstrap 可以安装它，但提供商设置可能仍需要终端。',\n"
+      "template": "    onboarding_notice_system_unavailable: \"@@PRODUCT@@ 运行环境不可用。请按照此分支的本地设置指南进行配置。提供商登录可能需要使用终端。\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Altur-Agent 运行环境不可用。请按照此分支的本地设置指南进行配置。提供商登录可能需要使用终端。\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: '请先在此选择一个简单的提供商路径。高级 OAuth 流程暂时仍建议在 @@PRODUCT@@ CLI 中完成。',\n",
-      "rendered": "    onboarding_notice_setup_required: '请先在此选择一个简单的提供商路径。高级 OAuth 流程暂时仍建议在 Altur-Agent CLI 中完成。',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ 已安装，但仍需选择提供商并保存可用凭据。',\n",
@@ -1263,24 +1182,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Request timeout for this auxiliary task. Blank uses Altur-Agent default.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: '官方 @@PRODUCT@@ 儀表板',\n",
-      "rendered": "    settings_label_dashboard_mode: '官方 Altur-Agent 儀表板',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: '@@PRODUCT@@ 閘道狀態（Telegram、Discord、Slack 等）',\n",
       "rendered": "    settings_desc_gateway_status: 'Altur-Agent 閘道狀態（Telegram、Discord、Slack 等）',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: '這是 @@PRODUCT@@ Agent 的工作佇列。建立或分類任務、指派對象、移至 Ready，然後讓調度器認領。',\n",
-      "rendered": "    kanban_work_queue_hint: '這是 Altur-Agent Agent 的工作佇列。建立或分類任務、指派對象、移至 Ready，然後讓調度器認領。',\n"
+      "template": "    kanban_work_queue_hint: '這是 @@PRODUCT@@ 的工作佇列。建立或分類任務、指派對象、移至 Ready，然後讓調度器認領。',\n",
+      "rendered": "    kanban_work_queue_hint: '這是 Altur-Agent 的工作佇列。建立或分類任務、指派對象、移至 Ready，然後讓調度器認領。',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: '@@PRODUCT@@ 設定檔',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Altur-Agent 設定檔',\n"
-    },
-    {
-      "template": "    tab_dashboard: '@@PRODUCT@@ 儀表板',\n",
-      "rendered": "    tab_dashboard: 'Altur-Agent 儀表板',\n"
     },
     {
       "template": "    settings_desc_voice_mode: '在聽寫麥克風旁顯示語音模式按鈕（音訊波形）。可自然說話，@@PRODUCT@@ 會在停頓後自動送出並朗讀回覆。需要同時支援語音辨識與 TTS 的瀏覽器。',\n",
@@ -1315,28 +1226,24 @@
       "rendered": "    onboarding_open: '開啟 Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: '驗證 @@PRODUCT@@ Agent 與設定可見性。',\n",
-      "rendered": "    onboarding_step_system_desc: '驗證 Altur-Agent Agent 與設定可見性。',\n"
+      "template": "    onboarding_step_system_desc: '驗證 @@PRODUCT@@ 與設定可見性。',\n",
+      "rendered": "    onboarding_step_system_desc: '驗證 Altur-Agent 與設定可見性。',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: '儲存最低限度的 @@PRODUCT@@ 供應商設定。',\n",
       "rendered": "    onboarding_step_setup_desc: '儲存最低限度的 Altur-Agent 供應商設定。',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent 看起來可由 Web UI 存取。',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent 看起來可由 Web UI 存取。',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ 看起來可由 Web UI 存取。',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent 看起來可由 Web UI 存取。',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent 尚未完全可用。Bootstrap 可以安裝它，但供應商設定可能仍需要使用終端機。',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent 尚未完全可用。Bootstrap 可以安裝它，但供應商設定可能仍需要使用終端機。',\n"
+      "template": "    onboarding_notice_system_unavailable: \"@@PRODUCT@@ 執行環境無法使用。請依照此分支的本機設定指南進行設定。供應商登入可能需要使用終端機。\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Altur-Agent 執行環境無法使用。請依照此分支的本機設定指南進行設定。供應商登入可能需要使用終端機。\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: '請在這裡選擇簡易供應商路徑。進階 OAuth 流程目前仍需使用 @@PRODUCT@@ CLI 處理。',\n",
-      "rendered": "    onboarding_notice_setup_required: '請在這裡選擇簡易供應商路徑。進階 OAuth 流程目前仍需使用 Altur-Agent CLI 處理。',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ 已安裝，但仍需要選擇供應商並儲存可用憑證。',\n",
@@ -1419,24 +1326,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Request timeout for this auxiliary task. Blank uses Altur-Agent default.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Painel oficial @@PRODUCT@@',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Painel oficial Altur-Agent',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: 'Status do gateway @@PRODUCT@@ (Telegram, Discord, Slack, etc.)',\n",
       "rendered": "    settings_desc_gateway_status: 'Status do gateway Altur-Agent (Telegram, Discord, Slack, etc.)',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
-      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
+      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
+      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: 'Perfis @@PRODUCT@@',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Perfis Altur-Agent',\n"
-    },
-    {
-      "template": "    tab_dashboard: 'Painel @@PRODUCT@@',\n",
-      "rendered": "    tab_dashboard: 'Painel Altur-Agent',\n"
     },
     {
       "template": "    settings_label_shutdown: 'Parar o servidor @@PRODUCT@@',\n",
@@ -1463,28 +1362,24 @@
       "rendered": "    onboarding_open: 'Abrir Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: 'Verificar @@PRODUCT@@ Agent e visibilidade da config.',\n",
-      "rendered": "    onboarding_step_system_desc: 'Verificar Altur-Agent Agent e visibilidade da config.',\n"
+      "template": "    onboarding_step_system_desc: 'Verificar @@PRODUCT@@ e visibilidade da config.',\n",
+      "rendered": "    onboarding_step_system_desc: 'Verificar Altur-Agent e visibilidade da config.',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: 'Salvar config mínima do provedor @@PRODUCT@@.',\n",
       "rendered": "    onboarding_step_setup_desc: 'Salvar config mínima do provedor Altur-Agent.',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent parece acessível pela Web UI.',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent parece acessível pela Web UI.',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ parece acessível pela Web UI.',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent parece acessível pela Web UI.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent não está totalmente disponível. Bootstrap pode instalar, mas setup do provedor pode requerer terminal.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent não está totalmente disponível. Bootstrap pode instalar, mas setup do provedor pode requerer terminal.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"O ambiente de execução do @@PRODUCT@@ não está disponível. Siga o guia de configuração local desta versão. O início de sessão no provedor pode exigir um terminal.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"O ambiente de execução do Altur-Agent não está disponível. Siga o guia de configuração local desta versão. O início de sessão no provedor pode exigir um terminal.\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Escolha caminho simples de provedor aqui. OAuth avançado ainda pertence ao @@PRODUCT@@ CLI.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Escolha caminho simples de provedor aqui. OAuth avançado ainda pertence ao Altur-Agent CLI.',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ está instalado, mas ainda é preciso escolher um provedor e salvar credenciais funcionais.',\n",
@@ -1571,24 +1466,16 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Request timeout for this auxiliary task. Blank uses Altur-Agent default.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: '공식 @@PRODUCT@@ 대시보드',\n",
-      "rendered": "    settings_label_dashboard_mode: '공식 Altur-Agent 대시보드',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: '@@PRODUCT@@ 게이트웨이 상태 (Telegram, Discord, Slack 등)',\n",
       "rendered": "    settings_desc_gateway_status: 'Altur-Agent 게이트웨이 상태 (Telegram, Discord, Slack 등)',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
-      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
+      "template": "    kanban_work_queue_hint: 'This is the @@PRODUCT@@ work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n",
+      "rendered": "    kanban_work_queue_hint: 'This is the Altur-Agent work queue. Create or triage a task, assign it, move it to Ready, then let the dispatcher claim it.',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: '@@PRODUCT@@ 프로필',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Altur-Agent 프로필',\n"
-    },
-    {
-      "template": "    tab_dashboard: '@@PRODUCT@@ 대시보드',\n",
-      "rendered": "    tab_dashboard: 'Altur-Agent 대시보드',\n"
     },
     {
       "template": "    settings_label_shutdown: '@@PRODUCT@@ 서버 중지',\n",
@@ -1615,28 +1502,24 @@
       "rendered": "    onboarding_open: 'Open Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: 'Verify @@PRODUCT@@ Agent and config visibility.',\n",
-      "rendered": "    onboarding_step_system_desc: 'Verify Altur-Agent Agent and config visibility.',\n"
+      "template": "    onboarding_step_system_desc: 'Verify @@PRODUCT@@ and config visibility.',\n",
+      "rendered": "    onboarding_step_system_desc: 'Verify Altur-Agent and config visibility.',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: 'Save the minimum @@PRODUCT@@ provider config.',\n",
       "rendered": "    onboarding_step_setup_desc: 'Save the minimum Altur-Agent provider config.',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent looks reachable from the Web UI.',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent looks reachable from the Web UI.',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ looks reachable from the Web UI.',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent looks reachable from the Web UI.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent is not fully available yet. Bootstrap can install it, but provider setup may still require a terminal.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent is not fully available yet. Bootstrap can install it, but provider setup may still require a terminal.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"@@PRODUCT@@ 실행 환경을 사용할 수 없습니다. 이 포크의 로컬 설정 가이드를 따르세요. 제공업체 로그인에는 터미널이 필요할 수 있습니다.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Altur-Agent 실행 환경을 사용할 수 없습니다. 이 포크의 로컬 설정 가이드를 따르세요. 제공업체 로그인에는 터미널이 필요할 수 있습니다.\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Choose a simple provider path here. Advanced OAuth flows still belong in the @@PRODUCT@@ CLI for now.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Choose a simple provider path here. Advanced OAuth flows still belong in the Altur-Agent CLI for now.',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ is installed, but you still need to choose a provider and save working credentials.',\n",
@@ -1727,14 +1610,6 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Délai d\\'expiration de la requête pour cette tâche auxiliaire. Vide utilise la valeur par défaut d\\'Altur-Agent.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Tableau de bord officiel @@PRODUCT@@',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Tableau de bord officiel Altur-Agent',\n"
-    },
-    {
-      "template": "    settings_desc_dashboard_mode: 'Afficher un lien dans la barre de navigation lorsque le tableau de bord officiel @@PRODUCT@@ est accessible. Les URL de proxy inverse public sont stockées comme des liens navigateur uniquement et ne sont jamais sondées par le serveur.',\n",
-      "rendered": "    settings_desc_dashboard_mode: 'Afficher un lien dans la barre de navigation lorsque le tableau de bord officiel Altur-Agent est accessible. Les URL de proxy inverse public sont stockées comme des liens navigateur uniquement et ne sont jamais sondées par le serveur.',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: 'État de la passerelle @@PRODUCT@@ (Telegram, Discord, Slack, etc.)',\n",
       "rendered": "    settings_desc_gateway_status: 'État de la passerelle Altur-Agent (Telegram, Discord, Slack, etc.)',\n"
     },
@@ -1745,10 +1620,6 @@
     {
       "template": "    kanban_assignee_profiles_label: 'Profils @@PRODUCT@@',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Profils Altur-Agent',\n"
-    },
-    {
-      "template": "    tab_dashboard: 'Tableau de bord @@PRODUCT@@',\n",
-      "rendered": "    tab_dashboard: 'Tableau de bord Altur-Agent',\n"
     },
     {
       "template": "    settings_desc_voice_mode: 'Afficher le bouton du mode vocal (forme d\\'onde audio) à côté du micro de dictée. Vous permet de parler naturellement — @@PRODUCT@@ envoie automatiquement après une pause et lit les réponses à voix haute. Nécessite un navigateur prenant en charge à la fois la reconnaissance vocale et la synthèse vocale.',\n",
@@ -1791,16 +1662,12 @@
       "rendered": "    onboarding_notice_system_ready: 'L\\'agent Altur-Agent semble accessible depuis l\\'interface Web.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: 'L\\'agent @@PRODUCT@@ n\\'est pas encore entièrement disponible. Le bootstrap peut l\\'installer, mais la configuration du fournisseur peut encore nécessiter un terminal.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'L\\'agent Altur-Agent n\\'est pas encore entièrement disponible. Le bootstrap peut l\\'installer, mais la configuration du fournisseur peut encore nécessiter un terminal.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"L’environnement d’exécution d’@@PRODUCT@@ est indisponible. Suivez le guide de configuration locale de cette version. La connexion au fournisseur peut nécessiter un terminal.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"L’environnement d’exécution d’Altur-Agent est indisponible. Suivez le guide de configuration locale de cette version. La connexion au fournisseur peut nécessiter un terminal.\",\n"
     },
     {
       "template": "    onboarding_check_agent: 'Agent @@PRODUCT@@',\n",
       "rendered": "    onboarding_check_agent: 'Agent Altur-Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Choisissez un chemin de fournisseur simple ici. Les flux OAuth avancés appartiennent encore à la CLI @@PRODUCT@@ pour l\\'instant.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Choisissez un chemin de fournisseur simple ici. Les flux OAuth avancés appartiennent encore à la CLI Altur-Agent pour l\\'instant.',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ est installé, mais vous devez encore choisir un fournisseur et enregistrer des identifiants valides.',\n",
@@ -1839,8 +1706,8 @@
       "rendered": "    kanban_work_queue_hint: 'Toto je fronta úkolů Altur-Agent agenta. Vytvořte nebo triážujte úkol, přiřaďte ho, přesuňte do stavu Připraveno a nechte dispečera ho získat.',\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ je nainstalovaný, ale ještě musíte vybrat poskytovatele a uložit funkční přihlašovací údaje.',\n",
@@ -1855,12 +1722,12 @@
       "rendered": "    onboarding_notice_provider_api_key_required: 'Altur-Agent má uloženou volbu poskytovatele/modelu, ale pro chat stále potřebuje API klíč.',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent se jeví jako dosažitelný z Web UI.',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent se jeví jako dosažitelný z Web UI.',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ se jeví jako dosažitelný z Web UI.',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent se jeví jako dosažitelný z Web UI.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent ještě není plně dostupný. Bootstrap ho může nainstalovat, ale nastavení poskytovatele může stále vyžadovat terminál.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent ještě není plně dostupný. Bootstrap ho může nainstalovat, ale nastavení poskytovatele může stále vyžadovat terminál.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"Běhové prostředí @@PRODUCT@@ není dostupné. Postupujte podle místního průvodce nastavením tohoto forku. Přihlášení k poskytovateli může vyžadovat terminál.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Běhové prostředí Altur-Agent není dostupné. Postupujte podle místního průvodce nastavením tohoto forku. Přihlášení k poskytovateli může vyžadovat terminál.\",\n"
     },
     {
       "template": "    onboarding_oauth_provider_ready_body: 'Tato instance je nakonfigurována používat OAuth poskytovatele (<strong>{provider}</strong>), který byl nastaven přes @@PRODUCT@@ CLI. Žádný API klíč zde není potřeba — klikněte Pokračovat pro dokončení nastavení.',\n",
@@ -1895,10 +1762,6 @@
       "rendered": "    settings_help_meta: 'Zdroje a podpora pro Altur-Agent.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Oficiální @@PRODUCT@@ Dashboard',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Oficiální Altur-Agent Dashboard',\n"
-    },
-    {
       "template": "    settings_label_shutdown: 'Zastavit @@PRODUCT@@ server',\n",
       "rendered": "    settings_label_shutdown: 'Zastavit Altur-Agent server',\n"
     },
@@ -1921,10 +1784,6 @@
     {
       "template": "    settings_shutdown_confirm_title: 'Zastavit @@PRODUCT@@',\n",
       "rendered": "    settings_shutdown_confirm_title: 'Zastavit Altur-Agent',\n"
-    },
-    {
-      "template": "    tab_dashboard: '@@PRODUCT@@ Dashboard',\n",
-      "rendered": "    tab_dashboard: 'Altur-Agent Dashboard',\n"
     },
     {
       "template": "    approval_gateway_unsupported: 'Schválení vyžadují novější gateway. Upgradujte připojený @@PRODUCT@@ gateway.',\n",
@@ -2011,10 +1870,6 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Request timeout for this auxiliary task. Blank uses Altur-Agent default.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Resmi @@PRODUCT@@ Kontrol Paneli',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Resmi Altur-Agent Kontrol Paneli',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: '@@PRODUCT@@ ağ geçidi durumu (Telegram, Discord, Slack, vb.)',\n",
       "rendered": "    settings_desc_gateway_status: 'Altur-Agent ağ geçidi durumu (Telegram, Discord, Slack, vb.)',\n"
     },
@@ -2025,10 +1880,6 @@
     {
       "template": "    kanban_assignee_profiles_label: '@@PRODUCT@@ profilleri',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Altur-Agent profilleri',\n"
-    },
-    {
-      "template": "    tab_dashboard: '@@PRODUCT@@ Kontrol Paneli',\n",
-      "rendered": "    tab_dashboard: 'Altur-Agent Kontrol Paneli',\n"
     },
     {
       "template": "    settings_label_shutdown: '@@PRODUCT@@ sunucusunu durdur',\n",
@@ -2043,10 +1894,6 @@
       "rendered": "    settings_shutdown_confirm_message: 'Altur-Agent sunucusu durdurulsun mu?',\n"
     },
     {
-      "template": "    providers_oauth_not_configured_hint: 'Kimliği doğrulanmadı. Bu sağlayıcıyı yapılandırmak için terminalde @@PRODUCT@@ Auth komutunu çalıştırın.',\n",
-      "rendered": "    providers_oauth_not_configured_hint: 'Kimliği doğrulanmadı. Bu sağlayıcıyı yapılandırmak için terminalde Altur-Agent Auth komutunu çalıştırın.',\n"
-    },
-    {
       "template": "    onboarding_title: '@@PRODUCT@@ Web Kullanıcı Arayüzüne Hoş Geldiniz',\n",
       "rendered": "    onboarding_title: 'Altur-Agent Web Kullanıcı Arayüzüne Hoş Geldiniz',\n"
     },
@@ -2059,28 +1906,24 @@
       "rendered": "    onboarding_open: 'Altur-Agent\\'i aç',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: '@@PRODUCT@@ Agent\\'ı ve yapılandırma görünürlüğünü doğrulayın.',\n",
-      "rendered": "    onboarding_step_system_desc: 'Altur-Agent Agent\\'ı ve yapılandırma görünürlüğünü doğrulayın.',\n"
+      "template": "    onboarding_step_system_desc: '@@PRODUCT@@\\'ı ve yapılandırma görünürlüğünü doğrulayın.',\n",
+      "rendered": "    onboarding_step_system_desc: 'Altur-Agent\\'ı ve yapılandırma görünürlüğünü doğrulayın.',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: 'Minimum @@PRODUCT@@ sağlayıcı yapılandırmasını kaydedin.',\n",
       "rendered": "    onboarding_step_setup_desc: 'Minimum Altur-Agent sağlayıcı yapılandırmasını kaydedin.',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent\\'a Web kullanıcı arayüzünden ulaşılabilir görünüyor.',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent\\'a Web kullanıcı arayüzünden ulaşılabilir görünüyor.',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@\\'a Web kullanıcı arayüzünden ulaşılabilir görünüyor.',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent\\'a Web kullanıcı arayüzünden ulaşılabilir görünüyor.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent henüz tam olarak mevcut değil. Bootstrap bunu kurabilir ancak sağlayıcı kurulumu yine de bir terminal gerektirebilir.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent henüz tam olarak mevcut değil. Bootstrap bunu kurabilir ancak sağlayıcı kurulumu yine de bir terminal gerektirebilir.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"@@PRODUCT@@ çalışma ortamı kullanılamıyor. Bu çatala ait yerel kurulum kılavuzunu izleyin. Sağlayıcıda oturum açmak için terminal gerekebilir.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Altur-Agent çalışma ortamı kullanılamıyor. Bu çatala ait yerel kurulum kılavuzunu izleyin. Sağlayıcıda oturum açmak için terminal gerekebilir.\",\n"
     },
     {
       "template": "    onboarding_check_agent: '@@PRODUCT@@ Temsilcisi',\n",
       "rendered": "    onboarding_check_agent: 'Altur-Agent Temsilcisi',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Burada basit bir sağlayıcı yolu seçin. Gelişmiş OAuth akışları şimdilik @@PRODUCT@@ CLI\\'ye ait olmaya devam ediyor.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Burada basit bir sağlayıcı yolu seçin. Gelişmiş OAuth akışları şimdilik Altur-Agent CLI\\'ye ait olmaya devam ediyor.',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ kurulu, ancak hâlâ bir sağlayıcı seçip çalışan kimlik bilgilerini kaydetmeniz gerekiyor.',\n",
@@ -2171,10 +2014,6 @@
       "rendered": "    settings_aux_advanced_timeout_desc: 'Limit czasu żądania dla tego zadania pomocniczego. Puste pole oznacza użycie domyślnej wartości Altur-Agent.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Oficjalny panel @@PRODUCT@@',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Oficjalny panel Altur-Agent',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: 'Status bramy @@PRODUCT@@ (Telegram, Discord, Slack itp.)',\n",
       "rendered": "    settings_desc_gateway_status: 'Status bramy Altur-Agent (Telegram, Discord, Slack itp.)',\n"
     },
@@ -2185,10 +2024,6 @@
     {
       "template": "    kanban_assignee_profiles_label: 'Profile @@PRODUCT@@',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Profile Altur-Agent',\n"
-    },
-    {
-      "template": "    tab_dashboard: 'Pulpit nawigacyjny @@PRODUCT@@',\n",
-      "rendered": "    tab_dashboard: 'Pulpit nawigacyjny Altur-Agent',\n"
     },
     {
       "template": "    settings_desc_voice_mode: 'Pokaż przycisk trybu głosowego (fala dźwiękowa) obok mikrofonu dyktowania. Pozwala mówić naturalnie — @@PRODUCT@@ automatycznie wysyła wiadomość po pauzie i czyta odpowiedzi na głos. Wymaga przeglądarki obsługującej zarówno rozpoznawanie mowy, jak i TTS.',\n",
@@ -2231,16 +2066,12 @@
       "rendered": "    onboarding_notice_system_ready: 'Agent Altur-Agent wydaje się osiągalny z poziomu Web UI.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: 'Agent @@PRODUCT@@ nie jest jeszcze w pełni dostępny. Bootstrap może go zainstalować, ale konfiguracja dostawcy może nadal wymagać terminala.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Agent Altur-Agent nie jest jeszcze w pełni dostępny. Bootstrap może go zainstalować, ale konfiguracja dostawcy może nadal wymagać terminala.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"Środowisko uruchomieniowe @@PRODUCT@@ jest niedostępne. Skorzystaj z lokalnej instrukcji konfiguracji tej wersji. Logowanie u dostawcy może wymagać terminala.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Środowisko uruchomieniowe Altur-Agent jest niedostępne. Skorzystaj z lokalnej instrukcji konfiguracji tej wersji. Logowanie u dostawcy może wymagać terminala.\",\n"
     },
     {
       "template": "    onboarding_check_agent: 'Agent @@PRODUCT@@',\n",
       "rendered": "    onboarding_check_agent: 'Agent Altur-Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Wybierz tutaj prostą ścieżkę dostawcy. Zaawansowane przepływy OAuth na razie pozostają w CLI @@PRODUCT@@.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Wybierz tutaj prostą ścieżkę dostawcy. Zaawansowane przepływy OAuth na razie pozostają w CLI Altur-Agent.',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ jest zainstalowany, ale nadal trzeba wybrać dostawcę i zapisać działające dane uwierzytelniające.',\n",
@@ -2315,28 +2146,16 @@
       "rendered": "    settings_help_docs_desc: 'Hướng dẫn, tham chiếu cấu hình và README đầy đủ của Altur-Agent.',\n"
     },
     {
-      "template": "    settings_label_dashboard_mode: 'Bảng điều khiển @@PRODUCT@@ chính thức',\n",
-      "rendered": "    settings_label_dashboard_mode: 'Bảng điều khiển Altur-Agent chính thức',\n"
-    },
-    {
-      "template": "    settings_desc_dashboard_mode: 'Hiển thị liên kết nav-rail khi dashboard @@PRODUCT@@ chính thức khả dụng. URL reverse-proxy công khai chỉ được lưu trong trình duyệt và không bao giờ bị server probe.',\n",
-      "rendered": "    settings_desc_dashboard_mode: 'Hiển thị liên kết nav-rail khi dashboard Altur-Agent chính thức khả dụng. URL reverse-proxy công khai chỉ được lưu trong trình duyệt và không bao giờ bị server probe.',\n"
-    },
-    {
       "template": "    settings_desc_gateway_status: 'Trạng thái gateway @@PRODUCT@@ (Telegram, Discord, Slack, v.v.)',\n",
       "rendered": "    settings_desc_gateway_status: 'Trạng thái gateway Altur-Agent (Telegram, Discord, Slack, v.v.)',\n"
     },
     {
-      "template": "    kanban_work_queue_hint: 'Đây là hàng đợi công việc của @@PRODUCT@@ Agent. Tạo hoặc phân loại tác vụ, gán người xử lý, chuyển sang Ready rồi để dispatcher nhận.',\n",
-      "rendered": "    kanban_work_queue_hint: 'Đây là hàng đợi công việc của Altur-Agent Agent. Tạo hoặc phân loại tác vụ, gán người xử lý, chuyển sang Ready rồi để dispatcher nhận.',\n"
+      "template": "    kanban_work_queue_hint: 'Đây là hàng đợi công việc của @@PRODUCT@@. Tạo hoặc phân loại tác vụ, gán người xử lý, chuyển sang Ready rồi để dispatcher nhận.',\n",
+      "rendered": "    kanban_work_queue_hint: 'Đây là hàng đợi công việc của Altur-Agent. Tạo hoặc phân loại tác vụ, gán người xử lý, chuyển sang Ready rồi để dispatcher nhận.',\n"
     },
     {
       "template": "    kanban_assignee_profiles_label: 'Hồ sơ @@PRODUCT@@',\n",
       "rendered": "    kanban_assignee_profiles_label: 'Hồ sơ Altur-Agent',\n"
-    },
-    {
-      "template": "    tab_dashboard: 'Bảng điều khiển @@PRODUCT@@',\n",
-      "rendered": "    tab_dashboard: 'Bảng điều khiển Altur-Agent',\n"
     },
     {
       "template": "    settings_desc_voice_mode: 'Hiển thị nút voice-mode (dạng sóng âm thanh) cạnh microphone đọc chính tả. Cho phép bạn nói tự nhiên — @@PRODUCT@@ tự gửi sau khoảng dừng và đọc phản hồi thành tiếng. Yêu cầu trình duyệt hỗ trợ cả nhận diện giọng nói và TTS.',\n",
@@ -2367,28 +2186,24 @@
       "rendered": "    onboarding_open: 'Mở Altur-Agent',\n"
     },
     {
-      "template": "    onboarding_step_system_desc: 'Xác minh @@PRODUCT@@ Agent và khả năng truy cập config.',\n",
-      "rendered": "    onboarding_step_system_desc: 'Xác minh Altur-Agent Agent và khả năng truy cập config.',\n"
+      "template": "    onboarding_step_system_desc: 'Xác minh @@PRODUCT@@ và khả năng truy cập config.',\n",
+      "rendered": "    onboarding_step_system_desc: 'Xác minh Altur-Agent và khả năng truy cập config.',\n"
     },
     {
       "template": "    onboarding_step_setup_desc: 'Lưu cấu hình provider tối thiểu cho @@PRODUCT@@.',\n",
       "rendered": "    onboarding_step_setup_desc: 'Lưu cấu hình provider tối thiểu cho Altur-Agent.',\n"
     },
     {
-      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ Agent có vẻ truy cập được từ Web UI.',\n",
-      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent Agent có vẻ truy cập được từ Web UI.',\n"
+      "template": "    onboarding_notice_system_ready: '@@PRODUCT@@ có vẻ truy cập được từ Web UI.',\n",
+      "rendered": "    onboarding_notice_system_ready: 'Altur-Agent có vẻ truy cập được từ Web UI.',\n"
     },
     {
-      "template": "    onboarding_notice_system_unavailable: '@@PRODUCT@@ Agent chưa hoàn toàn khả dụng. Bootstrap có thể cài đặt nhưng thiết lập provider vẫn có thể cần terminal.',\n",
-      "rendered": "    onboarding_notice_system_unavailable: 'Altur-Agent Agent chưa hoàn toàn khả dụng. Bootstrap có thể cài đặt nhưng thiết lập provider vẫn có thể cần terminal.',\n"
+      "template": "    onboarding_notice_system_unavailable: \"Môi trường chạy @@PRODUCT@@ hiện không khả dụng. Hãy làm theo hướng dẫn thiết lập cục bộ của bản fork này. Việc đăng nhập nhà cung cấp có thể cần dùng thiết bị đầu cuối.\",\n",
+      "rendered": "    onboarding_notice_system_unavailable: \"Môi trường chạy Altur-Agent hiện không khả dụng. Hãy làm theo hướng dẫn thiết lập cục bộ của bản fork này. Việc đăng nhập nhà cung cấp có thể cần dùng thiết bị đầu cuối.\",\n"
     },
     {
-      "template": "    onboarding_check_agent: '@@PRODUCT@@ Agent',\n",
-      "rendered": "    onboarding_check_agent: 'Altur-Agent Agent',\n"
-    },
-    {
-      "template": "    onboarding_notice_setup_required: 'Hãy chọn cách thiết lập provider đơn giản tại đây. Các luồng OAuth nâng cao hiện vẫn nên thực hiện trong @@PRODUCT@@ CLI.',\n",
-      "rendered": "    onboarding_notice_setup_required: 'Hãy chọn cách thiết lập provider đơn giản tại đây. Các luồng OAuth nâng cao hiện vẫn nên thực hiện trong Altur-Agent CLI.',\n"
+      "template": "    onboarding_check_agent: '@@PRODUCT@@',\n",
+      "rendered": "    onboarding_check_agent: 'Altur-Agent',\n"
     },
     {
       "template": "    onboarding_notice_provider_choice_required: '@@PRODUCT@@ đã được cài đặt, nhưng bạn vẫn cần chọn provider và lưu thông tin xác thực hoạt động được.',\n",
@@ -2429,6 +2244,34 @@
     {
       "template": "    settings_aux_advanced_timeout_desc: 'Thời gian chờ request cho auxiliary task này. Để trống để dùng mặc định của @@PRODUCT@@.',\n",
       "rendered": "    settings_aux_advanced_timeout_desc: 'Thời gian chờ request cho auxiliary task này. Để trống để dùng mặc định của Altur-Agent.',\n"
+    },
+    {
+      "template": "    session_title_regenerate_desc: 'Požádejte @@PRODUCT@@, aby z konverzace vygeneroval nový název',\n",
+      "rendered": "    session_title_regenerate_desc: 'Požádejte Altur-Agent, aby z konverzace vygeneroval nový název',\n"
+    },
+    {
+      "rendered": "    onboarding_api_key_help_prefix: \"Uloženo jako tajný údaj v souboru .env aplikace Altur-Agent pomocí\",",
+      "template": "    onboarding_api_key_help_prefix: \"Uloženo jako tajný údaj v souboru .env aplikace @@PRODUCT@@ pomocí\","
+    },
+    {
+      "rendered": "    onboarding_lead: \"Rychlé vedené nastavení ověří Altur-Agent, uloží skutečnou konfiguraci poskytovatele, zvolí pracovní prostor a model a volitelně ochrání aplikaci heslem.\",",
+      "template": "    onboarding_lead: \"Rychlé vedené nastavení ověří @@PRODUCT@@, uloží skutečnou konfiguraci poskytovatele, zvolí pracovní prostor a model a volitelně ochrání aplikaci heslem.\","
+    },
+    {
+      "rendered": "    onboarding_notice_setup_already_ready: \"Bylo zjištěno funkční nastavení poskytovatele pro Altur-Agent. Můžete jej ponechat nebo zde nahradit.\",",
+      "template": "    onboarding_notice_setup_already_ready: \"Bylo zjištěno funkční nastavení poskytovatele pro @@PRODUCT@@. Můžete jej ponechat nebo zde nahradit.\","
+    },
+    {
+      "rendered": "    onboarding_open: \"Otevřít Altur-Agent\",",
+      "template": "    onboarding_open: \"Otevřít @@PRODUCT@@\","
+    },
+    {
+      "rendered": "    onboarding_step_setup_desc: \"Uložte základní konfiguraci poskytovatele pro Altur-Agent.\",",
+      "template": "    onboarding_step_setup_desc: \"Uložte základní konfiguraci poskytovatele pro @@PRODUCT@@.\","
+    },
+    {
+      "rendered": "    onboarding_step_system_desc: \"Ověřte dostupnost Altur-Agent a jeho konfigurace.\",",
+      "template": "    onboarding_step_system_desc: \"Ověřte dostupnost @@PRODUCT@@ a jeho konfigurace.\","
     }
   ],
   "static/messages.js": [
@@ -2473,7 +2316,7 @@
       "rendered": "<meta name=\"author\" content=\"ArtemisProject\">\n"
     },
     {
-      "template": "      <img src=\"static/brand-logo.svg\" width=\"18\" height=\"18\" alt=\"@@LOGO_LABEL@@\">\n",
+      "template": "      <img src=\"@@LOGO_PATH@@\" width=\"18\" height=\"18\" alt=\"@@LOGO_LABEL@@\">\n",
       "rendered": "      <img src=\"static/brand-logo.svg\" width=\"18\" height=\"18\" alt=\"Altur-Agent logo\">\n"
     },
     {
@@ -2481,15 +2324,7 @@
       "rendered": "    <span class=\"app-titlebar-title\" id=\"appTitlebarTitle\">Altur-Agent</span>\n"
     },
     {
-      "template": "    <button class=\"rail-btn nav-tab dashboard-link has-tooltip\" id=\"dashboardRailBtn\" data-dashboard-link style=\"display:none\" onclick=\"openHermesDashboard(event)\" data-tooltip=\"@@PRODUCT@@ Dashboard\" data-i18n-title=\"tab_dashboard\" aria-label=\"@@PRODUCT@@ Dashboard\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 9h18\"/><path d=\"M9 21V9\"/></svg><span class=\"dashboard-external-badge\" aria-hidden=\"true\"></span></button>\n",
-      "rendered": "    <button class=\"rail-btn nav-tab dashboard-link has-tooltip\" id=\"dashboardRailBtn\" data-dashboard-link style=\"display:none\" onclick=\"openHermesDashboard(event)\" data-tooltip=\"Altur-Agent Dashboard\" data-i18n-title=\"tab_dashboard\" aria-label=\"Altur-Agent Dashboard\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 9h18\"/><path d=\"M9 21V9\"/></svg><span class=\"dashboard-external-badge\" aria-hidden=\"true\"></span></button>\n"
-    },
-    {
-      "template": "      <button class=\"nav-tab dashboard-link has-tooltip has-tooltip--bottom\" id=\"dashboardMobileBtn\" data-dashboard-link data-label=\"Dashboard\" style=\"display:none\" onclick=\"openHermesDashboard(event)\" data-tooltip=\"@@PRODUCT@@ Dashboard\" data-i18n-title=\"tab_dashboard\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 9h18\"/><path d=\"M9 21V9\"/></svg><span class=\"dashboard-external-badge\" aria-hidden=\"true\"></span></button>\n",
-      "rendered": "      <button class=\"nav-tab dashboard-link has-tooltip has-tooltip--bottom\" id=\"dashboardMobileBtn\" data-dashboard-link data-label=\"Dashboard\" style=\"display:none\" onclick=\"openHermesDashboard(event)\" data-tooltip=\"Altur-Agent Dashboard\" data-i18n-title=\"tab_dashboard\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M3 9h18\"/><path d=\"M9 21V9\"/></svg><span class=\"dashboard-external-badge\" aria-hidden=\"true\"></span></button>\n"
-    },
-    {
-      "template": "        <div class=\"empty-logo\"><img src=\"static/brand-logo.svg\" width=\"80\" height=\"80\" alt=\"@@LOGO_LABEL@@\"></div>\n",
+      "template": "        <div class=\"empty-logo\"><img src=\"@@LOGO_PATH@@\" width=\"80\" height=\"80\" alt=\"@@LOGO_LABEL@@\"></div>\n",
       "rendered": "        <div class=\"empty-logo\"><img src=\"static/brand-logo.svg\" width=\"80\" height=\"80\" alt=\"Altur-Agent logo\"></div>\n"
     },
     {
@@ -2537,10 +2372,6 @@
       "rendered": "              <label data-i18n=\"settings_label_shutdown\">Stop the Altur-Agent server</label>\n"
     },
     {
-      "template": "              <label for=\"settingsDashboardMode\" data-i18n=\"settings_label_dashboard_mode\">Official @@PRODUCT@@ Dashboard</label>\n",
-      "rendered": "              <label for=\"settingsDashboardMode\" data-i18n=\"settings_label_dashboard_mode\">Official Altur-Agent Dashboard</label>\n"
-    },
-    {
       "template": "              <div style=\"font-size:11px;color:var(--muted);margin-bottom:8px\" data-i18n=\"settings_desc_gateway_status\">Status of the @@PRODUCT@@ gateway (Telegram, Discord, Slack, etc.)</div>\n",
       "rendered": "              <div style=\"font-size:11px;color:var(--muted);margin-bottom:8px\" data-i18n=\"settings_desc_gateway_status\">Status of the Altur-Agent gateway (Telegram, Discord, Slack, etc.)</div>\n"
     },
@@ -2567,6 +2398,10 @@
     {
       "template": "      <div class=\"kanban-modal-hint\" id=\"kanbanTaskModalAssigneeHint\" data-i18n=\"kanban_assignee_hint\">Pick a @@PRODUCT@@ profile so the dispatcher can claim and run this task. Tasks left as <em>Unassigned</em> will sit in Ready forever.</div>\n",
       "rendered": "      <div class=\"kanban-modal-hint\" id=\"kanbanTaskModalAssigneeHint\" data-i18n=\"kanban_assignee_hint\">Pick a Altur-Agent profile so the dispatcher can claim and run this task. Tasks left as <em>Unassigned</em> will sit in Ready forever.</div>\n"
+    },
+    {
+      "template": "                  <a href=\"@@HELP_PATH@@\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"help-card-link\">\n",
+      "rendered": "                  <a href=\"static/altur-help.html\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"help-card-link\">\n"
     }
   ],
   "static/share.html": [
@@ -2575,7 +2410,7 @@
       "rendered": "  <title>Shared Conversation - Altur-Agent</title>\n"
     },
     {
-      "template": "          <img src=\"/static/brand-logo.svg\" width=\"24\" height=\"24\" alt=\"@@LOGO_LABEL@@\">\n",
+      "template": "          <img src=\"/@@LOGO_PATH@@\" width=\"24\" height=\"24\" alt=\"@@LOGO_LABEL@@\">\n",
       "rendered": "          <img src=\"/static/brand-logo.svg\" width=\"24\" height=\"24\" alt=\"Altur-Agent logo\">\n"
     },
     {
@@ -2634,8 +2469,8 @@
       "rendered": "\"Restart Altur-Agent manually before retrying this action.\""
     },
     {
-      "template": "\"@@PRODUCT@@ Agent was updated while @@PRODUCT@@ was running. \"",
-      "rendered": "\"Altur-Agent Agent was updated while Altur-Agent was running. \""
+      "template": "\"@@PRODUCT@@ was updated while @@PRODUCT@@ was running. \"",
+      "rendered": "\"Altur-Agent was updated while Altur-Agent was running. \""
     }
   ],
   "api/terminal.py": [],
@@ -2651,8 +2486,8 @@
   ],
   "api/gateway_delegation_wakeup.py": [
     {
-      "template": "\"gateway delegation poller inactive: installed @@PRODUCT@@ Agent lacks the delivery reserve/commit API\"",
-      "rendered": "\"gateway delegation poller inactive: installed Altur-Agent Agent lacks the delivery reserve/commit API\""
+      "template": "\"gateway delegation poller inactive: installed @@PRODUCT@@ lacks the delivery reserve/commit API\"",
+      "rendered": "\"gateway delegation poller inactive: installed Altur-Agent lacks the delivery reserve/commit API\""
     }
   ],
   "api/agent_sessions.py": [],
@@ -2678,8 +2513,8 @@
       "rendered": "\"Altur-Agent has a saved provider/model selection, but the custom \""
     },
     {
-      "template": "\"@@PRODUCT@@ is not fully importable from the Web UI yet. Finish bootstrap or fix the \"",
-      "rendered": "\"Altur-Agent is not fully importable from the Web UI yet. Finish bootstrap or fix the \""
+      "template": "\"@@PRODUCT@@ runtime is unavailable. Follow this fork’s local setup guide \"",
+      "rendered": "\"Altur-Agent runtime is unavailable. Follow this fork’s local setup guide \""
     },
     {
       "template": "@@PRODUCT@@ is minimally configured and ready to chat via ",
@@ -2699,8 +2534,8 @@
   ],
   "api/background_process.py": [
     {
-      "template": "\"process recovery unavailable: @@PRODUCT@@ Agent is not installed\"",
-      "rendered": "\"process recovery unavailable: Altur-Agent Agent is not installed\""
+      "template": "\"process recovery unavailable: @@PRODUCT@@ is not installed\"",
+      "rendered": "\"process recovery unavailable: Altur-Agent is not installed\""
     }
   ],
   "api/passkeys.py": [
@@ -2736,8 +2571,8 @@
   "api/crash_visibility.py": [],
   "api/kanban_bridge.py": [
     {
-      "template": "\"scheduling requires a newer @@PRODUCT@@ Agent\"",
-      "rendered": "\"scheduling requires a newer Altur-Agent Agent\""
+      "template": "\"scheduling requires a newer @@PRODUCT@@\"",
+      "rendered": "\"scheduling requires a newer Altur-Agent\""
     }
   ],
   "api/gateway_watcher.py": [],
@@ -2777,16 +2612,11 @@
   ],
   "api/helpers.py": [],
   "api/runner_client.py": [],
-  "api/commands.py": [
-    {
-      "template": "\"Not logged into Nous. Run `hermes auth login nous` in @@PRODUCT@@ CLI, then try /credits again.\"",
-      "rendered": "\"Not logged into Nous. Run `hermes auth login nous` in Altur-Agent CLI, then try /credits again.\""
-    }
-  ],
+  "api/commands.py": [],
   "api/profiles.py": [
     {
-      "template": "\"@@PRODUCT@@ Agent process-home pin unavailable\"",
-      "rendered": "\"Altur-Agent Agent process-home pin unavailable\""
+      "template": "\"@@PRODUCT@@ process-home pin unavailable\"",
+      "rendered": "\"Altur-Agent process-home pin unavailable\""
     }
   ],
   "api/shares.py": [],
@@ -2799,20 +2629,20 @@
   ],
   "api/worktrees.py": [
     {
-      "template": "\"@@PRODUCT@@ Agent returned incomplete worktree metadata\"",
-      "rendered": "\"Altur-Agent Agent returned incomplete worktree metadata\""
+      "template": "\"@@PRODUCT@@ returned incomplete worktree metadata\"",
+      "rendered": "\"Altur-Agent returned incomplete worktree metadata\""
     },
     {
-      "template": "\"@@PRODUCT@@ Agent failed to create a git worktree\"",
-      "rendered": "\"Altur-Agent Agent failed to create a git worktree\""
+      "template": "\"@@PRODUCT@@ failed to create a git worktree\"",
+      "rendered": "\"Altur-Agent failed to create a git worktree\""
     },
     {
-      "template": "\"@@PRODUCT@@ Agent worktree helper output: %s\"",
-      "rendered": "\"Altur-Agent Agent worktree helper output: %s\""
+      "template": "\"@@PRODUCT@@ worktree helper output: %s\"",
+      "rendered": "\"Altur-Agent worktree helper output: %s\""
     },
     {
-      "template": "\"@@PRODUCT@@ Agent worktree helper is unavailable\"",
-      "rendered": "\"Altur-Agent Agent worktree helper is unavailable\""
+      "template": "\"@@PRODUCT@@ worktree helper is unavailable\"",
+      "rendered": "\"Altur-Agent worktree helper is unavailable\""
     }
   ],
   "api/dashboard_probe.py": [],
@@ -2826,8 +2656,8 @@
       "rendered": "\"\"\"<!doctype html>\n<html lang=\\\"en\\\">\n<head>\n  <meta charset=\\\"utf-8\\\">\n  <meta name=\\\"viewport\\\" content=\\\"width=device-width, initial-scale=1\\\">\n  <title>Altur-Agent is restarting</title>\n</head>\n<body style=\\\"margin:0;padding:2rem;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#111827;color:#e5e7eb;\\\">\n  <main style=\\\"max-width:40rem;margin:10vh auto;line-height:1.5;\\\">\n    <h1 style=\\\"font-size:1.5rem;margin:0 0 0.75rem;\\\">Altur-Agent is restarting…</h1>\n    <p style=\\\"margin:0;color:#cbd5e1;\\\">The WebUI shell could not load cleanly. Refresh in a moment if this page does not update automatically.</p>\n  </main>\n</body>\n</html>\"\"\""
     },
     {
-      "template": "\"@@PRODUCT@@ Agent exposes WIKI_PATH/wiki.path for location, but no stable on/off config flag is currently available.\"",
-      "rendered": "\"Altur-Agent Agent exposes WIKI_PATH/wiki.path for location, but no stable on/off config flag is currently available.\""
+      "template": "\"@@PRODUCT@@ exposes WIKI_PATH/wiki.path for location, but no stable on/off config flag is currently available.\"",
+      "rendered": "\"Altur-Agent exposes WIKI_PATH/wiki.path for location, but no stable on/off config flag is currently available.\""
     },
     {
       "template": "\"@@PRODUCT@@ agent CLI entrypoint not found\"",
@@ -2838,14 +2668,22 @@
       "rendered": "\"Altur-Agent agent checkout not found\""
     },
     {
-      "template": "<img class=\"logo\" src=\"static/brand-logo.svg\" alt=\"@@LOGO_LABEL@@\">",
+      "template": "<img class=\"logo\" src=\"@@LOGO_PATH@@\" alt=\"@@LOGO_LABEL@@\">",
       "rendered": "<img class=\"logo\" src=\"static/brand-logo.svg\" alt=\"Altur-Agent logo\">"
+    },
+    {
+      "template": "        \"Content-Disposition\", f'attachment; filename=\"@@EXPORT_PREFIX@@-{sid}.{ext}\"'\n",
+      "rendered": "        \"Content-Disposition\", f'attachment; filename=\"altur-agent-{sid}.{ext}\"'\n"
+    },
+    {
+      "template": "  <img class=\"logo\" src=\"@@LOGO_PATH@@\" alt=\"Altur-Agent logo\">\n",
+      "rendered": "  <img class=\"logo\" src=\"static/brand-logo.svg\" alt=\"Altur-Agent logo\">\n"
     }
   ],
   "static/altur-help.html": [
     {
-      "template": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>@@PRODUCT@@ help</title><style>body{font:16px system-ui;max-width:760px;margin:48px auto;padding:20px;line-height:1.6;color:#222;background:#faf7f0}code{background:#ddd;padding:3px}</style><img src=\"brand-logo.svg\" width=\"64\" height=\"64\" alt=\"@@LOGO_LABEL@@\"><h1>@@PRODUCT@@</h1><p>Published by @@PUBLISHER@@.</p><p>Use Settings to configure a provider and model, choose a workspace and profile, and protect this local instance with a password. The agent runtime is installed separately within this checkout.</p><p>Setup and maintenance instructions are in README.md and docs/ALTUR.md in the source checkout. Automatic updates are disabled. No support email or external documentation site has been configured.</p><p>Third-party runtime: Hermes Agent by Nous Research. Provider names identify the actual external services.</p></html>",
-      "rendered": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Altur-Agent help</title><style>body{font:16px system-ui;max-width:760px;margin:48px auto;padding:20px;line-height:1.6;color:#222;background:#faf7f0}code{background:#ddd;padding:3px}</style><img src=\"brand-logo.svg\" width=\"64\" height=\"64\" alt=\"Altur-Agent logo\"><h1>Altur-Agent</h1><p>Published by ArtemisProject.</p><p>Use Settings to configure a provider and model, choose a workspace and profile, and protect this local instance with a password. The agent runtime is installed separately within this checkout.</p><p>Setup and maintenance instructions are in README.md and docs/ALTUR.md in the source checkout. Automatic updates are disabled. No support email or external documentation site has been configured.</p><p>Third-party runtime: Hermes Agent by Nous Research. Provider names identify the actual external services.</p></html>"
+      "template": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>@@PRODUCT@@ help</title><style>body{font:16px system-ui;max-width:760px;margin:48px auto;padding:20px;line-height:1.6;color:#222;background:#faf7f0}code{background:#ddd;padding:3px}</style><img src=\"brand-logo.svg\" width=\"64\" height=\"64\" alt=\"@@LOGO_LABEL@@\"><h1>@@PRODUCT@@</h1><p>Published by @@PUBLISHER@@.</p><p>Use Settings to configure a provider and model, choose a workspace and profile, and protect this local instance with a password. The agent runtime is installed separately within this checkout.</p><p>Setup and maintenance instructions are in README.md and docs/ALTUR.md in the source checkout. Automatic updates are disabled. No support email or external documentation site has been configured.</p><p id=\"scheduled-jobs\">Scheduled execution requires a running gateway service configured for this instance. Manual tasks work in the web application. The maintained setup reference is docs/ALTUR.md, “Scheduled jobs,” in this source checkout.</p><p><a href=\"notices.html\">Legal and third-party notices</a></p></html>",
+      "rendered": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Altur-Agent help</title><style>body{font:16px system-ui;max-width:760px;margin:48px auto;padding:20px;line-height:1.6;color:#222;background:#faf7f0}code{background:#ddd;padding:3px}</style><img src=\"brand-logo.svg\" width=\"64\" height=\"64\" alt=\"Altur-Agent logo\"><h1>Altur-Agent</h1><p>Published by ArtemisProject.</p><p>Use Settings to configure a provider and model, choose a workspace and profile, and protect this local instance with a password. The agent runtime is installed separately within this checkout.</p><p>Setup and maintenance instructions are in README.md and docs/ALTUR.md in the source checkout. Automatic updates are disabled. No support email or external documentation site has been configured.</p><p id=\"scheduled-jobs\">Scheduled execution requires a running gateway service configured for this instance. Manual tasks work in the web application. The maintained setup reference is docs/ALTUR.md, “Scheduled jobs,” in this source checkout.</p><p><a href=\"notices.html\">Legal and third-party notices</a></p></html>"
     }
   ],
   "server.py": [
@@ -2856,6 +2694,244 @@
     {
       "template": "  @@PRODUCT@@ listening on ",
       "rendered": "  Altur-Agent listening on "
+    }
+  ],
+  "Dockerfile": [
+    {
+      "template": "LABEL maintainer=\"@@PUBLISHER@@\"\n",
+      "rendered": "LABEL maintainer=\"ArtemisProject\"\n"
+    },
+    {
+      "template": "LABEL description=\"@@PRODUCT@@ — browser interface for the agent runtime\"\n",
+      "rendered": "LABEL description=\"Altur-Agent — browser interface for the agent runtime\"\n"
+    }
+  ],
+  "docker-compose.two-container.yml": [
+    {
+      "template": "# Two-container Docker Compose: agent runtime + @@PRODUCT@@\n",
+      "rendered": "# Two-container Docker Compose: agent runtime + Altur-Agent\n"
+    }
+  ],
+  "docker-compose.three-container.yml": [
+    {
+      "template": "# Three-container Docker Compose: agent runtime + Dashboard + @@PRODUCT@@\n",
+      "rendered": "# Three-container Docker Compose: agent runtime + Dashboard + Altur-Agent\n"
+    },
+    {
+      "template": "#   The WebUI reports \"@@PRODUCT@@ agent is not responding\" when the gateway\n",
+      "rendered": "#   The WebUI reports \"Altur-Agent agent is not responding\" when the gateway\n"
+    }
+  ],
+  "bootstrap.py": [
+    {
+      "template": "\"\"\"One-shot bootstrap launcher for @@PRODUCT@@.\"\"\"\n",
+      "rendered": "\"\"\"One-shot bootstrap launcher for Altur-Agent.\"\"\"\n"
+    },
+    {
+      "template": "        \"for @@PRODUCT@@. Create an isolated Python 3.14 environment, then use its \"\n",
+      "rendered": "        \"for Altur-Agent. Create an isolated Python 3.14 environment, then use its \"\n"
+    },
+    {
+      "template": "    parser = argparse.ArgumentParser(description=\"Bootstrap @@PRODUCT@@ onboarding.\")\n",
+      "rendered": "    parser = argparse.ArgumentParser(description=\"Bootstrap Altur-Agent onboarding.\")\n"
+    },
+    {
+      "template": "    \"\"\"Scheme of a healthy @@PRODUCT@@ already answering on host:port, else \"\".\n",
+      "rendered": "    \"\"\"Scheme of a healthy Altur-Agent already answering on host:port, else \"\".\n"
+    },
+    {
+      "template": "                f\"@@PRODUCT@@ is already running at {_url}. Stop that instance first.\"\n",
+      "rendered": "                f\"Altur-Agent is already running at {_url}. Stop that instance first.\"\n"
+    },
+    {
+      "template": "            f\"Starting @@PRODUCT@@ on {scheme}://{_url_host(args.host)}:{args.port} \"\n",
+      "rendered": "            f\"Starting Altur-Agent on {scheme}://{_url_host(args.host)}:{args.port} \"\n"
+    },
+    {
+      "template": "    info(f\"Starting @@PRODUCT@@ on {scheme}://{_url_host(args.host)}:{args.port}\")\n",
+      "rendered": "    info(f\"Starting Altur-Agent on {scheme}://{_url_host(args.host)}:{args.port}\")\n"
+    }
+  ],
+  "start.sh": [
+    {
+      "template": "[==] @@PRODUCT@@ is already running at ${_hermes_probe_scheme}://${_hermes_probe_host}:${_hermes_port}\n",
+      "rendered": "[==] Altur-Agent is already running at ${_hermes_probe_scheme}://${_hermes_probe_host}:${_hermes_port}\n"
+    }
+  ],
+  "start.ps1": [
+    {
+      "template": "    Native Windows launcher for @@PRODUCT@@ - PowerShell equivalent\n",
+      "rendered": "    Native Windows launcher for Altur-Agent - PowerShell equivalent\n"
+    },
+    {
+      "template": "Write-Host \"[start.ps1] @@PRODUCT@@ native Windows launcher\" -ForegroundColor Cyan\n",
+      "rendered": "Write-Host \"[start.ps1] Altur-Agent native Windows launcher\" -ForegroundColor Cyan\n"
+    },
+    {
+      "template": "    Write-Error \"server.py not found at $serverPath - is this the @@PRODUCT@@ repo root?\"\n",
+      "rendered": "    Write-Error \"server.py not found at $serverPath - is this the Altur-Agent repo root?\"\n"
+    }
+  ],
+  "ctl.sh": [
+    {
+      "template": "  start [bootstrap args...]   Start @@PRODUCT@@ as a background daemon\n",
+      "rendered": "  start [bootstrap args...]   Start Altur-Agent as a background daemon\n"
+    },
+    {
+      "template": "    echo \"[ctl] @@PRODUCT@@ is already running (PID ${existing_pid})\"\n",
+      "rendered": "    echo \"[ctl] Altur-Agent is already running (PID ${existing_pid})\"\n"
+    },
+    {
+      "template": "    echo \"[ctl] Refusing to start a second @@PRODUCT@@ while launchd job ${HERMES_WEBUI_LAUNCHD_LABEL:-${DEFAULT_LAUNCHD_LABEL}} is running (PID ${launchd_pid}).\" >&2\n",
+      "rendered": "    echo \"[ctl] Refusing to start a second Altur-Agent while launchd job ${HERMES_WEBUI_LAUNCHD_LABEL:-${DEFAULT_LAUNCHD_LABEL}} is running (PID ${launchd_pid}).\" >&2\n"
+    },
+    {
+      "template": "    echo \"[ctl] Refusing to start a second @@PRODUCT@@: systemd ${systemd_conflict}.\" >&2\n",
+      "rendered": "    echo \"[ctl] Refusing to start a second Altur-Agent: systemd ${systemd_conflict}.\" >&2\n"
+    },
+    {
+      "template": "      echo \"[ctl] @@PRODUCT@@ failed to stay running. Log: ${LOG_FILE}\" >&2\n",
+      "rendered": "      echo \"[ctl] Altur-Agent failed to stay running. Log: ${LOG_FILE}\" >&2\n"
+    },
+    {
+      "template": "    echo \"[ctl] @@PRODUCT@@ failed to stay running. Log: ${LOG_FILE}\" >&2\n",
+      "rendered": "    echo \"[ctl] Altur-Agent failed to stay running. Log: ${LOG_FILE}\" >&2\n"
+    },
+    {
+      "template": "  echo \"[ctl] Started @@PRODUCT@@ (PID ${pid})\"\n",
+      "rendered": "  echo \"[ctl] Started Altur-Agent (PID ${pid})\"\n"
+    },
+    {
+      "template": "    echo \"[ctl] @@PRODUCT@@ is stopped\"\n",
+      "rendered": "    echo \"[ctl] Altur-Agent is stopped\"\n"
+    },
+    {
+      "template": "  echo \"[ctl] Stopping @@PRODUCT@@ (PID ${pid})\"\n",
+      "rendered": "  echo \"[ctl] Stopping Altur-Agent (PID ${pid})\"\n"
+    },
+    {
+      "template": "    echo \"● @@PRODUCT@@ — running\"\n",
+      "rendered": "    echo \"● Altur-Agent — running\"\n"
+    },
+    {
+      "template": "      echo \"● @@PRODUCT@@ — running (not managed by ctl.sh)\"\n",
+      "rendered": "      echo \"● Altur-Agent — running (not managed by ctl.sh)\"\n"
+    },
+    {
+      "template": "      echo \"● @@PRODUCT@@ — stopped\"\n",
+      "rendered": "      echo \"● Altur-Agent — stopped\"\n"
+    }
+  ],
+  ".env.example": [
+    {
+      "template": "# @@PRODUCT@@ -- local machine config template\n",
+      "rendered": "# Altur-Agent -- local machine config template\n"
+    }
+  ],
+  ".env.docker.example": [
+    {
+      "template": "# @@PRODUCT@@ — Docker Compose configuration template\n",
+      "rendered": "# Altur-Agent — Docker Compose configuration template\n"
+    }
+  ],
+  "scripts/windows/setup_webui_autostart.ps1": [
+    {
+      "template": "$description = \"Auto-start @@PRODUCT@@ inside WSL at Windows logon. Runs $WslScriptPath.\"\n",
+      "rendered": "$description = \"Auto-start Altur-Agent inside WSL at Windows logon. Runs $WslScriptPath.\"\n"
+    },
+    {
+      "template": "if ($PSCmdlet.ShouldProcess($TaskName, \"Register Windows Scheduled Task for @@PRODUCT@@ WSL autostart\")) {\n",
+      "rendered": "if ($PSCmdlet.ShouldProcess($TaskName, \"Register Windows Scheduled Task for Altur-Agent WSL autostart\")) {\n"
+    }
+  ],
+  "scripts/wsl/hermes_webui_autostart.sh": [
+    {
+      "template": "# WSL-friendly autostart launcher for @@PRODUCT@@.\n",
+      "rendered": "# WSL-friendly autostart launcher for Altur-Agent.\n"
+    },
+    {
+      "template": "    log \"@@PRODUCT@@ repo not found: ${HERMES_WEBUI_REPO}\"\n",
+      "rendered": "    log \"Altur-Agent repo not found: ${HERMES_WEBUI_REPO}\"\n"
+    },
+    {
+      "template": "  # @@PRODUCT@@ usually launches the agent in-process, so this check is opt-in.\n",
+      "rendered": "  # Altur-Agent usually launches the agent in-process, so this check is opt-in.\n"
+    },
+    {
+      "template": "    log \"@@PRODUCT@@ already running at ${HERMES_WEBUI_HEALTH_URL}\"\n",
+      "rendered": "    log \"Altur-Agent already running at ${HERMES_WEBUI_HEALTH_URL}\"\n"
+    },
+    {
+      "template": "    log \"@@PRODUCT@@ already running with pid $(cat \"${HERMES_WEBUI_PID_FILE}\")\"\n",
+      "rendered": "    log \"Altur-Agent already running with pid $(cat \"${HERMES_WEBUI_PID_FILE}\")\"\n"
+    },
+    {
+      "template": "  log \"Starting @@PRODUCT@@ from ${HERMES_WEBUI_REPO} on ${HERMES_WEBUI_HOST}:${HERMES_WEBUI_PORT}\"\n",
+      "rendered": "  log \"Starting Altur-Agent from ${HERMES_WEBUI_REPO} on ${HERMES_WEBUI_HOST}:${HERMES_WEBUI_PORT}\"\n"
+    },
+    {
+      "template": "    log \"@@PRODUCT@@ started and passed health check\"\n",
+      "rendered": "    log \"Altur-Agent started and passed health check\"\n"
+    },
+    {
+      "template": "    log \"@@PRODUCT@@ process started with pid $(cat \"${HERMES_WEBUI_PID_FILE}\"); health check not ready yet\"\n",
+      "rendered": "    log \"Altur-Agent process started with pid $(cat \"${HERMES_WEBUI_PID_FILE}\"); health check not ready yet\"\n"
+    },
+    {
+      "template": "  log \"@@PRODUCT@@ failed to stay running; see ${WEBUI_LOG}\"\n",
+      "rendered": "  log \"Altur-Agent failed to stay running; see ${WEBUI_LOG}\"\n"
+    }
+  ],
+  "mcp_server.py": [
+    {
+      "template": "@@PRODUCT@@ MCP Server — exposes project and session management\n",
+      "rendered": "Altur-Agent MCP Server — exposes project and session management\n"
+    }
+  ],
+  "docker_init.bash": [
+    {
+      "template": "echo \"\"; echo \"== Checking required environment variables for @@PRODUCT@@\"\n",
+      "rendered": "echo \"\"; echo \"== Checking required environment variables for Altur-Agent\"\n"
+    },
+    {
+      "template": "echo \"\"; echo \"== Installing uv and creating a new virtual environment for @@PRODUCT@@\"\n",
+      "rendered": "echo \"\"; echo \"== Installing uv and creating a new virtual environment for Altur-Agent\"\n"
+    },
+    {
+      "template": "  echo \"\"; echo \"== Installing @@PRODUCT@@ dependencies\"\n",
+      "rendered": "  echo \"\"; echo \"== Installing Altur-Agent dependencies\"\n"
+    },
+    {
+      "template": "echo \"\";echo \"== Activating @@PRODUCT@@'s virtual environment\"\n",
+      "rendered": "echo \"\";echo \"== Activating Altur-Agent's virtual environment\"\n"
+    },
+    {
+      "template": "  install_venv_dependencies || error_exit \"Failed to install @@PRODUCT@@ dependencies\"\n",
+      "rendered": "  install_venv_dependencies || error_exit \"Failed to install Altur-Agent dependencies\"\n"
+    },
+    {
+      "template": "echo \"\"; echo \"== Running @@PRODUCT@@\"\n",
+      "rendered": "echo \"\"; echo \"== Running Altur-Agent\"\n"
+    },
+    {
+      "template": "cd /app; python server.py || error_exit \"@@PRODUCT@@ failed or exited with an error\"\n",
+      "rendered": "cd /app; python server.py || error_exit \"Altur-Agent failed or exited with an error\"\n"
+    }
+  ],
+  "static/notices.html": [
+    {
+      "rendered": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Legal notices</title><style>body{font:16px system-ui;max-width:760px;margin:40px auto;padding:20px;line-height:1.6}</style><h1>Legal and third-party notices</h1><p>Altur-Agent is published by ArtemisProject. The WebUI derives from nesquena/hermes-webui; its MIT license and contributor credits are preserved in the source distribution.</p><p>The separately installed runtime derives from Hermes Agent by Nous Research and contributors and retains its own license and notices. Actual provider names identify third-party services.</p><p>See LICENSE, CONTRIBUTORS.md and THIRD_PARTY_NOTICES.md in the source distribution.</p></html>",
+      "template": "<!doctype html><html lang=\"en\"><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Legal notices</title><style>body{font:16px system-ui;max-width:760px;margin:40px auto;padding:20px;line-height:1.6}</style><h1>Legal and third-party notices</h1><p>@@PRODUCT@@ is published by @@PUBLISHER@@. The WebUI derives from nesquena/hermes-webui; its MIT license and contributor credits are preserved in the source distribution.</p><p>The separately installed runtime derives from Hermes Agent by Nous Research and contributors and retains its own license and notices. Actual provider names identify third-party services.</p><p>See LICENSE, CONTRIBUTORS.md and THIRD_PARTY_NOTICES.md in the source distribution.</p></html>"
+    }
+  ],
+  "AGENTS.md": [
+    {
+      "rendered": "# Agent instructions for Altur-Agent\n",
+      "template": "# Agent instructions for @@PRODUCT@@\n"
+    },
+    {
+      "rendered": "Altur-Agent can read and write real agent state, sessions, workspaces,\n",
+      "template": "@@PRODUCT@@ can read and write real agent state, sessions, workspaces,\n"
     }
   ]
 }

@@ -5,6 +5,7 @@ import json,time,argparse
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--port',type=int,default=8794)
 parser.add_argument('--capture',type=Path,help='Optional local request capture for prompt inspection')
+parser.add_argument('--capture-log',type=Path,help='Append every dummy fixture request as JSONL for prompt-boundary inspection')
 args=parser.parse_args()
 class H(BaseHTTPRequestHandler):
  def log_message(self,*a):pass
@@ -14,7 +15,10 @@ class H(BaseHTTPRequestHandler):
   d=json.loads(self.rfile.read(int(self.headers.get('Content-Length',0))))
   if args.capture:
    args.capture.parent.mkdir(parents=True,exist_ok=True);args.capture.write_text(json.dumps(d,indent=2))
-  user=' '.join(str(m.get('content','')) for m in d.get('messages',[]) if m.get('role')=='user')
+  if args.capture_log:
+   args.capture_log.parent.mkdir(parents=True,exist_ok=True)
+   with args.capture_log.open('a') as output:output.write(json.dumps(d)+'\n')
+  user=next((str(m.get('content','')) for m in reversed(d.get('messages',[])) if m.get('role')=='user'),'')
   text='[LOCAL FIXTURE] I am Altur-Agent. This response verifies the WebUI transport and branding; no real AI provider was called.'
   if 'preserve' in user.lower():text+=' User text preserved: Hermes, NousResearch, nesquena.'
   if 'slow' in user.lower():text+=' Slow streaming cancellation fixture. '*120

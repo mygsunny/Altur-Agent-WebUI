@@ -128,7 +128,7 @@ class _ProfileGoalManager:
             raise RuntimeError("Altur-Agent goal manager unavailable")
         context_api = context_api or _profile_home_context_api()
         if context_api is None:
-            raise RuntimeError("Hermes profile context unavailable")
+            raise RuntimeError("Agent profile context unavailable")
         self.session_id = session_id
         self.profile_home = Path(profile_home).expanduser().resolve()
         self._set_home, self._reset_home = context_api

@@ -425,7 +425,7 @@ def start_gateway_delegation_poller() -> bool:
     global _THREAD
     try:
         if not _claim_api_available():
-            logger.info("gateway delegation poller inactive: installed Altur-Agent Agent lacks the delivery reserve/commit API")
+            logger.info("gateway delegation poller inactive: installed Altur-Agent lacks the delivery reserve/commit API")
             return False
         with _LOCK:
             if _THREAD is not None and _THREAD.is_alive():

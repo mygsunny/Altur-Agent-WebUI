@@ -6,7 +6,7 @@ Altur-Agent by ArtemisProject is a branded fork of the existing Python and vanil
 
 ## Local setup
 
-Use Python **3.14** for the pinned agent runtime. The WebUI contributor test runner uses a separate Python 3.11–3.13 environment. No global agent installer is needed.
+Use Python **3.14** for the pinned agent runtime. The WebUI contributor test runner uses a separate Python 3.11–3.13 environment. No global agent installer is needed. The isolated launcher targets macOS/POSIX; native Windows deployment is unverified.
 
 ```sh
 git clone https://github.com/mygsunny/Altur-Agent-WebUI.git
@@ -20,7 +20,7 @@ python3.14 -m venv .runtime/venv
 
 Open **http://127.0.0.1:8793**. Complete provider setup with your own provider or local OpenAI-compatible server. No real provider credentials are bundled. Stop with Ctrl+C. The launcher stays in the foreground, binds loopback, and uses `.trial/agent-home`, `.trial/state` and `.trial/workspace`. It does not use the desktop profile or import the operator's Claude Code history by default. These checkout-local data directories are ignored by Git; retain them when updating the source.
 
-The launcher seeds SOUL.md only when missing, using the brand identity. User-edited identity/personas remain authoritative. Settings can enable password protection; passkeys and configured SSO keep upstream authentication behavior. Do not expose this development instance publicly.
+Setup applies a hash-verified source overlay to the private pinned runtime for hardcoded help/tool/callback copy; the launcher verifies it before starting. The launcher seeds SOUL.md only when missing, using the brand identity. User-edited identity/personas remain authoritative. Settings can enable password protection; passkeys and configured SSO keep upstream authentication behavior. Do not expose this development instance publicly.
 
 ## Branding and maintenance
 
@@ -31,12 +31,12 @@ The canonical definition is [`branding/brand.json`](branding/brand.json). The or
 .venv/bin/python scripts/generate-branding.py
 ```
 
-This generates SVG/PNG/ICO icons, PWA metadata, and catalogued application-owned literals before interpolation. It never filters user messages or model output. See [`docs/ALTUR.md`](docs/ALTUR.md) for the brand relationship, compatibility exceptions, runtime pin, upstream merge process and validation limits.
+This generates SVG/PNG/ICO icons, PWA metadata, catalogued application-owned literals, 17-language runtime defaults, and the reviewed source overlay in an existing private runtime before interpolation. It never filters user messages or model output. Restart the foreground server and reload open tabs after regeneration so versioned browser assets and backend metadata are refreshed. See [`docs/ALTUR.md`](docs/ALTUR.md) for the brand relationship, compatibility exceptions, runtime pin, upstream merge process and validation limits.
 
 ## Development checks
 
 ```sh
-./scripts/test.sh tests/test_altur_branding.py tests/test_onboarding_static.py tests/test_session_public_share.py tests/test_pwa_manifest_sw.py
+./scripts/test.sh tests/test_altur_*.py tests/test_onboarding_static.py tests/test_session_public_share.py tests/test_pwa_manifest_sw.py
 ```
 
 The documented test runner creates a separate `.venv` using Python 3.11–3.13. Keep the runtime environment under `.runtime/venv` separate. See [TESTING.md](TESTING.md) and [ARCHITECTURE.md](ARCHITECTURE.md) for the inherited application architecture and detailed feature tests.

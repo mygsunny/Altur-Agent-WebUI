@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Hermes WebUI MCP Server — exposes project and session management
+Altur-Agent MCP Server — exposes project and session management
 as MCP tools for any MCP-compatible agent.
 
 Option A rewrite (2026-05-08): imports api.models and api.profiles
@@ -10,16 +10,16 @@ locking, profile scoping, index consistency, and validation.
     pip install "mcp>=1.28,<2"   # one-time setup
     python3 mcp_server.py # start via stdio
 
-MCP config for Hermes Agent (add to config.yaml):
+MCP configuration (add to config.yaml):
     mcp_servers:
       hermes-webui:
         command: /path/to/venv/bin/python3
-        args: [/path/to/hermes-webui/mcp_server.py]
+        args: [/path/to/Altur-Agent-WebUI/mcp_server.py]
         env:
           HERMES_WEBUI_PASSWORD: your_password
 
 Profile override (optional):
-        args: [/path/to/hermes-webui/mcp_server.py, --profile, myprofile]
+        args: [/path/to/Altur-Agent-WebUI/mcp_server.py, --profile, myprofile]
 
 AI-authoring disclosure: this file was rewritten by MILO (Hermes Agent)
 under human direction, per maintainer guidelines for #1616.
@@ -55,6 +55,7 @@ import api.config as _cfg
 from api.config import (
     STATE_DIR, SESSION_DIR, SESSION_INDEX_FILE, PROJECTS_FILE, HOME,
 )
+from api.branding import BRAND
 from api.models import load_projects, save_projects
 from api.profiles import get_active_profile_name, _is_root_profile, _profiles_match
 
@@ -73,7 +74,7 @@ WEBUI_URL = f"http://{WEBUI_HOST}:{WEBUI_PORT}"
 _auth_cookie: str | None = None
 _auth_expires: float = 0  # unix timestamp after which we re-auth
 
-server = Server("hermes-webui")
+server = Server(BRAND["product"]["display_name"])
 
 
 # ═══════════════════════════════════════════════════════════════════════════

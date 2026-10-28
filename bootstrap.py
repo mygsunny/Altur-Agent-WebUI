@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One-shot bootstrap launcher for Hermes Web UI."""
+"""One-shot bootstrap launcher for Altur-Agent."""
 
 from __future__ import annotations
 
@@ -194,10 +194,10 @@ def _python_can_run_webui_and_agent(python_exe: str, agent_dir: Path | None = No
 
 
 def ensure_python_has_webui_deps(python_exe: str, agent_dir: Path | None = None) -> str:
-    """Return a Python executable that can run both WebUI and Hermes Agent.
+    """Return a Python executable that can run both WebUI and agent runtime.
 
     The WebUI can be launched directly with its local .venv. That venv has the
-    WebUI dependencies (for example PyYAML), but may not have Hermes Agent on its
+    WebUI dependencies (for example PyYAML), but may not have the agent runtime on its
     import path. In that case the server starts healthy, then chat fails later
     with "AIAgent not available". Prefer the agent venv when it is usable, and
     validate the final interpreter before starting the server.
@@ -221,9 +221,9 @@ def ensure_python_has_webui_deps(python_exe: str, agent_dir: Path | None = None)
 
     if (os.getenv("HERMES_WEBUI_DISABLE_LOCAL_VENV") or "").strip().lower() in {"1", "true", "yes", "on"}:
         raise RuntimeError(
-            "Python environment cannot import both WebUI dependencies and Hermes Agent, "
+            "Python environment cannot import both WebUI dependencies and the agent runtime, "
             "and local .venv creation is disabled for this packaged launch. Set "
-            "HERMES_WEBUI_PYTHON to an interpreter with Hermes Agent dependencies."
+            "HERMES_WEBUI_PYTHON to an interpreter with agent runtime dependencies."
         )
 
     venv_dir = REPO_ROOT / ".venv"
@@ -263,8 +263,8 @@ def ensure_python_has_webui_deps(python_exe: str, agent_dir: Path | None = None)
     if _python_can_run_webui_and_agent(str(venv_python), agent_dir):
         return str(venv_python)
     raise RuntimeError(
-        "Python environment cannot import both WebUI dependencies and Hermes Agent. "
-        "Set HERMES_WEBUI_PYTHON to the Hermes Agent venv Python or install the "
+        "Python environment cannot import both WebUI dependencies and the agent runtime. "
+        "Set HERMES_WEBUI_PYTHON to the agent runtime venv Python or install the "
         "WebUI requirements into that environment."
     )
 
@@ -274,14 +274,12 @@ def hermes_command_exists() -> bool:
 
 
 def install_hermes_agent() -> None:
-    if platform.system() == "Windows" and not is_wsl():
-        raise RuntimeError(
-            "Auto-install is not supported on native Windows. "
-            "Install hermes-agent manually first."
-        )
-    info(f"Hermes Agent not found. Attempting install via {INSTALLER_URL}")
-    subprocess.run(
-        ["/bin/bash", "-lc", f"curl -fsSL {INSTALLER_URL} | bash"], check=True
+    """Compatibility entry point: installation is explicit and checkout-local."""
+    raise RuntimeError(
+        "The agent runtime is unavailable. Automatic runtime installation is disabled "
+        "for Altur-Agent. Create an isolated Python 3.14 environment, then use its "
+        "Python to run scripts/setup-altur.py and scripts/start-altur.py. "
+        "See README.md for the supported setup procedure."
     )
 
 
@@ -453,7 +451,7 @@ def open_browser(url: str) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Bootstrap Hermes Web UI onboarding.")
+    parser = argparse.ArgumentParser(description="Bootstrap Altur-Agent onboarding.")
     parser.add_argument("port", nargs="?", type=int, default=DEFAULT_PORT)
     parser.add_argument("--host", default=DEFAULT_HOST)
     parser.add_argument(
@@ -464,7 +462,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--skip-agent-install",
         action="store_true",
-        help="Fail instead of attempting the official Hermes installer.",
+        help="Fail if the agent runtime is unavailable; automatic installation is disabled.",
     )
     parser.add_argument(
         "--foreground",
@@ -740,7 +738,7 @@ def _probe_host(host: str) -> str:
 
 
 def _already_serving_scheme(host: str, port: int) -> str:
-    """Scheme of a healthy Hermes WebUI already answering on host:port, else "".
+    """Scheme of a healthy Altur-Agent already answering on host:port, else "".
 
     Bounded, TLS-aware probe (``wait_for_health``, one second) of the port the
     bind preflight just found occupied. The listener there may be OUR OWN
@@ -808,7 +806,7 @@ def main() -> int:
         # dir, the outcome #8111 exists to prevent.
         if args.foreground or _detect_supervisor():
             raise PortInUseError(
-                f"Hermes WebUI is already running at {_url}. Stop that instance first."
+                f"Altur-Agent is already running at {_url}. Stop that instance first."
             ) from None
         info(f"Web UI is already running: {_url}")
         if not args.no_browser:
@@ -816,10 +814,10 @@ def main() -> int:
         return 0
 
     agent_dir = discover_agent_dir()
-    if not agent_dir and not hermes_command_exists():
+    if not agent_dir:
         if args.skip_agent_install:
             raise RuntimeError(
-                "Hermes Agent was not found and auto-install was disabled."
+                "The agent runtime was not found. Run scripts/setup-altur.py in an isolated Python 3.14 environment; see README.md."
             )
         install_hermes_agent()
         agent_dir = discover_agent_dir()
@@ -855,7 +853,7 @@ def main() -> int:
     foreground_reason = "--foreground" if args.foreground else _detect_supervisor()
     if foreground_reason:
         info(
-            f"Starting Hermes Web UI on {scheme}://{_url_host(args.host)}:{args.port} "
+            f"Starting Altur-Agent on {scheme}://{_url_host(args.host)}:{args.port} "
             f"(foreground mode: {foreground_reason})"
         )
         try:
@@ -922,7 +920,7 @@ def main() -> int:
     # /health, then return. Suitable for an interactive `bash start.sh` run.
     log_path = state_dir / f"bootstrap-{args.port}.log"
 
-    info(f"Starting Hermes Web UI on {scheme}://{_url_host(args.host)}:{args.port}")
+    info(f"Starting Altur-Agent on {scheme}://{_url_host(args.host)}:{args.port}")
     with log_path.open("ab") as log_file:
         proc = subprocess.Popen(
             [python_exe, server_path],

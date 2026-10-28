@@ -61,14 +61,15 @@ def test_onboarding_provider_notice_uses_i18n_key():
     assert "system.provider_note|| (setupOk?" not in js
 
 
-def test_bootstrap_script_contains_official_installer_and_windows_guard():
+def test_bootstrap_retains_runtime_provenance_and_documents_explicit_setup():
     src = read("bootstrap.py")
     assert (
         "https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scripts/install.sh"
         in src
     )
-    # Native Windows is now experimental-supported (#1952), not hard-blocked:
-    # ensure_supported_platform() warns instead of raising, but auto-install
-    # (which shells out to /bin/bash) still guards native Windows explicitly.
+    # Keep real dependency provenance, while every platform uses explicit,
+    # isolated setup rather than automatically running the upstream installer.
     assert "Native Windows bootstrap is experimental" in src
-    assert "Auto-install is not supported on native Windows" in src
+    assert "Automatic runtime installation is disabled" in src
+    assert "scripts/setup-altur.py" in src
+    assert "scripts/start-altur.py" in src

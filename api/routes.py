@@ -13965,7 +13965,7 @@ def _build_llm_wiki_status() -> dict:
             "path_configured": path_configured,
             "path_source": path_source,
             "toggle_available": False,
-            "toggle_reason": "Altur-Agent Agent exposes WIKI_PATH/wiki.path for location, but no stable on/off config flag is currently available.",
+            "toggle_reason": "Altur-Agent exposes WIKI_PATH/wiki.path for location, but no stable on/off config flag is currently available.",
             "docs_url": _LLM_WIKI_DOCS_URL,
         }
         if not wiki_path.exists():
@@ -14858,7 +14858,7 @@ def _project_os_onboarding_context(repo_root: Path, project_md: dict | None, pla
     summary = "workspace root onboarding 진행 중 · 저장소 경계는 아직 미확정이며 자동 승격은 금지됩니다."
     next_safe_action = "workspace-root 기준으로 경계만 좁게 검증"
     if has_boundary_hold:
-        summary = "workspace root onboarding 진행 중 · 저장소 경계는 아직 미확정이며 TO_BE_VALIDATED_BY_HERMES 상태를 유지합니다."
+        summary = "workspace root onboarding 진행 중 · 저장소 경계는 아직 미확정이며 저장소 경계 검증을 보류합니다."
     return {
         "active": True,
         "doc_source": "root",

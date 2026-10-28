@@ -1010,13 +1010,13 @@ function _cronGatewayNoticeHtml(status) {
         ? 'Gateway endpoint not reachable'
         : 'Gateway not running';
   const body = notConfigured
-    ? 'In Altur-Agent, scheduled jobs require the Hermes gateway daemon. If this is a single-container Docker install, jobs can be created and run manually here, but scheduled ticks need a gateway container or `hermes gateway` running outside the WebUI.'
+    ? 'Scheduled jobs require a gateway service. Jobs can be created and run manually here; scheduled execution needs the configured gateway service to be running. See the local setup guide.'
     : isStaleMetadata
       ? 'The gateway is marked as configured, but its health metadata has gone stale. In Docker, scheduled jobs require a live gateway daemon that refreshes runtime metadata while ticking cron.'
       : isRemoteUnreachable
         ? 'The gateway health endpoint is not reachable from WebUI. Verify the configured gateway URL env var (`GATEWAY_HEALTH_URL`, `HERMES_GATEWAY_HEALTH_URL`, `HERMES_API_URL`, or `HERMES_WEBUI_GATEWAY_BASE_URL`) points to a reachable gateway service and network path before relying on cron ticking.'
-        : 'In Altur-Agent, scheduled jobs require the Hermes gateway daemon to be running. Start the gateway container or `hermes gateway` before relying on offline scheduled runs.';
-  const docsHref = 'https://github.com/nesquena/hermes-webui/blob/master/docs/docker.md#scheduled-jobs-and-the-gateway-daemon';
+        : 'Scheduled jobs require the configured gateway service to be running. Follow the local setup guide before relying on offline scheduled runs.';
+  const docsHref = 'static/altur-help.html#scheduled-jobs';
   const helpLink = notConfigured || isRemoteUnreachable || isStaleMetadata
     ? `<p><a href="${docsHref}" target="_blank" rel="noopener">How to enable scheduled jobs in Docker ↗</a></p>`
     : '';
@@ -4838,7 +4838,7 @@ function _renderLlmWikiStatus(d) {
   // becomes config-driven. esc() HTML-escapes but doesn't validate URL scheme.
   const docsUrl = /^https?:\/\//i.test(rawDocsUrl) ? rawDocsUrl : '#';
   const toggleNote = status.toggle_available
-    ? 'Toggle available from configured Altur-Agent Agent setting.'
+    ? 'Toggle available from configured Altur-Agent setting.'
     : (status.toggle_reason || 'No stable LLM Wiki on/off config flag was detected, so this panel is read-only.');
   const statusNote = isReady
     ? 'LLM Wiki is configured and page metadata is visible without exposing wiki content.'
@@ -12218,14 +12218,14 @@ function _buildProviderCard(p){
     const hint=document.createElement('div');
     hint.className='provider-card-hint';
     if(p.key_source==='config_yaml'){
-      hint.textContent=t('providers_oauth_config_yaml_hint')||'Token configured via config.yaml. To update, edit the providers section in your config.yaml or run hermes auth.';
+      hint.textContent=t('providers_oauth_config_yaml_hint')||'Sign-in is configured in config.yaml. Follow the local provider sign-in guide to change it.';
     } else if(p.auth_error){
       hint.textContent=p.auth_error;
       hint.style.color='var(--accent)';
     } else if(p.has_key){
       hint.textContent=t('providers_oauth_hint');
     } else {
-      hint.textContent=t('providers_oauth_not_configured_hint')||'Not authenticated. Run hermes auth in the terminal to configure this provider.';
+      hint.textContent=t('providers_oauth_not_configured_hint')||'This provider requires command-line sign-in. Follow the local setup guide.';
       hint.style.color='var(--muted)';
     }
     body.appendChild(hint);
@@ -12418,7 +12418,7 @@ function _buildProviderCard(p){
     const hint=document.createElement('div');
     hint.className='provider-card-hint';
     hint.textContent=p.is_custom
-      ? 'Custom provider loaded from config.yaml / hermes model. Edit it from the CLI or config file.'
+      ? 'Custom provider loaded from config.yaml. Edit it using the local setup guide or the configuration file.'
       : 'Provider is managed outside the WebUI.';
     body.appendChild(hint);
   }

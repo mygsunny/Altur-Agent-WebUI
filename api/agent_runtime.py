@@ -28,7 +28,7 @@ from api.config import (
 from api.subprocess_utils import windows_hide_flags
 
 _RESTART_REQUIRED_MESSAGE = (
-    "Altur-Agent Agent was updated while Altur-Agent was running. "
+    "Altur-Agent was updated while Altur-Agent was running. "
     "WebUI cannot verify that the Agent update completed safely. "
     "Check the Agent update outcome and environment first. "
     "Restart Altur-Agent manually before retrying this action."

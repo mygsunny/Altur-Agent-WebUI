@@ -168,7 +168,7 @@ def probe_official_dashboard(
             result["version"] = version.strip()
         return result
     except Exception:
-        logger.debug("official Hermes dashboard probe failed", exc_info=True)
+        logger.debug("Configured dashboard probe failed", exc_info=True)
         return {"running": False}
 
 

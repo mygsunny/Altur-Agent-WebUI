@@ -5785,7 +5785,7 @@ function _checkProviderMismatch(modelId){
   const norm=p=>aliases[p]||p;
   if(norm(modelProvider)!==norm(ap)){
     return (window.t?window.t('provider_mismatch_warning',modelId,ap):
-      `"${modelId}" may not work with your configured provider (${ap}). Send anyway or run \`hermes model\` to switch.`);
+      `"${modelId}" may not work with your configured provider (${ap}). Send anyway or choose a provider and model in Settings.`);
   }
   return null;
 }
@@ -13709,8 +13709,7 @@ function _updateTargetArrowNamesTag(info,tag){
 }
 function _formatManualUpdateInstruction(info){
   if(!(info&&info.no_git&&info.manual_update&&info.behind>0)) return null;
-  const tag=info.channel==='experimental'?'experimental':'latest';
-  return t('settings_update_manual_docker',`docker pull ghcr.io/nesquena/hermes-webui:${tag}`);
+  return t('settings_updates_disabled');
 }
 function _formatUpdateCheckError(label,info){
   if(!info||!info.error) return null;

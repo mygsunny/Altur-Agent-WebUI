@@ -3009,7 +3009,7 @@ def set_provider_key(provider_id: str, api_key: str | None) -> dict[str, Any]:
         return {
             "ok": False,
             "error": f"'{_PROVIDER_DISPLAY.get(provider_id, provider_id)}' uses OAuth authentication. "
-                     f"Use `hermes model` in the terminal to configure it.",
+                     f"Complete provider sign-in using the local setup guide, then try again.",
         }
 
     env_var = _provider_env_var_for(provider_id)

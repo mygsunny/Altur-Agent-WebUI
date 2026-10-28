@@ -2682,7 +2682,7 @@ $('btnDownload').onclick=()=>{
   if(!S.session)return;
   const blob=new Blob([transcript()],{type:'text/markdown'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download=`hermes-${S.session.session_id}.md`;a.click();URL.revokeObjectURL(a.href);
+  a.download=`altur-agent-${S.session.session_id}.md`;a.click();URL.revokeObjectURL(a.href);
 };
 function _buildSessionExportUrl(sessionId,params){
   const url=new URL('api/session/export',document.baseURI||location.href);
@@ -2696,7 +2696,7 @@ $('btnExportJSON').onclick=()=>{
   if(!S.session)return;
   const url=_buildSessionExportUrl(S.session.session_id);
   const a=document.createElement('a');a.href=url;
-  a.download=`hermes-${S.session.session_id}.json`;a.click();
+  a.download=`altur-agent-${S.session.session_id}.json`;a.click();
 };
 $('btnShareSession').onclick=async()=>{
   if(!S.session) return;
@@ -2773,7 +2773,7 @@ function exportSessionHTML(session){
   const paletteB64=btoa(unescape(encodeURIComponent(JSON.stringify(clean))));
   const url=_buildSessionExportUrl(sid,{format:'html',theme,palette:paletteB64});
   const a=document.createElement('a');a.href=url;
-  a.download=`hermes-${sid}.html`;a.click();
+  a.download=`altur-agent-${sid}.html`;a.click();
 }
 $('btnExportHTML').onclick=()=>exportSessionHTML();
 $('btnImportJSON').onclick=()=>$('importFileInput').click();

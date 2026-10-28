@@ -91,6 +91,8 @@ def list_commands(_registry=None) -> list[dict[str, Any]]:
             logger.warning("hermes_cli.commands not importable -- /api/commands returns []")
             return []
 
+    from api.branding import BRAND
+    built_in_descriptions = BRAND['messages']['command_descriptions']
     out: list[dict[str, Any]] = []
     for cmd in _registry:
         if cmd.gateway_only:
@@ -99,7 +101,7 @@ def list_commands(_registry=None) -> list[dict[str, Any]]:
             continue
         out.append({
             'name': cmd.name,
-            'description': cmd.description,
+            'description': built_in_descriptions.get(cmd.name, cmd.description),
             'category': cmd.category,
             'aliases': list(cmd.aliases),
             'args_hint': cmd.args_hint,
@@ -147,6 +149,8 @@ def list_command_bundles() -> list[dict[str, Any]]:
         logger.warning("Failed to list skill bundles", exc_info=True)
         return []
 
+    from api.branding import BRAND
+    built_in_descriptions = BRAND['messages']['command_descriptions']
     out: list[dict[str, Any]] = []
     for bundle in bundles:
         slug = str((bundle or {}).get("slug", "")).strip().lower()
@@ -441,7 +445,7 @@ def _run_credits_command() -> str:
         return "Couldn't fetch credits right now."
 
     if not getattr(view, "logged_in", False):
-        return "Not logged into Nous. Run `hermes auth login nous` in Altur-Agent CLI, then try /credits again."
+        return "No credit account is configured for this provider. Configure a provider account in Settings or follow the local sign-in guide, then try /credits again."
 
     lines = ["💳 **Nous credits**"]
     for line in tuple(getattr(view, "balance_lines", ()) or ()):
@@ -488,7 +492,7 @@ def resolve_moa_config(preset: str | None = None) -> dict:
     try:
         from hermes_cli.moa_config import moa_usage, normalize_moa_config
     except ImportError as exc:
-        raise RuntimeError("MoA runtime unavailable (hermes-agent not installed or too old)") from exc
+        raise RuntimeError("MoA runtime unavailable (The agent runtime is unavailable or does not support this feature)") from exc
     try:
         from hermes_cli.moa_config import resolve_moa_preset
     except ImportError:

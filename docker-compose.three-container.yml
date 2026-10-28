@@ -1,14 +1,14 @@
-# Three-container Docker Compose: Hermes Agent + Dashboard + WebUI
+# Three-container Docker Compose: agent runtime + Dashboard + Altur-Agent
 #
 # QUICK START:
 #   docker compose -f docker-compose.three-container.yml up -d
 #   Open http://localhost:8787 (chat) and http://localhost:9119 (dashboard)
 #   Remote access (issue #6876): echo "HERMES_DASHBOARD_BIND=0.0.0.0" >> .env
 #   and echo "API_SERVER_KEY=<16+ chars>" >> .env, then recreate the stack.
-#   The WebUI reports "Hermes agent is not responding" when the gateway
+#   The WebUI reports "Altur-Agent agent is not responding" when the gateway
 #   listener is down — API_SERVER_KEY must be set for port 8642 to open.
 #
-# This extends the two-container setup with the Hermes Dashboard for
+# This extends the two-container setup with the connected dashboard for
 # monitoring agent activity, sessions, and resource usage.
 #
 # Services:
@@ -117,7 +117,11 @@ services:
       - hermes-net
 
   hermes-webui:
-    image: ghcr.io/nesquena/hermes-webui:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: altur-agent-webui:local
+    pull_policy: build
     container_name: hermes-webui
     depends_on:
       - hermes-agent

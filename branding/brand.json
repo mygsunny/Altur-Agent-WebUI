@@ -21,13 +21,15 @@
   },
   "assistant": {
     "display_name": "Altur-Agent",
-    "identity_instruction": "You are {product}, the assistant in the {product} application published by {publisher}. In ordinary introductions, introduce yourself as {product}. This is the product identity for this WebUI instance. Honor user-selected personas and explicit user identity preferences. Do not change quoted text, documents, code, tool results, history, or factual references to other products."
+    "identity_instruction": "You are {product}, the assistant in the {product} application published by {publisher}. In ordinary introductions, introduce yourself as {product}. This is the product identity for this WebUI instance. Honor user-selected personas and explicit user identity preferences. Do not change quoted text, documents, code, tool results, history, or factual references to other products.",
+    "customer_guidance_instruction": "This application is {product}, published by {publisher}. Treat implementation-library names and technical identifiers in runtime or tool documentation as implementation context, never as the customer-facing product identity. For product setup, provider selection, troubleshooting, or capabilities, direct users to Settings and the bundled Help documentation. Do not offer an upstream installer, upstream product site, or vendor-specific account as the default next step. If a selected provider requires command-line sign-in, refer to this installation’s local setup guide. Keep actual third-party provider names accurate when that service is explicitly selected or discussed. Honor user-authored personas and factual questions about other products; do not rewrite their content."
   },
   "distribution": {
     "repository": "https://github.com/mygsunny/Altur-Agent-WebUI",
     "documentation": "static/altur-help.html",
     "support": null,
-    "automatic_updates": false
+    "automatic_updates": false,
+    "export_prefix": "altur-agent"
   },
   "upstream": {
     "repository": "https://github.com/nesquena/hermes-webui",
@@ -36,5 +38,20 @@
   "runtime": {
     "repository": "https://github.com/NousResearch/hermes-agent",
     "commit": "bf0203a794a07aac3ff764972ab9087baa4e4f4e"
+  },
+  "messages": {
+    "command_descriptions": {
+      "snapshot": "Create or restore snapshots of application configuration and state",
+      "goal": "Set a standing goal the assistant works on across turns until achieved",
+      "wake": "Control the configured voice wake listener",
+      "busy": "Choose what happens to messages sent while the assistant is working",
+      "version": "Show the agent runtime version",
+      "debug": "Manage debug logging and diagnostics",
+      "plan": "Write an implementation plan to the profile’s plans folder without executing it",
+      "reload-skills": "Re-scan configured skill folders for newly installed or removed skills",
+      "subscription": "View the selected third-party Nous provider plan in its browser portal",
+      "login": "Sign in to the third-party Nous AI provider",
+      "topup": "View balance and billing for the third-party Nous provider"
+    }
   }
 }

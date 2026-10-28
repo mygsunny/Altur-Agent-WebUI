@@ -306,9 +306,9 @@ def test_every_fallback_is_the_plain_install_it_replaced(tmp_path, case):
     # A skipped overrides step is announced when the Agent declared any, so the
     # operator isn't left with only uv's "unsatisfiable" to go on.
     if case == "helper-fails":
-        assert "!! Could not read hermes-agent's [tool.uv] override-dependencies" in stdout
+        assert "!! Could not read the agent runtime's [tool.uv] override-dependencies" in stdout
     if case == "no-writable-temp-dir":
-        assert "!! Could not create a temporary file for hermes-agent's uv overrides" in stdout
+        assert "!! Could not create a temporary file for the agent runtime's uv overrides" in stdout
     if case in ("no-override-table", "no-pyproject", "no-helper"):
         assert "!!" not in stdout
     assert list((tmp_path / "app").iterdir()) == [Path(_stage(tmp_path))]

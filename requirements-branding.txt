@@ -1,3 +1,4 @@
 # Development-only deterministic asset generation
 resvg-py==0.5.0
 Pillow==13.0.0
+PyYAML>=6.0

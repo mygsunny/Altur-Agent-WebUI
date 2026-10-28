@@ -5,6 +5,7 @@ from __future__ import annotations
 import contextlib
 import errno
 import http.server
+import json
 import shutil
 import socket
 import ssl
@@ -19,6 +20,10 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import bootstrap  # noqa: E402
+
+PRODUCT_NAME = json.loads(
+    (Path(__file__).resolve().parents[1] / "branding/brand.json").read_text(encoding="utf-8")
+)["product"]["display_name"]
 
 
 class _StubSocket:
@@ -356,7 +361,7 @@ def test_occupied_port_in_foreground_reports_our_own_instance(
         bootstrap.main()
     message = str(excinfo.value)
     assert (
-        f"Hermes WebUI is already running at http://localhost:{bootstrap.DEFAULT_PORT}"
+        f"{PRODUCT_NAME} is already running at http://localhost:{bootstrap.DEFAULT_PORT}"
         in message
     )
     assert "Stop that instance first" in message
@@ -375,7 +380,7 @@ def test_occupied_port_under_supervisor_reports_our_own_instance(
     with pytest.raises(RuntimeError) as excinfo:
         bootstrap.main()
     message = str(excinfo.value)
-    assert "Hermes WebUI is already running at" in message
+    assert f"{PRODUCT_NAME} is already running at" in message
     assert "Stop that instance first" in message
     assert "start.sh" not in message
 
@@ -583,7 +588,7 @@ def test_occupied_port_in_foreground_names_bracketed_ipv6(
     with pytest.raises(RuntimeError) as excinfo:
         bootstrap.main()
     assert (
-        f"Hermes WebUI is already running at http://[::1]:{bootstrap.DEFAULT_PORT}"
+        f"{PRODUCT_NAME} is already running at http://[::1]:{bootstrap.DEFAULT_PORT}"
         in str(excinfo.value)
     )
 
@@ -750,7 +755,7 @@ def test_windows_access_denied_by_our_webui_in_foreground_names_it(
         bootstrap.main()
     message = str(excinfo.value)
     assert (
-        f"Hermes WebUI is already running at http://localhost:{bootstrap.DEFAULT_PORT}"
+        f"{PRODUCT_NAME} is already running at http://localhost:{bootstrap.DEFAULT_PORT}"
         in message
     )
     assert "Stop that instance first" in message

@@ -1,21 +1,21 @@
 <#
 .SYNOPSIS
-    Native Windows launcher for Hermes WebUI - PowerShell equivalent
+    Native Windows launcher for Altur-Agent - PowerShell equivalent
     of start.sh, bypassing bootstrap.py's platform refusal.
 
 .DESCRIPTION
     Mirrors start.sh's discovery: load optional .env, find Python,
-    locate the hermes-agent install, set sensible env defaults, then
+    locate the agent runtime install, set sensible env defaults, then
     invoke server.py directly. The bootstrap.py path is skipped
     because it currently raises on platform.system() == 'Windows';
     server.py itself runs cleanly on native Windows.
 
-    Assumes Python + hermes-agent + the WebUI Python deps are already
+    Assumes Python + the agent runtime + the WebUI Python deps are already
     installed natively on Windows - same assumption start.sh makes
     when invoked outside a fresh bootstrap. For first-time setup, the
     native Windows path is to install Python 3.11+, then create a
     Windows venv (`python -m venv venv`) and `pip install -r
-    requirements.txt` from the hermes-agent root in PowerShell - this
+    requirements.txt` from the agent runtime checkout in PowerShell - this
     script then finds `venv\Scripts\python.exe` automatically. A venv
     created inside WSL2 is a Linux virtual environment (`venv/bin/python`)
     and cannot be used by native Windows Python, so the bootstrap.py-
@@ -43,7 +43,7 @@
     # Bind to all interfaces (set a password first via env or Settings).
 
 .LINK
-    https://github.com/nesquena/hermes-webui/issues/1952
+    See README.md for this fork's supported isolated setup procedure.
 #>
 
 [CmdletBinding()]
@@ -336,7 +336,7 @@ if (-not $AgentDir) {
 }
 if (-not $AgentDir) {
     $searched = $candidates -join ', '
-    Write-Error "hermes-agent not found. Searched: $searched. Set HERMES_WEBUI_AGENT_DIR explicitly to override."
+    Write-Error "Agent runtime not found. Searched: $searched. Set HERMES_WEBUI_AGENT_DIR explicitly to override."
     exit 1
 }
 
@@ -434,7 +434,7 @@ New-Item -ItemType Directory -Force -Path $env:HERMES_HOME | Out-Null
 New-Item -ItemType Directory -Force -Path $env:HERMES_WEBUI_STATE_DIR | Out-Null
 
 # === Launch (foreground, matches start.sh) =============================
-Write-Host "[start.ps1] Hermes WebUI native Windows launcher" -ForegroundColor Cyan
+Write-Host "[start.ps1] Altur-Agent native Windows launcher" -ForegroundColor Cyan
 Write-Host "[start.ps1] Python:     $Python"
 Write-Host "[start.ps1] Agent dir:  $AgentDir"
 Write-Host "[start.ps1] State dir:  $env:HERMES_WEBUI_STATE_DIR"
@@ -443,7 +443,7 @@ Write-Host ""
 
 $serverPath = Join-Path $RepoRoot 'server.py'
 if (-not (Test-Path $serverPath)) {
-    Write-Error "server.py not found at $serverPath - is this the hermes-webui repo root?"
+    Write-Error "server.py not found at $serverPath - is this the Altur-Agent repo root?"
     exit 1
 }
 

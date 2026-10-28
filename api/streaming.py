@@ -1543,6 +1543,7 @@ def _webui_ephemeral_system_prompt(
         parts.append(BRAND['assistant']['identity_instruction'])
     if personality_prompt:
         parts.append(str(personality_prompt).strip())
+    parts.append(BRAND['assistant']['customer_guidance_instruction'])
     surface_prompt = _webui_surface_context_prompt(surface_context)
     if surface_prompt:
         parts.append(surface_prompt)
@@ -2197,13 +2198,13 @@ def _classify_provider_error(
         return {
             'label': 'No usable credentials',
             'type': 'credential_pool_empty',
-            'hint': 'The credential pool for this provider has no usable keys left (all entries exhausted or unconfigured). Add or refresh a key for this provider in your Hermes config / credential pool, or switch providers via `hermes model`.',
+            'hint': 'The credential pool for this provider has no usable keys left (all entries exhausted or unconfigured). Add or refresh a key for this provider in Settings → Providers or the configured credential pool, or select another provider in Settings.',
         }
     if _is_quota:
         return {
             'label': 'Out of credits',
             'type': 'quota_exhausted',
-            'hint': 'Your provider account is out of credits or usage. Top up, wait for the plan window to reset, or switch providers via `hermes model`.',
+            'hint': 'Your provider account is out of credits or usage. Top up, wait for the plan window to reset, or switch providers in Settings.',
         }
     if _is_rate_limit:
         return {
@@ -2215,13 +2216,13 @@ def _classify_provider_error(
         return {
             'label': 'Authentication failed',
             'type': 'auth_mismatch',
-            'hint': 'The selected model may not be supported by your configured provider or your API key is invalid. Run `hermes model` in your terminal to update credentials, then restart the WebUI.',
+            'hint': 'The selected model may not be supported by your configured provider or your API key is invalid. Update the provider credentials in Settings, then retry.',
         }
     if _is_not_found:
         return {
             'label': 'Model not found',
             'type': 'model_not_found',
-            'hint': 'The selected model was not found by the provider. Check the model ID in Settings or run `hermes model` to verify it exists for your provider.',
+            'hint': 'The selected model was not found by the provider. Check the model ID and selected provider in Settings.',
         }
     if _is_compression_exhausted:
         return {
@@ -2235,7 +2236,7 @@ def _classify_provider_error(
             # Preserve the existing no_response event type (#373) while making
             # the catch-all silent-failure message more specific for #1765.
             'type': 'no_response',
-            'hint': 'The provider returned no content and no error. This often means a usage/rate limit was hit silently. Check provider status, switch providers via `hermes model`, or try again in a moment.',
+            'hint': 'The provider returned no content and no error. This often means a usage/rate limit was hit silently. Check provider status, switch providers in Settings, or try again in a moment.',
         }
     return {'label': 'Error', 'type': 'error', 'hint': ''}
 
@@ -3471,7 +3472,7 @@ def _aiagent_import_error_detail() -> str:
     import os as _os
     import sys as _sys
 
-    lines = ["AIAgent not available -- check that hermes-agent is on sys.path"]
+    lines = ["The agent runtime is not available. Follow the local setup guide to install or repair this instance."]
     lines.append("")
     lines.append(f"  python:  {_sys.executable}")
     agent_dir = _os.environ.get("HERMES_WEBUI_AGENT_DIR")
@@ -3483,20 +3484,19 @@ def _aiagent_import_error_detail() -> str:
     # Show only the sys.path entries that look relevant — full sys.path is noisy.
     relevant = [p for p in _sys.path if "hermes" in p.lower() or "agent" in p.lower()]
     if relevant:
-        lines.append("  sys.path entries mentioning hermes/agent:")
+        lines.append("  Agent runtime search paths:")
         for entry in relevant[:6]:
             lines.append(f"    - {entry}")
         if len(relevant) > 6:
             lines.append(f"    ... and {len(relevant) - 6} more")
     else:
-        lines.append("  sys.path: (no entries mention hermes or agent)")
+        lines.append("  Agent runtime search paths: (none found)")
 
     lines.append("")
     lines.append("  Most common fix: install the agent in editable mode so its modules")
     lines.append("  appear on sys.path:")
     lines.append("")
-    lines.append("    cd /path/to/hermes-agent")
-    lines.append("    pip install -e .")
+    lines.append("    python scripts/setup-altur.py  # use this instance’s isolated runtime interpreter")
     lines.append("")
     lines.append("  Then restart the WebUI.")
     lines.append("")
@@ -16827,16 +16827,16 @@ def _run_agent_streaming(
                                 _err_type = 'auth_mismatch'
                                 _err_hint = (
                                     'The selected model may not be supported by your configured provider or '
-                                    'your API key is invalid. Run `hermes model` in your terminal to '
-                                    'update credentials, then restart the WebUI.'
+                                    'your API key is invalid. Update provider credentials in Settings, '
+                                    'then retry.'
                                 )
                     elif _is_auth:
                         _err_label = 'Authentication failed'
                         _err_type = 'auth_mismatch'
                         _err_hint = (
                             'The selected model may not be supported by your configured provider or '
-                            'your API key is invalid. Run `hermes model` in your terminal to '
-                            'update credentials, then restart the WebUI.'
+                            'your API key is invalid. Update provider credentials in Settings, '
+                            'then retry.'
                         )
                     elif _tool_limit_reached:
                         _err_label = 'Tool iteration limit reached'
@@ -18346,7 +18346,7 @@ def _run_agent_streaming(
                 _exc_label, _exc_type, _exc_hint = (
                     'Authentication error', 'auth_mismatch',
                     'The selected model may not be supported by your configured provider. '
-                    'Run `hermes model` in your terminal to switch providers, then restart the WebUI.',
+                    'Choose a configured provider and model in Settings, then retry.',
                 )
         elif _exc_is_not_found:
             _exc_label, _exc_type, _exc_hint = (

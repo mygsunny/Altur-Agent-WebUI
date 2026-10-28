@@ -121,7 +121,7 @@ def activate_managed_agent() -> None:
             # Agent import was lazy and an ImportError only disabled chat, leaving the
             # UI, diagnostics and updater reachable. Keep that behavior.
             print(
-                f"[!!] Hermes Agent dependency activation failed: {type(exc).__name__}: {exc}; "
+                f"[!!] Agent runtime dependency activation failed: {type(exc).__name__}: {exc}; "
                 "continuing startup. If WebUI then fails to import a dependency, run "
                 "`hermes pm repair` or set HERMES_WEBUI_PYTHON.",
                 file=sys.stderr,

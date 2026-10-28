@@ -483,9 +483,9 @@ function cliOnlyCommandResponse(cmdName, meta){
   const detail=desc?`\n\n${desc}`:'';
   let extra='';
   if(name==='browser'){
-    extra='\n\nBrowser tools in WebUI must be configured server-side with the agent/browser environment. Once configured, ask the model to use browser tools directly; `/browser` itself only works in `hermes chat`.';
+    extra='\n\nBrowser tools in WebUI must be configured server-side with the agent/browser environment. Once configured, ask the model to use browser tools directly; `/browser` itself only works in the command-line chat interface.';
   }
-  return `\`/${name}\` is a Altur-Agent CLI-only command and cannot run inside the WebUI.${detail}${extra}`;
+  return `\`/${name}\` is an Altur-Agent command-line command and cannot run inside the WebUI.${detail}${extra}`;
 }
 
 async function executeAgentCommand(text,_meta){
@@ -1185,7 +1185,10 @@ async function cmdUsage(){
 
 async function cmdTheme(args){
   const themes=['system','dark','light'];
-  const skins=(_SKINS||[]).map(s=>(s.value||s.name).toLowerCase());
+  const skinEntries=(_SKINS||[]);
+  const skins=skinEntries.map(s=>(s.value||s.name).toLowerCase());
+  const skinLabels=skinEntries.map(s=>s.name);
+  const skinLabel=id=>(skinEntries.find(s=>(s.value||s.name).toLowerCase()===id)||{}).name||id;
   const legacyThemes=Object.keys(_LEGACY_THEME_MAP||{});
   const val=(args||'').toLowerCase().trim();
   // Check if it's a theme
@@ -1205,12 +1208,13 @@ async function cmdTheme(args){
     if(skinSel)skinSel.value=appearance.skin;
     if(typeof _syncThemePicker==='function') _syncThemePicker(appearance.theme);
     if(typeof _syncSkinPicker==='function') _syncSkinPicker(appearance.skin);
-    showToast(t('theme_set')+appearance.theme+(legacyThemes.includes(val)?` + ${appearance.skin}`:''));
+    showToast(t('theme_set')+appearance.theme+(legacyThemes.includes(val)?` + ${skinLabel(appearance.skin)}`:''));
     return;
   }
   // Check if it's a skin
-  if(skins.includes(val)){
-    const appearance=_normalizeAppearance(localStorage.getItem('hermes-theme'),val);
+  const matchedSkin=skinEntries.find(s=>(s.value||s.name).toLowerCase()===val||s.name.toLowerCase()===val);
+  if(matchedSkin){
+    const appearance=_normalizeAppearance(localStorage.getItem('hermes-theme'),(matchedSkin.value||matchedSkin.name).toLowerCase());
     localStorage.setItem('hermes-theme',appearance.theme);
     localStorage.setItem('hermes-skin',appearance.skin);
     _applyTheme(appearance.theme);
@@ -1222,10 +1226,10 @@ async function cmdTheme(args){
     if(themeSel)themeSel.value=appearance.theme;
     if(typeof _syncThemePicker==='function') _syncThemePicker(appearance.theme);
     if(typeof _syncSkinPicker==='function') _syncSkinPicker(appearance.skin);
-    showToast(t('theme_set')+appearance.skin);
+    showToast(t('theme_set')+skinLabel(appearance.skin));
     return;
   }
-  showToast(t('theme_usage')+themes.join('|')+' | '+skins.join('|')+' | legacy:'+legacyThemes.join('|'));
+  showToast(t('theme_usage')+themes.join('|')+' | '+skinLabels.join('|')+' | legacy:'+legacyThemes.join('|'));
 }
 
 // Subcommands owned by the agent's own /skills write-approval handler

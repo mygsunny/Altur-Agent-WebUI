@@ -6,3 +6,13 @@ __pycache__
 tests/
 .env*
 /AGENTS.md
+
+.runtime/
+.trial/
+.venv/
+work/
+outputs/
+
+attachments/
+.webui_password
+data/

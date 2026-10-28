@@ -1,4 +1,4 @@
-# Two-container Docker Compose: Hermes Agent + Hermes WebUI
+# Two-container Docker Compose: agent runtime + Altur-Agent
 #
 # QUICK START:
 #   docker compose -f docker-compose.two-container.yml up -d
@@ -90,7 +90,11 @@ services:
       - hermes-net
 
   hermes-webui:
-    image: ghcr.io/nesquena/hermes-webui:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: altur-agent-webui:local
+    pull_policy: build
     container_name: hermes-webui
     depends_on:
       - hermes-agent

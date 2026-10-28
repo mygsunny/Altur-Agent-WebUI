@@ -19,6 +19,7 @@ and stand-ins for the dependency installers.
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -28,6 +29,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parent.parent
 INIT_SH = (REPO / "docker_init.bash").read_text(encoding="utf-8")
+PRODUCT_NAME = json.loads((REPO / "branding/brand.json").read_text(encoding="utf-8"))["product"]["display_name"]
 HELPER = REPO / "scripts" / "docker_venv_python.py"
 
 pytestmark = pytest.mark.skipif(
@@ -330,7 +332,7 @@ def test_docker_init_wires_the_transaction():
     # The dependency install inside the transaction cannot exit the script.
     install = _bash_function(INIT_SH, "install_venv_dependencies")
     assert "error_exit" not in install
-    assert 'install_venv_dependencies || error_exit "Failed to install hermes-webui dependencies"' in INIT_SH
+    assert f'install_venv_dependencies || error_exit "Failed to install {PRODUCT_NAME} dependencies"' in INIT_SH
     rebuild = _bash_function(INIT_SH, "rebuild_agent_venv")
     assert "ensure_hindsight_client_docker_dependency soft" in rebuild
     assert "--admits" in rebuild

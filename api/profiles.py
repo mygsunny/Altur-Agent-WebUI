@@ -1571,7 +1571,7 @@ def profile_env_for_active_request_readonly(
                 home_override_installed = True
             except Exception:
                 logger.debug(
-                    "Failed to install Hermes-home override for active request profile %s in %s",
+                    "Failed to install agent-home override for active request profile %s in %s",
                     profile,
                     purpose,
                     exc_info=True,
@@ -1588,7 +1588,7 @@ def profile_env_for_active_request_readonly(
                 reset_hermes_home_override(home_override_token)
             except Exception:
                 (logger_override or logger).debug(
-                    "Failed to reset Hermes-home override for active request profile %s in %s",
+                    "Failed to reset agent-home override for active request profile %s in %s",
                     profile,
                     purpose,
                     exc_info=True,
@@ -1788,7 +1788,7 @@ def _pin_process_profile_home(home: Path) -> None:
         if callable(pin):
             pin(str(home))
     except Exception:
-        logger.debug("Altur-Agent Agent process-home pin unavailable", exc_info=True)
+        logger.debug("Altur-Agent process-home pin unavailable", exc_info=True)
 
 
 def get_process_profile_home() -> Path:
@@ -2493,6 +2493,9 @@ def _create_profile_fallback(name: str, clone_from: str = None,
                 if src.exists():
                     shutil.copy2(src, profile_dir / filename)
 
+    if not clone_config and clone_from is None:
+        from api.branding import BRAND
+        (profile_dir / 'SOUL.md').write_text(BRAND['assistant']['identity_instruction'] + '\n', encoding='utf-8')
     return profile_dir
 
 
@@ -2812,13 +2815,15 @@ def create_profile_api(name: str, clone_from: str = None,
 
     try:
         from hermes_cli.profiles import create_profile
-        create_profile(
-            name,
-            clone_from=clone_from,
-            clone_config=clone_config,
-            clone_all=False,
-            no_alias=True,
-        )
+        import inspect
+        from api.branding import BRAND
+        create_kwargs = dict(clone_from=clone_from, clone_config=clone_config,
+                             clone_all=False, no_alias=True)
+        if clone_from is None and not clone_config:
+            parameters = inspect.signature(create_profile).parameters.values()
+            if any(p.name == 'soul' or p.kind == inspect.Parameter.VAR_KEYWORD for p in parameters):
+                create_kwargs['soul'] = BRAND['assistant']['identity_instruction'] + '\n'
+        create_profile(name, **create_kwargs)
     except ImportError:
         _create_profile_fallback(name, clone_from, clone_config)
 

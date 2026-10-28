@@ -89,3 +89,6 @@ attachments/
 .runtime/
 
 static/brand-cache-fixture.html
+
+# Regenerated from canonical brand and pinned locale registry.
+branding/generated-locales/

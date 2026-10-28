@@ -93,7 +93,7 @@ def test_server_warns_and_continues_on_bootstrap_internal_import_failure(tmp_pat
     )
     assert result.returncode == 0, result.stderr
     assert "SERVER_IMPORTED" in result.stdout
-    assert "Hermes Agent dependency activation failed" in result.stderr
+    assert "Agent runtime dependency activation failed" in result.stderr
     assert "deliberately_missing_agent_dependency" in result.stderr
 
 

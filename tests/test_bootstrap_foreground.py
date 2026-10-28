@@ -600,10 +600,67 @@ def test_package_python_without_agent_stays_fail_closed(import_bootstrap, clean_
     monkeypatch.setattr(bs, "_already_serving_scheme", lambda *a, **kw: "")
     monkeypatch.setattr(sys, "argv", ["bootstrap.py", "--foreground", "--skip-agent-install"])
 
-    with patch.object(bs, "_agent_dir_from_python", return_value=None) as mock_probe, patch.object(bs, "install_hermes_agent") as mock_install, patch.object(bs.venv, "EnvBuilder") as mock_builder, patch.object(os, "execv") as mock_execv, pytest.raises(RuntimeError, match="Hermes Agent was not found"):
+    with patch.object(bs, "_agent_dir_from_python", return_value=None) as mock_probe, patch.object(bs, "install_hermes_agent") as mock_install, patch.object(bs.venv, "EnvBuilder") as mock_builder, patch.object(os, "execv") as mock_execv, pytest.raises(RuntimeError, match="The agent runtime was not found"):
         bs.main()
 
     mock_probe.assert_called_once_with(python_exe)
     mock_install.assert_not_called()
     mock_builder.assert_not_called()
     mock_execv.assert_not_called()
+
+
+@pytest.mark.parametrize("platform_name", ["Darwin", "Linux", "Windows"])
+def test_runtime_installer_is_disabled_on_every_platform(import_bootstrap, monkeypatch, platform_name):
+    """The legacy helper must never pipe an upstream installer into a shell."""
+    bs = import_bootstrap
+    monkeypatch.setattr(bs.platform, "system", lambda: platform_name)
+    monkeypatch.setattr(bs, "is_wsl", lambda: False)
+
+    with patch.object(bs.subprocess, "run") as run, patch.object(bs.subprocess, "Popen") as popen:
+        with pytest.raises(RuntimeError, match="Automatic runtime installation is disabled") as excinfo:
+            bs.install_hermes_agent()
+
+    run.assert_not_called()
+    popen.assert_not_called()
+    message = str(excinfo.value)
+    assert "isolated Python 3.14 environment" in message
+    assert "scripts/setup-altur.py" in message
+    assert "scripts/start-altur.py" in message
+    assert "README.md" in message
+
+
+@pytest.mark.parametrize("skip_install", [False, True])
+def test_global_command_cannot_bypass_missing_runtime_gate(import_bootstrap, clean_env, monkeypatch, tmp_path, skip_install):
+    """A CLI on PATH is not proof that this instance can import its runtime."""
+    bs = import_bootstrap
+    state_dir = tmp_path / "state"
+    monkeypatch.setenv("HERMES_HOME", str(tmp_path / "agent-home"))
+    monkeypatch.setenv("HERMES_WEBUI_STATE_DIR", str(state_dir))
+    monkeypatch.setattr(bs, "ensure_supported_platform", lambda: None)
+    monkeypatch.setattr(bs, "_check_port_available", lambda *a, **kw: None)
+    monkeypatch.setattr(bs, "discover_agent_dir", lambda: None)
+    monkeypatch.setattr(bs, "hermes_command_exists", lambda: True)
+    argv = ["bootstrap.py", "--foreground", "--no-browser"]
+    if skip_install:
+        argv.append("--skip-agent-install")
+    monkeypatch.setattr(sys, "argv", argv)
+
+    with patch.object(bs, "discover_launcher_python", side_effect=AssertionError("Missing runtime reached launcher selection")) as launcher, \
+         patch.object(bs, "ensure_python_has_webui_deps") as deps, \
+         patch.object(bs.venv, "EnvBuilder") as builder, \
+         patch.object(bs.subprocess, "run") as run, \
+         patch.object(bs.subprocess, "Popen") as popen, \
+         patch.object(os, "execv") as execv:
+        with pytest.raises(RuntimeError) as excinfo:
+            bs.main()
+
+    message = str(excinfo.value)
+    assert "scripts/setup-altur.py" in message
+    assert "README.md" in message
+    if skip_install:
+        assert "The agent runtime was not found" in message
+    else:
+        assert "Automatic runtime installation is disabled" in message
+    for operation in (launcher, deps, builder, run, popen, execv):
+        operation.assert_not_called()
+    assert not state_dir.exists()

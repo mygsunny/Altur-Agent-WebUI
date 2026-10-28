@@ -1,4 +1,4 @@
-"""Default-off Hermes Gateway bridge for browser-originated chat turns."""
+"""Default-off configured gateway bridge for browser-originated chat turns."""
 from __future__ import annotations
 
 import http.client
@@ -496,10 +496,10 @@ def _gateway_http_error_event(exc: urllib.error.HTTPError, err_body: str, *, api
             "type": "gateway_auth_error",
             "message": "Gateway rejected the WebUI API key (HTTP 401).",
             "hint": (
-                "Set HERMES_WEBUI_GATEWAY_API_KEY to the same value as the Hermes Gateway "
+                "Set HERMES_WEBUI_GATEWAY_API_KEY to the same value as the configured gateway "
                 "API_SERVER_KEY, or disable HERMES_WEBUI_CHAT_BACKEND=gateway."
                 if not api_key_configured
-                else "Check that HERMES_WEBUI_GATEWAY_API_KEY matches the Hermes Gateway API_SERVER_KEY."
+                else "Check that HERMES_WEBUI_GATEWAY_API_KEY matches the configured gateway API_SERVER_KEY."
             ),
         }
     return {
@@ -568,7 +568,7 @@ def _gateway_reasoning_delta(payload: dict) -> str:
 
 
 def _gateway_tool_progress_event(payload: dict) -> tuple[str, dict] | None:
-    """Translate Hermes Gateway tool-progress SSE payloads to WebUI events."""
+    """Translate configured gateway tool-progress SSE payloads to WebUI events."""
     if not isinstance(payload, dict):
         return None
     event_type = str(payload.get("event") or "").strip().lower()
@@ -2825,7 +2825,7 @@ def _run_gateway_chat_streaming(
     reattach_endpoint=None,
     reattach_claim_token=None,
 ):
-    """Bridge a WebUI chat turn through Hermes Gateway's API server.
+    """Bridge a WebUI chat turn through configured gateway's API server.
 
     This default-off path keeps the browser contract unchanged: /api/chat/start
     still returns a local stream_id and /api/chat/stream still receives WebUI SSE
@@ -3083,11 +3083,11 @@ def _run_gateway_chat_streaming(
                 if not hasattr(s, "_approval_notice_emitted"):
                     s._approval_notice_emitted = False
                 if not s._approval_notice_emitted:
-                    approval_message = "Approvals require a newer gateway. Upgrade the connected Hermes gateway to enable this."
+                    approval_message = "Approvals require a newer gateway. Upgrade the connected configured gateway to enable this."
                     approval_type = "approval_gateway_unsupported"
                     if approval_reason == "unreachable":
                         approval_type = "approval_gateway_offline"
-                        approval_message = "Gateway connection failed. Check that the connected Hermes gateway is running and reachable."
+                        approval_message = "Gateway connection failed. Check that the connected configured gateway is running and reachable."
                     put_gateway_event("warning", {
                         "type": approval_type,
                         "message": approval_message,
@@ -3255,7 +3255,7 @@ def _run_gateway_chat_streaming(
                 "label": "Gateway returned no response",
                 "type": "gateway_empty_response",
                 "message": "Gateway returned no assistant message for this turn.",
-                "hint": "Check that Hermes Gateway API server is running and reachable.",
+                "hint": "Check that configured gateway API server is running and reachable.",
             })
             return
         with _get_session_agent_lock(session_id):

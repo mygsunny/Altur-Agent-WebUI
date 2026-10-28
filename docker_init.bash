@@ -299,7 +299,7 @@ migrate_home_old_uid() {
 # long enough to align the hermeswebui UID/GID with mounted volumes, prepare
 # root-owned paths, and then drop privileges for the server process.
 if [ "A${whoami}" == "Aroot" ]; then
-  echo "-- Running as root for one-time container init; will switch to hermeswebui"
+  echo "-- Running as root for one-time container init; will switch to the runtime user"
 
   # We are altering the UID/GID of the hermeswebui user to the desired ones and restarting as that user
   # using usermod for the already created hermeswebui user, knowing it is not already in use
@@ -314,12 +314,12 @@ if [ "A${whoami}" == "Aroot" ]; then
     _current_hermeswebui_gid=$(id -g hermeswebui 2>/dev/null || echo "")
     _current_hermeswebui_uid=$(id -u hermeswebui 2>/dev/null || echo "")
     if [ "A${_current_hermeswebui_gid}" == "A${WANTED_GID}" ] && [ "A${_current_hermeswebui_uid}" == "A${WANTED_UID}" ]; then
-      echo "  -- Skipping groupmod/usermod — hermeswebui already has UID ${WANTED_UID} GID ${WANTED_GID} and root fs is read-only"
+      echo "  -- Skipping groupmod/usermod — the runtime user already has UID ${WANTED_UID} GID ${WANTED_GID} and root fs is read-only"
     else
       error_exit "Cannot modify /etc/group or /etc/passwd (read-only root fs). Set UID=${_current_hermeswebui_uid} and GID=${_current_hermeswebui_gid} to match, or run without read_only=true. See issue #1470."
     fi
   else
-    groupmod -o -g "${WANTED_GID}" hermeswebui || error_exit "Failed to set GID of hermeswebui user"
+    groupmod -o -g "${WANTED_GID}" hermeswebui || error_exit "Failed to set GID of the runtime user"
     # usermod -u also walks the home directory to chown the old UID's files,
     # and aborts on the first entry that vanishes mid-walk — which happens
     # when a running agent replaces files in the shared ~/.hermes (#8106).
@@ -330,8 +330,8 @@ if [ "A${whoami}" == "Aroot" ]; then
     _usermod_nohome="/nonexistent-hermeswebui-home.$$"
     [ ! -e "$_usermod_nohome" ] || error_exit "Unexpected path $_usermod_nohome exists"
     _old_hermeswebui_uid=$(id -u hermeswebui)
-    usermod -o -u "${WANTED_UID}" -d "$_usermod_nohome" hermeswebui || error_exit "Failed to set UID of hermeswebui user"
-    usermod -d /home/hermeswebui hermeswebui || error_exit "Failed to restore home directory of hermeswebui user"
+    usermod -o -u "${WANTED_UID}" -d "$_usermod_nohome" hermeswebui || error_exit "Failed to set UID of the runtime user"
+    usermod -d /home/hermeswebui hermeswebui || error_exit "Failed to restore home directory of the runtime user"
   fi
 
   chown_home_hermeswebui || error_exit "Failed to set owner of /home/hermeswebui"
@@ -339,9 +339,9 @@ if [ "A${whoami}" == "Aroot" ]; then
     migrate_home_old_uid "$_old_hermeswebui_uid" || error_exit "Failed to move files of UID ${_old_hermeswebui_uid} under /home/hermeswebui to UID ${WANTED_UID}"
   fi
 
-  echo ""; echo "-- Preparing /app for the hermeswebui runtime user"
+  echo ""; echo "-- Preparing /app for the application runtime user"
   mkdir -p /app || error_exit "Failed to create /app directory"
-  chown hermeswebui:hermeswebui /app || error_exit "Failed to set owner of /app to hermeswebui user"
+  chown hermeswebui:hermeswebui /app || error_exit "Failed to set owner of /app to the runtime user"
   rsync -av --chown=hermeswebui:hermeswebui /apptoo/ /app/ || error_exit "Failed to sync /apptoo to /app with correct ownership"
 
   if [ -z "${HERMES_WEBUI_DEFAULT_WORKSPACE+x}" ]; then export HERMES_WEBUI_DEFAULT_WORKSPACE="/workspace"; fi
@@ -353,7 +353,7 @@ if [ "A${whoami}" == "Aroot" ]; then
 
   export UV_CACHE_DIR=${UV_CACHE_DIR:-/uv_cache}
   mkdir -p "${UV_CACHE_DIR}" || error_exit "Failed to create ${UV_CACHE_DIR} directory"
-  chown hermeswebui:hermeswebui "${UV_CACHE_DIR}" || error_exit "Failed to set owner of ${UV_CACHE_DIR} to hermeswebui user"
+  chown hermeswebui:hermeswebui "${UV_CACHE_DIR}" || error_exit "Failed to set owner of ${UV_CACHE_DIR} to the runtime user"
 
   chown -R "${WANTED_UID}:${WANTED_GID}" "$itdir" || error_exit "Failed to set owner of $itdir"
   # Issue #2010 — Railway / user-namespaced runtimes: in-container UID 0 may map
@@ -392,25 +392,25 @@ if [ "A${whoami}" == "Aroot" ]; then
       continue
     fi
     if [ -n "$group_name" ]; then
-      usermod -a -G "$group_name" hermeswebui 2>/dev/null || echo "!! WARNING: Could not add hermeswebui to supplemental group $group_name ($gid)"
+      usermod -a -G "$group_name" hermeswebui 2>/dev/null || echo "!! WARNING: Could not add the runtime user to supplemental group $group_name ($gid)"
     fi
   done
 
   # restart the script as hermeswebui set with the correct UID/GID this time
-  echo "-- Restarting as hermeswebui user with UID ${WANTED_UID} GID ${WANTED_GID}"
+  echo "-- Restarting as the runtime user with UID ${WANTED_UID} GID ${WANTED_GID}"
   exec su -s /bin/bash -c "exec \"${script_fullname}\"" hermeswebui || error_exit "subscript failed"
 fi
 
 # If we are here, the script is started as an unprivileged runtime user.
 # Because the whoami value for the hermeswebui user can be any existing user, we cannot check against it;
 # instead we check if the UID/GID are the expected ones.
-if [ "$WANTED_GID" != "$new_gid" ]; then error_exit "hermeswebui MUST be running as UID ${WANTED_UID} GID ${WANTED_GID}, current UID ${new_uid} GID ${new_gid}"; fi
-if [ "$WANTED_UID" != "$new_uid" ]; then error_exit "hermeswebui MUST be running as UID ${WANTED_UID} GID ${WANTED_GID}, current UID ${new_uid} GID ${new_gid}"; fi
+if [ "$WANTED_GID" != "$new_gid" ]; then error_exit "The runtime user MUST be running as UID ${WANTED_UID} GID ${WANTED_GID}, current UID ${new_uid} GID ${new_gid}"; fi
+if [ "$WANTED_UID" != "$new_uid" ]; then error_exit "The runtime user MUST be running as UID ${WANTED_UID} GID ${WANTED_GID}, current UID ${new_uid} GID ${new_gid}"; fi
 
 ########## 'hermeswebui' specific section below
 
 # We are therefore running as hermeswebui
-echo ""; echo "== Running as hermeswebui"
+echo ""; echo "== Running as the application runtime user"
 
 # Load environment variables one by one if they do not exist from the root init phase
 tmp_root_env="${_HW_ROOT_ENV_PATH:-/tmp/hermeswebui_root_env.txt}"
@@ -425,14 +425,14 @@ if [ ! -f /app/server.py ] && [ -d /apptoo ]; then
   cp -a /apptoo/. /app/ || error_exit "Failed to seed /app from /apptoo (is /app writable by the runtime user?)"
 fi
 
-echo ""; echo "-- Verifying /app is writable by the hermeswebui runtime user"
+echo ""; echo "-- Verifying /app is writable by the application runtime user"
 if [ ! -d /app ]; then error_exit "/app directory does not exist"; fi
 it=/app/.testfile; touch $it || error_exit "Failed to verify /app directory"
 rm -f $it || error_exit "Failed to delete test file in /app"
 
 ######## Environment variables (consume AFTER the load_env)
 
-echo ""; echo "== Checking required environment variables for hermes-webui"
+echo ""; echo "== Checking required environment variables for Altur-Agent"
 
 echo ""; echo "-- HERMES_WEBUI_STATE_DIR: Where to store sessions, workspaces, and other state (default: ~/.hermes/webui)"
 if [ -z "${HERMES_WEBUI_STATE_DIR+x}" ]; then error_exit "HERMES_WEBUI_STATE_DIR not set"; fi; 
@@ -460,7 +460,7 @@ else
 fi
 
 echo ""; echo "==================="
-echo ""; echo "== Installing uv and creating a new virtual environment for hermes-webui"
+echo ""; echo "== Installing uv and creating a new virtual environment for Altur-Agent"
 
 export PATH="/home/hermeswebui/.local/bin/:$PATH"
 if command -v uv &>/dev/null; then
@@ -473,7 +473,7 @@ export UV_PROJECT_ENVIRONMENT=venv
 
 export UV_CACHE_DIR=${UV_CACHE_DIR:-/uv_cache}
 mkdir -p "${UV_CACHE_DIR}" || error_exit "Failed to create ${UV_CACHE_DIR} directory"
-test -w "${UV_CACHE_DIR}" || error_exit "${UV_CACHE_DIR} is not writable by hermeswebui"
+test -w "${UV_CACHE_DIR}" || error_exit "${UV_CACHE_DIR} is not writable by the runtime user"
 
 cd /app
 
@@ -557,9 +557,9 @@ install_staged_agent() {
       || _isa_overrides="$(mktemp "$(dirname "$_isa_src")/.hermes-agent-uv-overrides.XXXXXX" 2>/dev/null)" \
       || _isa_overrides=""
     if [ -z "$_isa_overrides" ]; then
-      echo "!! Could not create a temporary file for hermes-agent's uv overrides; installing without them"
+      echo "!! Could not create a temporary file for the agent runtime's uv overrides; installing without them"
     elif ! python3 "$_venv_helper" --uv-overrides "$_isa_src/pyproject.toml" "$_isa_overrides"; then
-      echo "!! Could not read hermes-agent's [tool.uv] override-dependencies; installing without them"
+      echo "!! Could not read the agent runtime's [tool.uv] override-dependencies; installing without them"
       rm -f "$_isa_overrides"
       _isa_overrides=""
     fi
@@ -569,7 +569,7 @@ install_staged_agent() {
     fi
   fi
   if [ -n "$_isa_overrides" ]; then
-    echo "-- Applying hermes-agent's [tool.uv] override-dependencies ($(grep -c . "$_isa_overrides") entries)"
+    echo "-- Applying the agent runtime's [tool.uv] override-dependencies ($(grep -c . "$_isa_overrides") entries)"
     _isa_rc=0
     uv pip install -e "$_isa_src[all]" --overrides "$_isa_overrides" \
       --trusted-host pypi.org --trusted-host files.pythonhosted.org || _isa_rc=$?
@@ -584,18 +584,18 @@ install_staged_agent() {
 # normal install below still treats a failure as fatal). set -e does not apply
 # inside a function called as a condition, hence the explicit returns.
 install_venv_dependencies() {
-  echo ""; echo "== Installing hermes-webui dependencies"
+  echo ""; echo "== Installing Altur-Agent dependencies"
   uv pip install -r requirements.txt --trusted-host pypi.org --trusted-host files.pythonhosted.org || return 1
   uv pip install -U pip setuptools --trusted-host pypi.org --trusted-host files.pythonhosted.org || return 1
   test -x /app/venv/bin/pip || return 1
 
-  echo ""; echo "== Adding hermes-agent's pyproject.toml base dependencies to the virtual environment"
+  echo ""; echo "== Adding the agent runtime's pyproject.toml base dependencies to the virtual environment"
   # `$_agent_src` was already resolved above the venv decision (#8113) — that
   # lookup is what selects the interpreter, so it must not be repeated here.
   if [ -n "$_agent_src" ]; then
     if [ -w "$_agent_src" ]; then
       echo ""
-      echo "!! WARNING: hermes-agent source mount is writable from the WebUI container."
+      echo "!! WARNING: agent runtime source mount is writable from the application container."
       echo "!!   Path: $_agent_src"
       echo "!! The multi-container compose defaults use a read-only mount for defence-in-depth."
       echo "!! If this is not an intentional local development checkout, switch the WebUI"
@@ -638,33 +638,36 @@ install_venv_dependencies() {
         --exclude='.playwright' \
         --exclude='.install.lock' \
         "$_agent_src"/ "$_stage_src"/ \
-        || { echo "!! Failed to stage hermes-agent source to writable build dir"; return 1; }
+        || { echo "!! Failed to stage agent runtime source to writable build dir"; return 1; }
     else
       # Fallback when rsync isn't in the image — straight cp -a, then drop
       # the build artifacts that would trip setuptools.
       cp -a "$_agent_src"/. "$_stage_src"/ \
-        || { echo "!! Failed to copy hermes-agent source to writable build dir"; return 1; }
+        || { echo "!! Failed to copy agent runtime source to writable build dir"; return 1; }
       rm -rf "$_stage_src"/*.egg-info "$_stage_src"/build "$_stage_src"/dist 2>/dev/null || true
       rm -rf "$_stage_src"/.playwright 2>/dev/null || true
       rm -rf "$_stage_src"/.install.lock "$_stage_src"/tools/.install.lock 2>/dev/null || true
       find "$_stage_src" -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
     fi
     chmod -R u+w "$_stage_src" \
-      || { echo "!! Failed to make staged hermes-agent source writable (rsync/cp preserved :ro mount perms)"; return 1; }
+      || { echo "!! Failed to make staged agent runtime source writable (rsync/cp preserved :ro mount perms)"; return 1; }
     # rsync excluded .git; the cp -a fallback copied it, and only now (after the
     # chmod: cp -a keeps a :ro mount's 0555 directories) can it be removed. A
     # stage with .git is never run by select_staged_agent_for_git_checkout.
     rm -rf "$_stage_src/.git" \
-      || echo "!! WARNING: could not drop .git from the staged hermes-agent copy; the mounted Agent will be run instead"
+      || echo "!! WARNING: could not drop .git from the staged agent runtime copy; the mounted runtime will be run instead"
     # Never fatal: without the manifest the recovery path simply ignores the
     # stage and falls back to the authorized Agent directory.
     write_agent_stage_manifest "$_agent_src" "$_stage_src" \
-      || echo "!! WARNING: could not record which hermes-agent source was staged; the startup recovery installer will not use the staged copy"
+      || echo "!! WARNING: could not record which agent runtime source was staged; the startup recovery installer will not use the staged copy"
+    # Brand only the writable staged copy; mounted runtime and data are untouched.
+    python3 /app/scripts/runtime-branding.py apply "$_stage_src" \
+      || { echo "!! Private runtime differs from the reviewed pin; follow the fork setup guide."; return 1; }
     install_staged_agent "$_stage_src" \
-      || { echo "!! Failed to install hermes-agent's requirements"; return 1; }
+      || { echo "!! Failed to install the agent runtime's requirements"; return 1; }
   else
     echo ""
-    echo "!! WARNING: hermes-agent source not found."
+    echo "!! WARNING: agent runtime source not found."
     echo "!!   Looked in: ${_agent_paths[0]}"
     echo "!!              ${_agent_paths[1]}"
     echo "!! The WebUI will start with reduced functionality (no model auto-detection,"
@@ -672,7 +675,7 @@ install_venv_dependencies() {
     echo "!! To fix: mount the agent source volume into the container:"
     echo "!!   -v /path/to/hermes-agent:/home/hermeswebui/.hermes/hermes-agent"
     echo "!! Or see the two-container compose example:"
-    echo "!!   https://github.com/nesquena/hermes-webui/blob/master/docker-compose.two-container.yml"
+    echo "!!   See docker-compose.two-container.yml in this checkout."
     echo ""
   fi
   touch /app/venv/.deps_installed || return 1
@@ -725,7 +728,7 @@ restore_previous_agent_venv() {
     if [ -e "$_agent_stage" ] || ! mv -T "$_agent_stage_prev" "$_agent_stage"; then
       # The restored venv's editable install points here: keep the journal so
       # the next start retries, and boot on the venv meanwhile.
-      echo "!! WARNING: could not restore the previous staged hermes-agent source at $_agent_stage;"
+      echo "!! WARNING: could not restore the previous staged agent runtime source at $_agent_stage;"
       echo "!! the agent may not import until the next start retries it."
       return 0
     fi
@@ -799,7 +802,7 @@ rebuild_agent_venv() {
     return 1
   fi
   if [ -e "$_agent_stage" ] && ! mv -T "$_agent_stage" "$_agent_stage_prev" 2>/dev/null; then
-    echo "!! Could not move the staged hermes-agent source aside; keeping the existing virtual environment."
+    echo "!! Could not move the staged agent runtime source aside; keeping the existing virtual environment."
     restore_previous_agent_venv || return 2
     return 1
   fi
@@ -892,8 +895,8 @@ export VIRTUAL_ENV=/app/venv
 test -d /app/venv
 test -f /app/venv/bin/activate
 
-echo "";echo "== Activating hermes webui's virtual environment"
-source /app/venv/bin/activate || error_exit "Failed to activate hermeswebui virtual environment"
+echo "";echo "== Activating Altur-Agent's virtual environment"
+source /app/venv/bin/activate || error_exit "Failed to activate the application virtual environment"
 test -x /app/venv/bin/python3
 
 if [ -f /app/venv/.deps_installed ]; then
@@ -903,7 +906,7 @@ if [ -f /app/venv/.deps_installed ]; then
     echo ""; echo "== Dependencies already installed — skipping (fast restart)"
   fi
 else
-  install_venv_dependencies || error_exit "Failed to install hermes-webui dependencies"
+  install_venv_dependencies || error_exit "Failed to install Altur-Agent dependencies"
 fi
 
 ensure_hindsight_client_docker_dependency
@@ -914,19 +917,19 @@ ensure_hindsight_client_docker_dependency
 # dependency with the venv's own interpreter and say so loudly on failure.
 # This never aborts startup — the WebUI still serves without the agent.
 if [ -n "$_agent_src" ] && [ -f /app/scripts/docker_venv_python.py ] && command -v python3 >/dev/null 2>&1; then
-  echo ""; echo "== Verifying the Hermes agent's critical imports"
+  echo ""; echo "== Verifying the agent runtime's critical imports"
   _verify_expected="${_venv_python:-0.0}"
   if [ "$_verify_expected" = "-" ]; then _verify_expected="0.0"; fi
   if _verify_detail="$(python3 /app/scripts/docker_venv_python.py --verify /app/venv "$_verify_expected" 2>&1)"; then
-    echo "-- Hermes agent critical imports verified"
+    echo "-- Agent runtime critical imports verified"
   else
     echo ""
-    echo "!! WARNING: the Hermes agent is installed but is NOT importable."
+    echo "!! WARNING: the agent runtime is installed but is NOT importable."
     echo "!!   ${_verify_detail}"
     echo "!! Agent features (model auto-detection, personality routing, CLI session"
     echo "!! imports) will be unavailable even though this container is healthy."
     echo "!! The usual cause is a dependency set resolved for the wrong Python"
-    echo "!! version — see https://github.com/nesquena/hermes-webui/issues/8113"
+    echo "!! version — see this checkout's Docker setup instructions."
     echo ""
   fi
 fi
@@ -958,8 +961,17 @@ select_staged_agent_for_git_checkout() {
 }
 select_staged_agent_for_git_checkout "$_agent_src" "$_agent_stage"
 
-echo ""; echo "== Running hermes-webui"
-cd /app; python server.py || error_exit "hermes-webui failed or exited with an error"
+# This fork must run its verified private copy even for non-Git source mounts.
+# Never silently fall back to a host runtime or an unreviewed published image.
+python3 /app/scripts/runtime-branding.py apply "$_agent_stage" \
+  || error_exit "Private runtime branding verification failed; rebuild using the fork setup guide"
+export HERMES_WEBUI_AGENT_DIR="$_agent_stage"
+export HERMES_BUNDLED_LOCALES="/app/branding/generated-locales"
+export HERMES_MANAGED="altur-agent-webui"
+export GATEWAY_RELAY_DISPLAY_NAME="$(python3 -c 'import json; print(json.load(open("/app/branding/brand.json"))["assistant"]["display_name"])')"
+
+echo ""; echo "== Running Altur-Agent"
+cd /app; python server.py || error_exit "Altur-Agent failed or exited with an error"
 
 # we should never be here because the server should be running indefinitely, but if we are, we exit safely
 ok_exit "Clean exit"

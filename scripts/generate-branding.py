@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Regenerate approved owned literals and the complete icon family."""
-import hashlib,io,json,re
+import hashlib,io,json,re,sys,runpy
 from pathlib import Path
 from xml.sax.saxutils import escape
 import resvg_py
@@ -10,7 +10,10 @@ b=json.loads((ROOT/'branding/brand.json').read_text())
 name=b['product']['display_name']
 values={'@@PRODUCT@@':name,'@@PUBLISHER@@':b['organization']['display_name'],
         '@@LOGO_LABEL@@':b['assets']['accessible_label'],
-        '@@DESCRIPTION@@':b['product']['description']}
+        '@@DESCRIPTION@@':b['product']['description'],
+        '@@EXPORT_PREFIX@@':b['distribution']['export_prefix'],
+        '@@LOGO_PATH@@':b['assets']['logo'],
+        '@@HELP_PATH@@':b['distribution']['documentation']}
 def render(template):
  for key,value in values.items():template=template.replace(key,value)
  return template
@@ -62,4 +65,14 @@ p=ROOT/'static/sw.js';s=p.read_text()
 digest=hashlib.sha256((json.dumps(b,sort_keys=True)+source).encode()).hexdigest()[:12]
 s=re.sub(r"const CACHE_NAME = '[^']+';",f"const CACHE_NAME = 'altur-shell-{digest}-__WEBUI_VERSION__';",s)
 p.write_text(s)
+# Runtime packaging is scoped to this checkout's private copy. A source-only
+# distribution can regenerate assets before running the documented setup.
+locale_helper=ROOT/'branding/runtime_locales.py'
+if locale_helper.is_file():
+ runpy.run_path(str(locale_helper))['generate_runtime_locales'](project=ROOT)
+private_runtime=ROOT/'.runtime/hermes-agent'
+if private_runtime.exists():
+ sys.path.insert(0,str(ROOT))
+ from branding.runtime import apply_runtime_branding
+ apply_runtime_branding(private_runtime)
 print(f'Generated {name} literals, SVG/PNG/ICO assets and shell cache {digest}')
