@@ -123,6 +123,11 @@ class TestChangePasswordRequiresCurrentPassword:
         assert handler.status == 200
         payload = handler.json_body()
         assert payload.get("auth_enabled") is True
+        from api.auth import verify_password, _invalidate_password_hash_cache
+        assert verify_password("newpassword")
+        assert not verify_password("oldpassword")
+        _invalidate_password_hash_cache()
+        assert verify_password("newpassword")
         _clear_password_raw()
 
 

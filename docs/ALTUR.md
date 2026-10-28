@@ -20,6 +20,16 @@ Use scripts/setup-altur.py in a dedicated Python 3.14 environment. It clones/che
 
 scripts/start-altur.py binds 127.0.0.1, requires an explicit valid runtime checkout, strips inherited provider credentials and profile overrides, and sets separate agent/base/config/state/workspace locations. ALTUR_WEBUI_ISOLATED additionally prevents discovery/default-home fallback. Existing WebUI APIs, state formats and profile switching remain intact. Default external Claude transcript import is disabled only for a new isolated instance. The service runs in the foreground; no launch agent, updater or public host is installed.
 
+## Login password
+
+To change the WebUI login password, open Settings → System, enter the current
+password and the explicitly labeled New password, then select Change password.
+The action uses the existing authenticated settings endpoint and current-password
+verification. General Save Settings also applies a populated new-password field;
+if only the current-password field is populated, its confirmation explicitly says
+the password was unchanged. No password value or hash is returned to the browser.
+The new labels use the existing English fallback in locales without a translation.
+
 ## Intentional compatibility and attribution exceptions
 
 - Python modules/imports, `hermes` executable commands, HERMES_* environment variables and runtime configuration paths remain compatible.

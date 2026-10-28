@@ -10501,6 +10501,8 @@ async function loadSettingsPanel(){
         pwField.placeholder=t('password_env_var_locked_placeholder')||pwField.placeholder;
       }
     }
+    const changePasswordBtn=$('btnChangePassword');
+    if(changePasswordBtn) changePasswordBtn.disabled=pwEnvLocked;
     if(pwLockBanner) pwLockBanner.style.display=pwEnvLocked?'block':'none';
     // Show auth buttons only when auth is active
     try{
@@ -13556,6 +13558,22 @@ async function _applyAuxModels(){
  _loadAuxiliaryModels();
 }
 
+async function changeSettingsPassword(){
+  if(_settingsPasswordEnvLocked){
+    showToast(t('password_env_var_locked'));
+    return;
+  }
+  const field=$('settingsPassword');
+  if(!field||!String(field.value||'').trim()){
+    if(field) field.focus();
+    showToast(t('new_password_required'));
+    return;
+  }
+  // Keep current-password verification, CSRF, persistence and success/error
+  // handling on the existing explicit settings-save path.
+  return saveSettings();
+}
+
 async function saveSettings(andClose){
   const model=($('settingsModel')||{}).value;
   const modelState=(typeof _captureModelDropdownSelection==='function'&&$('settingsModel'))
@@ -13724,7 +13742,8 @@ async function saveSettings(andClose){
         }
     }
     _applySavedSettingsUi(saved, body, {sendKey,showTokenUsage,showQuotaChip,showConversationOutline,showBusyPlaceholderHint,showTps,fadeTextEffect,showCliSessions,theme,skin,language,sidebarDensity,fontSize});
-    showToast(t('settings_saved'));
+    const currentPasswordPresent=!!String(($('settingsCurrentPassword')||{}).value||'');
+    showToast(t(currentPasswordPresent?'settings_saved_password_unchanged':'settings_saved'));
     _settingsDirty=false;
     _resetSettingsPanelState();
     if(!andClose) _pendingSettingsTargetPanel = null;
