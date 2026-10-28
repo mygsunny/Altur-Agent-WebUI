@@ -103,6 +103,34 @@ def _clear_password_raw():
 
 
 class TestChangePasswordRequiresCurrentPassword:
+    @pytest.mark.parametrize('password', ['a', 'abc', ' abc ', '🔒🔒🔒'])
+    def test_new_password_requires_four_characters(self, password):
+        from api.auth import verify_password
+        _set_password_raw('existing-password')
+        handler = _post_settings({'_set_password': password, '_current_password': 'existing-password'})
+        assert handler.status == 400
+        assert '4' in handler.json_body()['error']
+        assert verify_password('existing-password')
+
+    @pytest.mark.parametrize('password', ['abcd', '1234', '🔒🔒🔒🔒', ' abcd '])
+    def test_exactly_four_characters_are_accepted(self, password):
+        from api.auth import verify_password
+        _set_password_raw('x')  # Grandfather an existing short credential.
+        handler = _post_settings({'_set_password': password, '_current_password': 'x'})
+        assert handler.status == 200
+        assert verify_password(password.strip())
+
+    def test_settings_exposes_the_password_policy(self):
+        settings, status = _get_settings()
+        assert status == 200
+        assert settings['password_min_length'] == 4
+
+    @pytest.mark.parametrize('password, expected', [('abc', 400), ('abcd', 200)])
+    def test_first_password_uses_the_same_policy(self, password, expected):
+        _clear_password_raw()
+        handler = _post_settings({'_set_password': password})
+        assert handler.status == expected
+
     def test_cannot_change_password_without_current_password(self):
         _set_password_raw("oldpassword")
         handler = _post_settings({"_set_password": "newpassword"})

@@ -1627,7 +1627,8 @@
                 <input type="password" id="settingsCurrentPassword" autocomplete="current-password" placeholder="Enter current password…" data-i18n-placeholder="current_password_placeholder" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
               </div>
               <label for="settingsPassword" style="font-size:11px;display:block;margin:6px 0 4px" data-i18n="new_password_label">New password</label>
-              <input type="password" id="settingsPassword" autocomplete="new-password" placeholder="Enter new password…" data-i18n-placeholder="password_placeholder" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
+              <input type="password" id="settingsPassword" autocomplete="new-password" aria-describedby="settingsPasswordPolicy" placeholder="Enter new password…" data-i18n-placeholder="password_placeholder" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
+              <div id="settingsPasswordPolicy" style="font-size:11px;color:var(--muted);margin-top:4px"></div>
               <button type="button" class="sm-btn" id="btnChangePassword" onclick="changeSettingsPassword()" style="margin-top:8px" data-i18n="settings_change_password_btn">Change password</button>
               </form>
               <div id="settingsPasswordEnvLock" data-i18n="password_env_var_locked" style="display:none;margin-top:6px;padding:8px 10px;font-size:11px;color:var(--muted);background:var(--code-bg);border:1px solid var(--border2);border-radius:6px;line-height:1.45">A server environment override controls the password. Remove that override and restart to manage the password here.</div>

@@ -991,6 +991,8 @@ const LOCALES = {
     settings_label_password: 'Access Password',
     new_password_label: 'New password',
     new_password_required: 'Enter a new password before changing it.',
+    new_password_min_length: 'Use at least {min} characters for the new password.',
+    password_min_length_help: 'Minimum {min} characters.',
     settings_change_password_btn: 'Change password',
     settings_saved_password_unchanged: 'Settings saved. Password unchanged; enter a new password to change it.',
     settings_label_pinned_limit: 'Pinned conversations limit',

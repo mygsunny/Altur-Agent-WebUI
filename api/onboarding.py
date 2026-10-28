@@ -11,7 +11,7 @@ import urllib.request
 from pathlib import Path
 from urllib.parse import urlparse
 
-from api.auth import is_auth_enabled
+from api.auth import MIN_PASSWORD_LENGTH, is_auth_enabled
 from api.config import (
     DEFAULT_MODEL,
     DEFAULT_WORKSPACE,
@@ -961,6 +961,7 @@ def get_onboarding_status() -> dict:
             "default_workspace": settings.get("default_workspace")
             or str(DEFAULT_WORKSPACE),
             "password_enabled": is_auth_enabled(),
+            "password_min_length": MIN_PASSWORD_LENGTH,
             "bot_name": settings.get("bot_name") or "Altur-Agent",
         },
         "system": {

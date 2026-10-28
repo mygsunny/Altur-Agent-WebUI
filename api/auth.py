@@ -62,6 +62,10 @@ PUBLIC_PATHS = frozenset({
 COOKIE_NAME = 'hermes_session'
 CSRF_HEADER_NAME = 'X-Hermes-CSRF-Token'
 
+# Admission rule for newly created/changed UI passwords. Existing credentials,
+# including legacy hash migration, remain valid independently of this minimum.
+MIN_PASSWORD_LENGTH = 4
+
 
 # RFC 6265 cookie-name token: a non-empty run of token chars
 # (no controls, whitespace, or separators such as ';', '=', ',').

@@ -10487,6 +10487,10 @@ async function loadSettingsPanel(){
     // Password field: always blank (we don't send hash back)
     const pwField=$('settingsPassword');
     if(pwField){pwField.value='';pwField.addEventListener('input',_markSettingsDirty,{once:false});}
+    const passwordMinimum=Math.max(0,Number(settings.password_min_length)||0);
+    if(pwField) pwField.minLength=passwordMinimum;
+    const passwordPolicy=$('settingsPasswordPolicy');
+    if(passwordPolicy) passwordPolicy.textContent=passwordMinimum?t('password_min_length_help').replace('{min}',String(passwordMinimum)):'';
     // #1560: when HERMES_WEBUI_PASSWORD env var is set, the settings password
     // field silently no-ops. Disable it + reveal the lock banner so the UI
     // tells the truth before a user tries (and the backend now also returns
@@ -13665,6 +13669,13 @@ async function saveSettings(andClose){
   body.bot_name=botName||'Altur-Agent';
   // Password: only act if the field has content; blank = leave auth unchanged
   if(pw && pw.trim()){
+    const passwordField=$('settingsPassword');
+    const passwordMinimum=Math.max(0,Number((passwordField||{}).minLength)||0);
+    if(Array.from(pw.trim()).length<passwordMinimum){
+      if(passwordField) passwordField.focus();
+      showToast(t('new_password_min_length').replace('{min}',String(passwordMinimum)));
+      return;
+    }
     const currentPwField=$('settingsCurrentPassword');
     const currentPw=(currentPwField||{}).value||'';
     if(_settingsPasswordAuthEnabled && !currentPw.trim()){

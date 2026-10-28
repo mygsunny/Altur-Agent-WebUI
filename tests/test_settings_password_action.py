@@ -19,7 +19,7 @@ global._settingsHermesDefaultModelOnOpen=QUALIFIED;
 global._settingsHermesDefaultModelProviderOnOpen=PROVIDER;
 global._settingsPasswordAuthEnabled=true;
 global._settingsPasswordEnvLocked=scenario==='locked';
-els.settingsPassword={value:'fixture-new',focus(){this.focused=true}};
+els.settingsPassword={value:'fixture-new',minLength:4,focus(){this.focused=true}};
 els.settingsCurrentPassword={value:'fixture-current',focus(){this.focused=true}};
 global._renderSettingsAuthStatus=()=>{};
 global._updateAuthWarningBadge=()=>{};
@@ -33,6 +33,7 @@ global._enqueueSettingsPost=async opts=>{
 if(['blank','general-current','general-empty'].includes(scenario)) els.settingsPassword.value='';
 if(['missing-current','general-empty','first'].includes(scenario)) els.settingsCurrentPassword.value='';
 if(scenario==='first')global._settingsPasswordAuthEnabled=false;
+if(scenario==='short')els.settingsPassword.value='abc';
 (async()=>{
   if(scenario.startsWith('general-')) await saveSettings(false);
   else {
@@ -73,6 +74,12 @@ def test_dedicated_change_refuses_blank_new_password_without_a_request():
     assert result['count'] == 0
     assert result['newFocused']
     assert result['toasts'][-1] == 'new_password_required'
+
+
+def test_dedicated_change_refuses_short_password_without_a_request():
+    result = run_case('short')
+    assert result['count'] == 0 and result['newFocused']
+    assert result['toasts'][-1] == 'new_password_min_length'
 
 
 def test_dedicated_change_uses_existing_authenticated_save_path():
