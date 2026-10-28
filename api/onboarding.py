@@ -771,22 +771,22 @@ def _status_from_runtime(cfg: dict, imports_ok: bool) -> dict:
         state = "agent_unavailable"
         note_key = "onboarding_notice_system_unavailable"
         note = (
-            "Hermes is not fully importable from the Web UI yet. Finish bootstrap or fix the "
+            "Altur-Agent is not fully importable from the Web UI yet. Finish bootstrap or fix the "
             "agent install before provider setup will work."
         )
     elif chat_ready:
         state = "ready"
         note_key = "onboarding_notice_system_ready"
         provider_name = _PROVIDER_DISPLAY.get(
-            provider, provider.title() if provider else "Hermes"
+            provider, provider.title() if provider else "Altur-Agent"
         )
-        note = f"Hermes is minimally configured and ready to chat via {provider_name}."
+        note = f"Altur-Agent is minimally configured and ready to chat via {provider_name}."
     elif provider_configured:
         state = "provider_incomplete"
         if provider == "custom" and not base_url:
             note_key = "onboarding_notice_custom_base_url_required"
             note = (
-                "Hermes has a saved provider/model selection, but the custom "
+                "Altur-Agent has a saved provider/model selection, but the custom "
                 "provider still needs a base URL. Add the API key too if that "
                 "server requires one."
             )
@@ -802,13 +802,13 @@ def _status_from_runtime(cfg: dict, imports_ok: bool) -> dict:
         else:
             note_key = "onboarding_notice_provider_api_key_required"
             note = (
-                "Hermes has a saved provider/model selection but still needs the "
+                "Altur-Agent has a saved provider/model selection but still needs the "
                 "API key required to chat."
             )
     else:
         state = "needs_provider"
         note_key = "onboarding_notice_provider_choice_required"
-        note = "Hermes is installed, but you still need to choose a provider and save working credentials."
+        note = "Altur-Agent is installed, but you still need to choose a provider and save working credentials."
 
     return {
         "provider_configured": provider_configured,
@@ -961,7 +961,7 @@ def get_onboarding_status() -> dict:
             "default_workspace": settings.get("default_workspace")
             or str(DEFAULT_WORKSPACE),
             "password_enabled": is_auth_enabled(),
-            "bot_name": settings.get("bot_name") or "Hermes",
+            "bot_name": settings.get("bot_name") or "Altur-Agent",
         },
         "system": {
             "hermes_found": bool(_HERMES_FOUND),
@@ -1022,7 +1022,7 @@ def apply_onboarding_setup(body: dict) -> dict:
         return {
             "error": "config_exists",
             "message": (
-                "Hermes is already configured (config.yaml exists). "
+                "Altur-Agent is already configured (config.yaml exists). "
                 "Pass confirm_overwrite=true to overwrite it."
             ),
             "requires_confirm": True,

@@ -37,7 +37,7 @@ CODEX_REDIRECT_URI = f"{CODEX_ISSUER}/deviceauth/callback"
 CODEX_BASE_URL = "https://chatgpt.com/backend-api/codex"
 # auth.openai.com rejects urllib's default "Python-urllib/x.y" User-Agent with
 # HTTP 530; same value the Codex usage probe sends (api/providers.py).
-CODEX_USER_AGENT = "codex_cli_rs/0.0.0 (Hermes WebUI)"
+CODEX_USER_AGENT = "codex_cli_rs/0.0.0 (Altur-Agent)"
 CODEX_FLOW_MAX_WAIT_SECONDS = 15 * 60
 
 _ALLOWED_ONBOARDING_OAUTH_PROVIDERS = {"openai-codex", "anthropic", "claude", "claude-code"}

@@ -1,21 +1,28 @@
 {
   "id": "./",
-  "name": "Hermes",
-  "short_name": "Hermes",
-  "description": "Hermes AI Agent Web UI",
+  "name": "Altur-Agent",
+  "short_name": "Altur-Agent",
+  "description": "Altur-Agent AI workspace by ArtemisProject",
   "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "display_override": [
+    "window-controls-overlay",
+    "standalone",
+    "minimal-ui"
+  ],
   "background_color": "#0D0D1A",
   "theme_color": "#0D0D1A",
   "orientation": "portrait-primary",
-  "categories": ["productivity", "utilities"],
+  "categories": [
+    "productivity",
+    "utilities"
+  ],
   "shortcuts": [
     {
       "name": "New conversation",
       "short_name": "New chat",
-      "description": "Open Hermes ready for a new chat",
+      "description": "Open Altur-Agent ready for a new chat",
       "url": "./?source=pwa&action=new-chat",
       "icons": [
         {

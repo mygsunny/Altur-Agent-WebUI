@@ -156,6 +156,9 @@ def _discover_agent_identity(
     ):
         return _AgentDiscovery(explicit_candidate.resolve())
 
+    if os.getenv("ALTUR_WEBUI_ISOLATED") == "1":
+        return _AgentDiscovery(None)
+
     authoritative_candidates = [
         hermes_home / "hermes-agent",
         repo_root.parent / "hermes-agent",

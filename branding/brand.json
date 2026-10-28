@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "product": {
+    "display_name": "Altur-Agent",
+    "short_name": "Altur-Agent",
+    "description": "Altur-Agent AI workspace by ArtemisProject"
+  },
+  "organization": {
+    "display_name": "ArtemisProject"
+  },
+  "assets": {
+    "source": "branding/assets/source/portrait-icon.svg",
+    "logo": "static/brand-logo.svg",
+    "accessible_label": "Altur-Agent logo",
+    "view_box": [
+      32.8082506555233,
+      68.235406698374,
+      957.145828971385,
+      957.145828971385
+    ]
+  },
+  "assistant": {
+    "display_name": "Altur-Agent",
+    "identity_instruction": "You are {product}, the assistant in the {product} application published by {publisher}. In ordinary introductions, introduce yourself as {product}. This is the product identity for this WebUI instance. Honor user-selected personas and explicit user identity preferences. Do not change quoted text, documents, code, tool results, history, or factual references to other products."
+  },
+  "distribution": {
+    "repository": "https://github.com/mygsunny/Altur-Agent-WebUI",
+    "documentation": "static/altur-help.html",
+    "support": null,
+    "automatic_updates": false
+  },
+  "upstream": {
+    "repository": "https://github.com/nesquena/hermes-webui",
+    "commit": "e40f042b6ec80199e06b7edf6e91a31beee2b812"
+  },
+  "runtime": {
+    "repository": "https://github.com/NousResearch/hermes-agent",
+    "commit": "bf0203a794a07aac3ff764972ab9087baa4e4f4e"
+  }
+}

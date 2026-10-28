@@ -631,7 +631,7 @@ def render_discoverability_markdown(report: dict) -> str:
 
 
 def _main() -> int:
-    parser = argparse.ArgumentParser(description="Read-only Hermes WebUI session discoverability audit")
+    parser = argparse.ArgumentParser(description="Read-only Altur-Agent session discoverability audit")
     parser.add_argument("--session-dir", type=Path, required=True)
     parser.add_argument("--state-db", type=Path, default=None)
     parser.add_argument("--format", choices=("json", "markdown"), default="json")

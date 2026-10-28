@@ -1677,6 +1677,13 @@ def cached_update_status(*, include_agent=True, channel=None):
 
 def check_for_updates(force=False, *, include_agent=True, channel=None):
     """Return cached update status for webui and agent repos."""
+    from api.branding import BRAND
+    if not BRAND['distribution']['automatic_updates']:
+        info = {'behind': 0, 'available': False, 'update_available': False,
+                'error': None, 'message': 'Updates are managed manually for this fork.'}
+        return {'webui': dict(info, name='webui'), 'agent': dict(info, name='agent'),
+                'checked_at': time.time(), 'include_agent': bool(include_agent),
+                'channel': 'stable', 'disabled': True}
     global _check_in_progress
     include_agent = bool(include_agent)
     if channel is None:
@@ -1844,7 +1851,7 @@ def _categorized_summary_bullets_from_text(text: str) -> tuple[list[str], list[s
 def _fallback_update_bullets(details: list[dict]) -> list[str]:
     bullets = []
     for item in details:
-        label = item.get('label') or item.get('name') or 'Hermes'
+        label = item.get('label') or item.get('name') or 'Altur-Agent'
         behind = item.get('behind') or 0
         commits = item.get('commits') or []
         if commits:
@@ -1860,7 +1867,7 @@ def _worth_knowing_bullets(details: list[dict]) -> list[str]:
     items = []
     truncated = [item for item in details if item.get('commits_truncated') and item.get('commits_limit')]
     for item in truncated[:2]:
-        label = item.get('label') or item.get('name') or 'Hermes'
+        label = item.get('label') or item.get('name') or 'Altur-Agent'
         behind = item.get('behind') or 0
         limit = item.get('commits_limit') or len(item.get('commits') or [])
         items.append(
@@ -1869,7 +1876,7 @@ def _worth_knowing_bullets(details: list[dict]) -> list[str]:
     if items:
         return items
     targets = [
-        f"{item.get('label') or item.get('name') or 'Hermes'} ({item.get('behind') or 0} update{'s' if (item.get('behind') or 0) != 1 else ''})"
+        f"{item.get('label') or item.get('name') or 'Altur-Agent'} ({item.get('behind') or 0} update{'s' if (item.get('behind') or 0) != 1 else ''})"
         for item in details
         if item.get('behind')
     ]
@@ -1916,7 +1923,7 @@ def _fallback_update_summary(updates: dict, details: list[dict]) -> str:
 
 def _update_summary_prompt(details: list[dict]) -> tuple[str, str]:
     system = (
-        "You write human-readable release summaries for Hermes users. "
+        "You write human-readable release summaries for Altur-Agent users. "
         "Focus on what the user will notice in the product. Keep it simple, specific, and short. "
         "avoid technical jargon, implementation details, SHA names, branch names, and file paths unless necessary. "
         "Return only bullets. Do not include headings, markdown tables, intro paragraphs, or closing notes."
@@ -2431,6 +2438,7 @@ def _restore_stash_after_pull_failure(
 
 def _apply_update_inner(target, channel=DEFAULT_UPDATE_CHANNEL):
     """Inner implementation of apply_update, called under _apply_lock."""
+    return {'ok': False, 'message': 'Automatic updates are disabled for this fork. Use the documented Git update procedure.'}
     channel = _normalize_channel(channel)
     if target == 'webui':
         path = REPO_ROOT

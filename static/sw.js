@@ -7,7 +7,7 @@
 
 // Cache version is injected by the server at request time (routes.py /sw.js handler).
 // Bumps automatically whenever the git commit changes — no manual edits needed.
-const CACHE_NAME = 'hermes-shell-__WEBUI_VERSION__';
+const CACHE_NAME = 'altur-shell-1a8480f5b765-__WEBUI_VERSION__';
 
 // Static assets that form the app shell.
 //
@@ -47,7 +47,7 @@ const SHELL_ASSETS = [
 function deleteOldShellCaches() {
   return caches.keys().then((keys) =>
     Promise.all(
-      keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
+      keys.filter((k) => k !== CACHE_NAME && /^(hermes-shell-|altur-shell-)/.test(k)).map((k) => caches.delete(k))
     )
   );
 }
@@ -134,7 +134,7 @@ self.addEventListener('fetch', (event) => {
         return caches.match('./').then((cached) => cached || new Response(
           '<html><body style="font-family:sans-serif;padding:2rem;background:#1a1a1a;color:#ccc">' +
           '<h2>You are offline</h2>' +
-          '<p>Hermes requires a server connection. Please check your network and try again.</p>' +
+          '<p>Altur-Agent requires a server connection. Please check your network and try again.</p>' +
           '</body></html>',
           { headers: { 'Content-Type': 'text/html' } }
         ));

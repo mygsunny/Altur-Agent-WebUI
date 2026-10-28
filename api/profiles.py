@@ -1788,7 +1788,7 @@ def _pin_process_profile_home(home: Path) -> None:
         if callable(pin):
             pin(str(home))
     except Exception:
-        logger.debug("Hermes Agent process-home pin unavailable", exc_info=True)
+        logger.debug("Altur-Agent Agent process-home pin unavailable", exc_info=True)
 
 
 def get_process_profile_home() -> Path:

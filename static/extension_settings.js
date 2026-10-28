@@ -413,7 +413,7 @@
         listener(change);
       }catch(error){
         if(typeof console!=='undefined'&&typeof console.error==='function'){
-          try{console.error('[Hermes extensions] Message-action change listener failed:',error);}catch(_loggingError){}
+          try{console.error('[Altur-Agent extensions] Message-action change listener failed:',error);}catch(_loggingError){}
         }
       }
     }
@@ -579,7 +579,7 @@
 
   function reportMessageActionFailure(record,error,onError){
     if(typeof console!=='undefined'&&typeof console.error==='function'){
-      try{console.error(`[Hermes extensions] ${record.extensionId}:${record.id} message action failed:`,error);}catch(_loggingError){}
+      try{console.error(`[Altur-Agent extensions] ${record.extensionId}:${record.id} message action failed:`,error);}catch(_loggingError){}
     }
     if(typeof onError==='function'){
       try{onError(error);}catch(_callbackError){}
@@ -656,7 +656,7 @@
         listener(change);
       }catch(error){
         if(typeof console!=='undefined'&&typeof console.error==='function'){
-          try{console.error('[Hermes extensions] Configure change listener failed:',error);}catch(_loggingError){}
+          try{console.error('[Altur-Agent extensions] Configure change listener failed:',error);}catch(_loggingError){}
         }
       }
     }
@@ -743,12 +743,12 @@
 
   function reportConfigureFailure(clean,error,onError){
     if(typeof console!=='undefined'&&typeof console.error==='function'){
-      try{console.error(`[Hermes extensions] ${clean} Configure handler failed:`,error);}catch(_loggingError){}
+      try{console.error(`[Altur-Agent extensions] ${clean} Configure handler failed:`,error);}catch(_loggingError){}
     }
     if(typeof onError==='function'){
       try{onError(error);}catch(callbackError){
         if(typeof console!=='undefined'&&typeof console.error==='function'){
-          try{console.error(`[Hermes extensions] ${clean} Configure failure reporter failed:`,callbackError);}catch(_loggingError){}
+          try{console.error(`[Altur-Agent extensions] ${clean} Configure failure reporter failed:`,callbackError);}catch(_loggingError){}
         }
       }
     }
@@ -855,7 +855,7 @@
         }catch(error){
           if(typeof console!=='undefined'&&typeof console.error==='function'){
             try{
-              console.error(`[Hermes extensions] ${extensionId} ${type} listener failed:`,error);
+              console.error(`[Altur-Agent extensions] ${extensionId} ${type} listener failed:`,error);
             }catch(_loggingError){ }
           }
         }

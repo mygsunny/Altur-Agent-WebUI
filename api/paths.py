@@ -305,6 +305,11 @@ def _platform_default_hermes_home() -> Path:
     legacy path is never preferred.  Explicit HERMES_HOME / HERMES_WEBUI_STATE_DIR
     overrides take precedence upstream and are unaffected.
     """
+    if os.getenv("ALTUR_WEBUI_ISOLATED") == "1":
+        isolated = os.getenv("HERMES_BASE_HOME") or os.getenv("HERMES_HOME")
+        if not isolated:
+            raise RuntimeError("Isolated launch requires an explicit agent home")
+        return Path(isolated).expanduser().resolve()
     if os.name == "nt":
         local_app_data = os.getenv("LOCALAPPDATA", "").strip()
         if local_app_data:
