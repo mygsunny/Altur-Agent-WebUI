@@ -1574,6 +1574,19 @@
   .sidebar-section{padding:14px 14px 8px;}
   .new-chat-btn{width:100%;padding:9px 12px;border-radius:9px;background:var(--accent-bg);border:1px solid var(--accent-bg-strong);color:var(--accent-text);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .15s;margin-bottom:8px;font-weight:500;}
   .new-chat-btn:hover{background:var(--accent-bg-strong);border-color:var(--accent);}
+  @keyframes railWiggle{0%,100%{transform:translateX(-1px) rotate(-9deg)}50%{transform:translateX(1px) rotate(9deg)}}
+  .rail .rail-btn{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;}
+  .rail.rail-editing :is(#btnRailNewChat,.nav-tab:not([data-panel="settings"]):not([data-dashboard-link])){animation:railWiggle .28s ease-in-out infinite;cursor:grab;}
+  .rail.rail-editing .rail-btn:nth-child(even){animation-delay:-.09s;}
+  .rail.rail-editing .rail-dragging{animation:none!important;cursor:grabbing;background:var(--hover-bg);outline:2px solid var(--focus-ring-strong);outline-offset:-2px;}
+  .rail .rail-drop-target{box-shadow:inset 0 -3px var(--accent);}
+  @media(prefers-reduced-motion:reduce){.rail.rail-editing :is(#btnRailNewChat,.nav-tab){animation:none!important;outline:1px dashed var(--muted);outline-offset:-3px;}}
+  /* A quiet action row, aligned with the date headings and conversation rows. */
+  .sidebar-new-chat{display:flex;align-items:center;gap:8px;flex-shrink:0;min-height:40px;margin:0 8px 4px;padding:8px 10px;border:0;border-radius:8px;background:transparent;color:var(--text);font:inherit;font-size:13px;line-height:20px;text-align:left;cursor:pointer;transition:background .15s,color .15s;}
+  .sidebar-new-chat svg{flex-shrink:0;color:var(--muted);}
+  .sidebar-new-chat:hover{background:var(--hover-bg);}
+  .sidebar-new-chat:focus-visible{outline:2px solid var(--focus-ring-strong);outline-offset:-2px;}
+  @media(max-width:767px){.sidebar-new-chat{min-height:44px;}}
   .session-list{flex:1;overflow-y:auto;padding:0 8px 8px;min-height:0;overscroll-behavior-y:contain;touch-action:pan-y;overflow-anchor:none;}
   .sidebar-search{position:relative;padding:8px 12px;flex-shrink:0;}
   .session-search-field{position:relative;display:flex;align-items:center;width:100%;}

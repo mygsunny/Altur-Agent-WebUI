@@ -1163,6 +1163,7 @@ const LOCALES = {
     tab_logs: 'Logs',
     tab_settings: 'Settings',
     close_menu: 'Close menu',
+    sidebar_new_chat: 'New chat',
     new_conversation: 'New conversation',
     filter_conversations: 'Filter conversations...',
     markdown_table_filter: 'Filter table',
