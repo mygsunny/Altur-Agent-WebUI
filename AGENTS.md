@@ -133,6 +133,12 @@ restarting existing services, or exposing the app beyond localhost. Those action
 require explicit human approval and the onboarding safety rules still apply.
 If verification is blocked, report the blocker rather than claim completion.
 
+## Fork change tracking
+
+- Record accepted UI additions and revisions in `docs/UI-CHANGES.md`, including verification limits.
+- Publish related source, regression tests and safe visual evidence together on a feature branch and pull request. Do not merge without authorization.
+- Keep machine-specific deployment launchers, private paths, credentials and user/session data out of commits. Deployment records remain local.
+
 ## Local state and secrets
 
 Altur-Agent can read and write real agent state, sessions, workspaces,

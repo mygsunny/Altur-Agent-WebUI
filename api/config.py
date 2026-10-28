@@ -13388,7 +13388,7 @@ _SETTINGS_DEFAULTS = {
     "inflight_state_max_string_chars": 60000,  # max string length kept inside a recovery snapshot field
     "inflight_state_max_json_chars": 1500000,  # max serialized recovery snapshot payload before pruning
     "hidden_tabs": [],  # sidebar tab panel names hidden by user (e.g. ["tasks","kanban"]); chat and settings are always visible
-    "tab_order": [],  # user-defined sidebar/rail tab order for reorderable tabs; chat/settings stay fixed
+    "tab_order": [],  # user-defined sidebar/rail tab order; Settings stays fixed, Chat stays visible
     "composer_control_order": [],  # user-defined composer footer control order; invalid/duplicate keys are ignored
     # #7622 (round 3): language is intentionally absent from the defaults so
     # `load_settings()` reports `None` for a fresh install.  This lets the
@@ -13927,8 +13927,8 @@ def save_settings(settings: dict) -> dict:
                 not isinstance(v, str) or not _SETTINGS_LANG_RE.match(v)
             ):
                 continue
-            # Validate list-valued ordering settings. Chat/settings stay fixed
-            # for tabs; composer ordering only accepts known control keys.
+            # Chat stays visible but is reorderable; Settings stays fixed.
+            # Composer ordering only accepts known control keys.
             # Duplicates are collapsed while preserving the first requested order.
             if k in {"hidden_tabs", "tab_order", "composer_control_order"}:
                 if not isinstance(v, list):
@@ -13941,7 +13941,7 @@ def save_settings(settings: dict) -> dict:
                     s = s.strip()
                     if not s or s in seen:
                         continue
-                    if k in {"hidden_tabs", "tab_order"} and s in {"chat", "settings"}:
+                    if (k == "hidden_tabs" and s in {"chat", "settings"}) or (k == "tab_order" and s == "settings"):
                         continue
                     if k == "composer_control_order" and s not in _COMPOSER_CONTROL_ORDER_KEYS:
                         continue
