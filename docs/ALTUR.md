@@ -30,6 +30,12 @@ if only the current-password field is populated, its confirmation explicitly say
 the password was unchanged. No password value or hash is returned to the browser.
 The new labels use the existing English fallback in locales without a translation.
 
+Passwords are saved and checked exactly as entered. Spaces are significant,
+including leading, trailing and space-only passwords; only a truly empty new
+field means no change. Existing stored credentials are not rewritten. The
+preexisting environment-variable override keeps its legacy trimming behavior;
+when it is configured the UI remains locked rather than changing that credential.
+
 ## Intentional compatibility and attribution exceptions
 
 - Python modules/imports, `hermes` executable commands, HERMES_* environment variables and runtime configuration paths remain compatible.

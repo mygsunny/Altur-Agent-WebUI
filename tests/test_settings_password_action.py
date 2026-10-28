@@ -24,6 +24,9 @@ els.settingsCurrentPassword={value:'fixture-current',focus(){this.focused=true}}
 global._renderSettingsAuthStatus=()=>{};
 global._updateAuthWarningBadge=()=>{};
 global._updateAuthDisabledWarning=()=>{};
+global._syncPasswordlessButton=()=>{};
+global.loadPasskeys=()=>{};
+global.showPromptDialog=async()=>'DISABLE AUTH';
 global._enqueueSettingsPost=async opts=>{
   const body=JSON.parse(opts.body);
   posts.push({url:'/api/settings',body});
@@ -33,8 +36,17 @@ global._enqueueSettingsPost=async opts=>{
 if(['blank','general-current','general-empty'].includes(scenario)) els.settingsPassword.value='';
 if(['missing-current','general-empty','first'].includes(scenario)) els.settingsCurrentPassword.value='';
 if(scenario==='first')global._settingsPasswordAuthEnabled=false;
+if(scenario==='spaced-new')els.settingsPassword.value=' fixture-new ';
+if(scenario==='space-only')els.settingsPassword.value=' ';
+if(['space-current','space-disable'].includes(scenario))els.settingsCurrentPassword.value=' ';
+const expectedNew=els.settingsPassword.value;
+const expectedCurrent=els.settingsCurrentPassword.value;
 (async()=>{
   if(scenario.startsWith('general-')) await saveSettings(false);
+  else if(scenario==='space-disable'){
+    eval(extractAsyncFunction(panelsSrc,'disableAuth'));
+    await disableAuth();
+  }
   else {
     eval(extractAsyncFunction(panelsSrc,'changeSettingsPassword'));
     await changeSettingsPassword();
@@ -48,7 +60,9 @@ if(scenario==='first')global._settingsPasswordAuthEnabled=false;
     cleared:els.settingsPassword.value===''&&els.settingsCurrentPassword.value==='',
     newFocused:!!els.settingsPassword.focused,
     currentFocused:!!els.settingsCurrentPassword.focused,
-    retained:els.settingsPassword.value==='fixture-new'
+    retained:els.settingsPassword.value==='fixture-new',
+    newPreserved:!!post&&post.body._set_password===expectedNew,
+    currentPreserved:!!post&&post.body._current_password===expectedCurrent
   }));
 })().catch(e=>{console.error(e.message);process.exit(1)});
 '''
@@ -103,3 +117,14 @@ def test_environment_locked_password_cannot_be_changed():
 def test_first_password_creation_does_not_send_current_password():
     result = run_case('first')
     assert result['newSent'] and not result['hasCurrent']
+
+
+@pytest.mark.parametrize('case', ['spaced-new', 'space-only', 'space-current'])
+def test_settings_preserves_password_spaces(case):
+    result = run_case(case)
+    assert result['newPreserved'] and result['currentPreserved']
+    assert result['cleared']
+
+
+def test_space_only_current_password_can_authorize_disable_action():
+    assert run_case('space-disable')['currentPreserved']

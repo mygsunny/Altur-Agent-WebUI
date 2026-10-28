@@ -20098,7 +20098,7 @@ def handle_post(handler, parsed) -> bool:
         logged_in_before = bool(current_cookie and verify_session(current_cookie))
         requested_password = bool(
             isinstance(body.get("_set_password"), str)
-            and body.get("_set_password", "").strip()
+            and body.get("_set_password", "")
         )
         requested_passwordless = bool(body.pop("_passwordless", False))
         requested_clear_password = bool(body.get("_clear_password") or requested_passwordless)

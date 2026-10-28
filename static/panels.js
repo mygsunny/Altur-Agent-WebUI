@@ -13564,7 +13564,7 @@ async function changeSettingsPassword(){
     return;
   }
   const field=$('settingsPassword');
-  if(!field||!String(field.value||'').trim()){
+  if(!field||!String(field.value||'')){
     if(field) field.focus();
     showToast(t('new_password_required'));
     return;
@@ -13664,15 +13664,15 @@ async function saveSettings(andClose){
   const botName=(($('settingsBotName')||{}).value||'').trim();
   body.bot_name=botName||'Altur-Agent';
   // Password: only act if the field has content; blank = leave auth unchanged
-  if(pw && pw.trim()){
+  if(pw){
     const currentPwField=$('settingsCurrentPassword');
     const currentPw=(currentPwField||{}).value||'';
-    if(_settingsPasswordAuthEnabled && !currentPw.trim()){
+    if(_settingsPasswordAuthEnabled && !currentPw){
       if(currentPwField) currentPwField.focus();
       showToast(t('current_password_required'));
       return;
     }
-    const payload={...body,_set_password:pw.trim()};
+    const payload={...body,_set_password:pw};
     if(_settingsPasswordAuthEnabled) payload._current_password=currentPw;
     try{
       const saved=await _enqueueSettingsPost({method:'POST',body:JSON.stringify(payload)});
@@ -13788,7 +13788,7 @@ async function goPasswordless(){
 async function disableAuth(){
   const currentPwField=$('settingsCurrentPassword');
   const currentPw=(currentPwField||{}).value||'';
-  if(_settingsPasswordAuthEnabled && !currentPw.trim()){
+  if(_settingsPasswordAuthEnabled && !currentPw){
     if(currentPwField) currentPwField.focus();
     showToast(t('current_password_required'));
     return;

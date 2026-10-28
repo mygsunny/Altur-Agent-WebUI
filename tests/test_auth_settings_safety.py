@@ -103,6 +103,33 @@ def _clear_password_raw():
 
 
 class TestChangePasswordRequiresCurrentPassword:
+    @pytest.mark.parametrize('password', [' pass word ', ' ', '  '])
+    def test_password_spaces_are_preserved_exactly(self, password):
+        from api.auth import verify_password, _invalidate_password_hash_cache
+        _set_password_raw('existing-password')
+        handler = _post_settings({'_set_password': password, '_current_password': 'existing-password'})
+        assert handler.status == 200
+        assert verify_password(password)
+        assert not verify_password(password.strip())
+        _invalidate_password_hash_cache()
+        assert verify_password(password)
+
+    def test_first_password_can_be_a_space(self):
+        from api.auth import verify_password
+        _clear_password_raw()
+        handler = _post_settings({'_set_password': ' '})
+        assert handler.status == 200 and handler.json_body()['auth_enabled']
+        assert verify_password(' ')
+        assert not verify_password('')
+
+    def test_space_only_current_password_can_authorize_a_change(self):
+        from api.auth import verify_password
+        _set_password_raw(' ')
+        assert verify_password(' ')
+        handler = _post_settings({'_set_password': 'replacement', '_current_password': ' '})
+        assert handler.status == 200
+        assert verify_password('replacement')
+
     def test_cannot_change_password_without_current_password(self):
         _set_password_raw("oldpassword")
         handler = _post_settings({"_set_password": "newpassword"})

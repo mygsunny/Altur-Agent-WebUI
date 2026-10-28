@@ -424,7 +424,7 @@ function _renderOnboardingBody(){
 
 function _getOnboardingPasswordSummaryKey(settings){
   const hasExistingPassword=!!(settings&&settings.password_enabled);
-  const hasNewPassword=!!((ONBOARDING.form.password||'').trim());
+  const hasNewPassword=!!(ONBOARDING.form.password||'');
   if(hasNewPassword) return hasExistingPassword?'onboarding_password_will_replace':'onboarding_password_will_enable';
   return hasExistingPassword?'onboarding_password_keep_existing':'onboarding_password_remains_disabled';
 }
@@ -506,7 +506,7 @@ async function _saveOnboardingProviderSetup(){
 async function _saveOnboardingDefaults(){
   const workspace=(ONBOARDING.form.workspace||'').trim();
   const model=(ONBOARDING.form.model||'').trim();
-  const password=(ONBOARDING.form.password||'').trim();
+  const password=ONBOARDING.form.password||'';
   if(!workspace) throw new Error(t('onboarding_error_choose_workspace'));
   if(!model) throw new Error(t('onboarding_error_choose_model'));
   const known=_getOnboardingWorkspaceChoices().some(ws=>ws.path===workspace);
@@ -587,7 +587,7 @@ async function nextOnboardingStep(){
       if(!ONBOARDING.form.model) throw new Error(t('onboarding_error_model_required'));
     }
     if(ONBOARDING.steps[ONBOARDING.step]==='password'){
-      ONBOARDING.form.password=(($('onboardingPasswordInput')||{}).value||'').trim();
+      ONBOARDING.form.password=($('onboardingPasswordInput')||{}).value||'';
     }
     if(ONBOARDING.step===ONBOARDING.steps.length-1){
       await _finishOnboarding();
