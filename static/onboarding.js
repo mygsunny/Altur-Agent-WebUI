@@ -402,7 +402,7 @@ function _renderOnboardingBody(){
       <form style="display:contents" autocomplete="off" onsubmit="return false">
       <label class="onboarding-field">
         <span>${t('onboarding_password_label')}</span>
-        <input id="onboardingPasswordInput" type="password" autocomplete="new-password" minlength="${Math.max(0,Number(settings.password_min_length)||0)}" value="${esc(ONBOARDING.form.password||'')}" placeholder="${t('onboarding_password_placeholder')}" oninput="ONBOARDING.form.password=this.value">
+        <input id="onboardingPasswordInput" type="password" autocomplete="new-password" value="${esc(ONBOARDING.form.password||'')}" placeholder="${t('onboarding_password_placeholder')}" oninput="ONBOARDING.form.password=this.value">
       </label>
       </form>
       <p class="onboarding-copy">${t('onboarding_password_help')}</p>`;
@@ -507,8 +507,6 @@ async function _saveOnboardingDefaults(){
   const workspace=(ONBOARDING.form.workspace||'').trim();
   const model=(ONBOARDING.form.model||'').trim();
   const password=(ONBOARDING.form.password||'').trim();
-  const passwordMinimum=Math.max(0,Number(((ONBOARDING.status||{}).settings||{}).password_min_length)||0);
-  if(password&&Array.from(password).length<passwordMinimum) throw new Error(t('new_password_min_length').replace('{min}',String(passwordMinimum)));
   if(!workspace) throw new Error(t('onboarding_error_choose_workspace'));
   if(!model) throw new Error(t('onboarding_error_choose_model'));
   const known=_getOnboardingWorkspaceChoices().some(ws=>ws.path===workspace);

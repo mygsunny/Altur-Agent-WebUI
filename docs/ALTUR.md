@@ -30,14 +30,6 @@ if only the current-password field is populated, its confirmation explicitly say
 the password was unchanged. No password value or hash is returned to the browser.
 The new labels use the existing English fallback in locales without a translation.
 
-New or changed passwords require at least four characters after the existing
-outer-whitespace trimming. There are no digit, uppercase, or symbol requirements.
-The canonical rule is `api.auth.MIN_PASSWORD_LENGTH`; settings and onboarding
-receive it from the server for their hints and validation. The settings endpoint
-enforces it independently of the browser. Existing shorter credentials remain
-valid for sign-in and legacy hash migration; changing one requires a new password
-that meets the current policy. Blank new-password fields still mean no change.
-
 ## Intentional compatibility and attribution exceptions
 
 - Python modules/imports, `hermes` executable commands, HERMES_* environment variables and runtime configuration paths remain compatible.

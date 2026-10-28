@@ -16815,8 +16815,7 @@ def handle_get(handler, parsed) -> bool:
             os.getenv("HERMES_WEBUI_PASSWORD", "").strip()
         )
         # Auth-state fields for frontend safety badge / confirmation flows
-        from api.auth import MIN_PASSWORD_LENGTH, get_password_hash, is_auth_enabled
-        settings["password_min_length"] = MIN_PASSWORD_LENGTH
+        from api.auth import get_password_hash, is_auth_enabled
         settings["auth_enabled"] = is_auth_enabled()
         settings["password_auth_enabled"] = get_password_hash() is not None
         try:
@@ -20155,10 +20154,6 @@ def handle_post(handler, parsed) -> bool:
                     "Current password is incorrect.",
                     403,
                 )
-
-        from api.auth import MIN_PASSWORD_LENGTH
-        if requested_password and len(body["_set_password"].strip()) < MIN_PASSWORD_LENGTH:
-            return bad(handler, f"New passwords must contain at least {MIN_PASSWORD_LENGTH} characters.", 400)
 
         if requested_passwordless:
             from api.auth import _passkey_feature_flag_enabled
