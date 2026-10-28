@@ -53,5 +53,9 @@
       "login": "Sign in to the third-party Nous AI provider",
       "topup": "View balance and billing for the third-party Nous provider"
     }
+  },
+  "ui": {
+    "assistant_name_mode": "brand",
+    "revision": "089a55c52409"
   }
 }

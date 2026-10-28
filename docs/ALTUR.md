@@ -2,7 +2,7 @@
 
 ## Brand source and desktop relationship
 
-`branding/brand.json` is canonical for product/short name, publisher, artwork, accessibility label, assistant identity, description, distribution destinations and upstream/runtime pins. The schema follows the desktop brand's schema_version/product/organization/assets/distribution/upstream structure. `branding/assets/source/portrait-icon.svg` is copied byte-for-byte from the desktop recipe's maintained SVG; the original Desktop path was unavailable. The desktop crop is recorded as view_box. The artwork is neither traced nor replaced. The web fork and desktop do not automatically synchronize.
+`BRANDING.json` is the canonical editable source for the UI name, publisher, SVG and default assistant name policy. Generated `branding/brand.json` resolves these values alongside distribution destinations and upstream/runtime pins. The schema follows the desktop brand's schema_version/product/organization/assets/distribution/upstream structure. `branding/assets/source/portrait-icon.svg` is copied byte-for-byte from the desktop recipe's maintained SVG; the original Desktop path was unavailable. The desktop crop is recorded as view_box. The artwork is neither traced nor replaced. The web fork and desktop do not automatically synchronize.
 
 Run `python scripts/generate-branding.py` with requirements-branding.txt installed after editing brand inputs. `branding/literals.json` records approved application-owned source literal templates and their generated values, including all locale bundles and fallback strings. It is a source catalog, not a runtime message filter. If upstream changes a slot, generation fails for review rather than silently missing it. SVG framing, rasterization, PNG sizes (16/32/180/192/512), ICO, manifest and service-worker cache namespace are deterministic. Light/dark use the same transparent portrait; opaque icons use a neutral tile and 20% maskable inset.
 
@@ -88,3 +88,39 @@ The local launcher sets the runtime’s supported `HERMES_MANAGED=altur-agent-we
 The launcher uses private Codex, Claude, and shared-auth roots below `.trial`, strips inherited provider credentials, and preserves HOME, PATH and certificate trust. It does not import live CLI credentials. The packaging layer owns permissions in managed mode: checkout-local trial state is private, new files use umask 077, and paths that escape the checkout are rejected. Existing profile contents and user personas are preserved.
 
 After regenerating source/assets, stop and restart the foreground development server, then reload existing tabs. The upstream server computes its versioned asset URLs at startup; a browser may keep the previous immutable JavaScript URL while that process is still running. Restarting computes the new source revision and requests fresh assets. Do not clear browser storage or conversation history. The generation command rebuilds branding; it does not install or supervise a service.
+
+
+## Change the UI name or logo
+
+Edit **`BRANDING.json`** at the repository root. Change `name` and/or `logo`
+(the path to your original SVG inside this repository), then run:
+
+```sh
+.venv/bin/python scripts/generate-branding.py
+```
+
+Install `requirements-branding.txt` in the isolated environment first if needed.
+Restart the WebUI and reload the browser. The command updates application-owned
+labels, all bundled localizations, login/share/export copy, runtime identity
+instructions, metadata, the complete icon family, and the shell cache revision.
+`branding/brand.json` is resolved output; do not edit its display fields directly.
+Technical identifiers and verified distribution destinations remain in that file.
+No user text, conversation history, credentials, storage keys, or profile names
+are rewritten. Branding is build-time configuration, not a public settings API.
+
+`publisher` sets the organization label. `description` supports `{name}` and
+`{publisher}`. `assistant_name_mode: "brand"` makes default assistant labels
+follow the manifest even when older settings contain another name; the saved
+value is preserved. Set it to `"customizable"` to restore per-install naming.
+Non-default profiles retain their explicit names in either mode.
+
+Keep SVGs self-contained, with a valid `viewBox`. `logo_framing` preserves the
+established portrait framing only while its `source` matches `logo`; a new SVG
+uses its own viewBox automatically. Change framing only to adjust deliberate
+padding. The original source artwork is never rewritten.
+
+The name/logo values are copied from the desktop brand, not synchronized with
+it. The desktop checkout is neither read nor modified by regeneration. Browser
+PWA launchers may refresh their installed title/icon later than page assets;
+reinstall the PWA if the operating system retains an old launcher icon. Do not
+clear conversation storage to refresh branding.

@@ -51,13 +51,16 @@ def test_generator_is_repeatable_and_renames_only_owned_sources(tmp_path):
  import pytest
  pytest.importorskip('resvg_py')
  catalog=json.loads((ROOT/'branding/literals.json').read_text())
- files=set(catalog)|{'branding/brand.json','branding/literals.json','branding/assets/source/portrait-icon.svg','static/manifest.json','static/sw.js','scripts/generate-branding.py'}
+ files=set(catalog)|{'BRANDING.json','branding/brand.json','branding/literals.json','branding/assets/source/portrait-icon.svg','static/manifest.json','static/sw.js','scripts/generate-branding.py'}
  for f in files:
   dest=tmp_path/f;dest.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(ROOT/f,dest)
  def run():subprocess.run([sys.executable,str(tmp_path/'scripts/generate-branding.py')],check=True)
  run();first={f:hashlib.sha256((tmp_path/f).read_bytes()).hexdigest() for f in files};run()
  assert first=={f:hashlib.sha256((tmp_path/f).read_bytes()).hexdigest() for f in files}
- p=tmp_path/'branding/brand.json';b=json.loads(p.read_text());b['product'].update(display_name='Example Agent',short_name='Example Agent');p.write_text(json.dumps(b));run()
+ p=tmp_path/'BRANDING.json';b=json.loads(p.read_text());b['name']='Example Agent';b['logo']='branding/assets/source/new.svg';(tmp_path/b['logo']).write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 50"><rect width="100" height="50" fill="red"/></svg>');p.write_text(json.dumps(b));run()
+ assert json.loads((tmp_path/'branding/brand.json').read_text())['assets']['view_box']==[0,0,100,50]
+ assert 'window.__ALTUR_BRAND__' in (tmp_path/'static/branding.js').read_text()
+ assert 'fill="red"' in (tmp_path/'static/brand-logo.svg').read_text()
  s=(tmp_path/'static/index.html').read_text()
  assert '<title>Example Agent</title>' in s
  assert 'X-Hermes-CSRF-Token' in s and "'hermes-theme'" in s

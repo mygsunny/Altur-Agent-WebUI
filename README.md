@@ -46,3 +46,5 @@ GitHub Actions, releases, deployment and application updates are disabled. Updat
 ## Provenance
 
 Based on [nesquena/hermes-webui](https://github.com/nesquena/hermes-webui), starting at `e40f042b6ec80199e06b7edf6e91a31beee2b812`, with its Git history preserved. The separate runtime is [Hermes Agent](https://github.com/NousResearch/hermes-agent), pinned to `bf0203a794a07aac3ff764972ab9087baa4e4f4e`. Original licensing and contributor credits remain in [LICENSE](LICENSE), [CONTRIBUTORS.md](CONTRIBUTORS.md), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The historical [upstream README](docs/UPSTREAM-README.md) is reference material, not this fork's installation procedure.
+
+Change the product name and SVG logo in [`BRANDING.json`](BRANDING.json); see [branding regeneration](docs/ALTUR.md#change-the-ui-name-or-logo).

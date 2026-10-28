@@ -14,7 +14,7 @@ import copy
 import hashlib
 import json
 import logging
-from api.branding import BRAND
+from api.branding import BRAND, assistant_name_managed
 import math
 import os
 import queue
@@ -13646,6 +13646,8 @@ def load_settings() -> dict:
     # values (including a legacy English pick written before this change)
     # win via the merge above and are never touched here.
     settings.setdefault("language", None)
+    if assistant_name_managed():
+        settings['bot_name'] = BRAND['assistant']['display_name']
     return settings
 
 
@@ -13977,6 +13979,12 @@ def save_settings(settings: dict) -> dict:
     effective_persisted_speech_keys = set(persisted_speech_keys)
     effective_persisted_speech_keys.update(applied_speech_keys)
     persisted = _settings_payload_for_write(current, effective_persisted_speech_keys)
+    if assistant_name_managed():
+        current['bot_name'] = BRAND['assistant']['display_name']
+        if 'bot_name' in raw_settings:
+            persisted['bot_name'] = raw_settings['bot_name']
+        else:
+            persisted.pop('bot_name', None)
     SETTINGS_FILE.parent.mkdir(parents=True, exist_ok=True)
     _atomic_write_settings_text(
         SETTINGS_FILE,

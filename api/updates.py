@@ -716,7 +716,9 @@ def _detect_agent_version() -> str:
 
 
 # Resolved once at import time — tags cannot change without a process restart.
-WEBUI_VERSION: str = _detect_webui_version()
+from api.branding import BRAND
+
+WEBUI_VERSION: str = _detect_webui_version() + ('-brand' + BRAND['ui']['revision'] if BRAND.get('ui', {}).get('revision') else '')
 AGENT_VERSION: str = _detect_agent_version()
 
 

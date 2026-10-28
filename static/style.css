@@ -7683,3 +7683,6 @@ html[data-conversation-outline="enabled"] #outlineToggleBtn:not([hidden]){displa
 /* Supplied portrait retains its proportions in inherited logo slots. */
 .app-titlebar-icon img{width:18px;height:18px;object-fit:contain;display:block}
 .empty-logo img{object-fit:contain}
+
+/* Canonical product artwork for the default assistant. */
+.assistant-brand-logo{width:100%;height:100%;object-fit:contain;border-radius:inherit}
