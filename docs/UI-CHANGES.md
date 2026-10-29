@@ -47,12 +47,12 @@ Tracking: branch `fix/desktop-session-discovery`, stacked on the navigation feat
 ### Fixed
 - Recover user-visible Desktop, GUI and local conversations independently of the 20-session recent-agent feed. Busy delegated children no longer evict older standalone Desktop chats from discovery.
 - Deduplicate recovery by conversation lineage. Keep profile scoping, project assignment, archived flags and explicit-session lookup narrowing intact.
-- Exclude hidden and delegated rows from this recovery pass before selecting candidates. Keep background-source and ordinary CLI limits unchanged.
+- Exclude hidden and delegated conversations from this recovery pass after resolving complete compression lineages, so hidden roots/intermediate segments cannot resurface under a tip ID. Keep background-source and ordinary CLI limits unchanged; run GUI recovery after CLI refill/budget accounting, and retain initial results if this optional pass fails.
 - Make current-password reentry optional for password changes from an existing authenticated login session, as requested by the owner. Login remains required; any supplied current password is still verified. Disabling authentication or switching to passwordless retains current-password verification. This intentionally changes the fork's prior reentry policy.
 - Explain the optional field in Settings, including the stronger requirement for disabling authentication. Blank general settings saves still leave the password unchanged; password spaces remain significant.
 
 ### Local verification
-- Seven disposable-SQLite discovery tests cover recent-child starvation, hidden/delegated/background exclusions, user forks, archive identity, explicit IDs, malformed metadata, legacy schemas and source filtering.
+- Ten disposable-SQLite discovery tests cover recent-child starvation, hidden/delegated/background exclusions, user forks, archive identity, explicit IDs, malformed metadata, legacy schemas, source filtering, hidden root/intermediate/tip lineages, mixed CLI refill, and optional-query failure.
 - Five policy tests exercise the actual settings-route guard and actual Settings save function, including unsigned refusal and the retained disable-authentication guard.
 - Existing password-action and dialog tests were exercised with disposable DOM credentials; 25 cases passed. Both navigation browser suites, JavaScript syntax and whitespace checks also passed.
 - An isolated loopback full-server test with generated fixture credentials returned 401 for unauthenticated protected access, 200 for a signed-in password rotation without reentry, 403 for disabling authentication without reentry, 401 for the old password and 200 for the new password. Authentication remained enabled.
