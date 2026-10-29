@@ -39,3 +39,22 @@ Tracking: [pull request #1](https://github.com/mygsunny/Altur-Agent-WebUI/pull/1
 ### Maintenance
 - Continue this log for later changes, and publish the source, relevant tests and safe visual evidence together in feature commits and pull requests.
 - Local installation migration, reversible backups, guarded launcher and password-management work have separate private deployment records; they are not part of the publishable application source in this change.
+
+## Desktop conversation discovery and signed-in password changes
+
+Tracking: branch `fix/desktop-session-discovery`, stacked on the navigation feature. Deployment is recorded separately; passing isolated checks does not imply the running service has reloaded.
+
+### Fixed
+- Recover user-visible Desktop, GUI and local conversations independently of the 20-session recent-agent feed. Busy delegated children no longer evict older standalone Desktop chats from discovery.
+- Deduplicate recovery by conversation lineage. Keep profile scoping, project assignment, archived flags and explicit-session lookup narrowing intact.
+- Exclude hidden and delegated rows from this recovery pass before selecting candidates. Keep background-source and ordinary CLI limits unchanged.
+- Make current-password reentry optional for password changes from an existing authenticated login session, as requested by the owner. Login remains required; any supplied current password is still verified. Disabling authentication or switching to passwordless retains current-password verification. This intentionally changes the fork's prior reentry policy.
+- Explain the optional field in Settings, including the stronger requirement for disabling authentication. Blank general settings saves still leave the password unchanged; password spaces remain significant.
+
+### Local verification
+- Seven disposable-SQLite discovery tests cover recent-child starvation, hidden/delegated/background exclusions, user forks, archive identity, explicit IDs, malformed metadata, legacy schemas and source filtering.
+- Five policy tests exercise the actual settings-route guard and actual Settings save function, including unsigned refusal and the retained disable-authentication guard.
+- Existing password-action and dialog tests were exercised with disposable DOM credentials; 25 cases passed. Both navigation browser suites, JavaScript syntax and whitespace checks also passed.
+- An isolated loopback full-server test with generated fixture credentials returned 401 for unauthenticated protected access, 200 for a signed-in password rotation without reentry, 403 for disabling authentication without reentry, 401 for the old password and 200 for the new password. Authentication remained enabled.
+- The same disposable server returned all four fixture Desktop roots despite 25 newer delegated children, and Chromium rendered all four roots visibly.
+- These are local checks, not GitHub CI or a claim that a production password has been rotated.

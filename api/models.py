@@ -10132,6 +10132,23 @@ def _load_cli_sessions_uncached(
             for value in _lineage_ids(row):
                 represented_rows.setdefault(value, row)
 
+        # Desktop/local GUI chats share this importer, but are not a recent-CLI
+        # feed. Recover their user-visible conversations independently so recent
+        # delegated children cannot evict older Desktop chats. Keep explicit-id
+        # lookups narrow, and reuse lineage-aware merging to avoid duplicates.
+        desktop_rows = read_importable_agent_session_rows(
+            db_path,
+            limit=None,
+            log=logger,
+            exclude_sources=None,
+            include_sources=('desktop', 'gui', 'local'),
+            user_visible_only=True,
+            session_ids=session_ids,
+        )
+        assert isinstance(desktop_rows, list)
+        for row in desktop_rows:
+            _merge_state_row(row)
+
         # --- Recovery pass 1: project-assigned conversations the recent window
         # truncated. Bounded PER PROJECT (see PROJECT_ASSIGNED_CLI_LIMIT) so a
         # chip can reveal its project's history without any one project growing
