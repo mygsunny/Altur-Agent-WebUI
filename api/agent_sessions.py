@@ -757,6 +757,7 @@ def read_importable_agent_session_rows(
     project_ids: tuple[str, ...] | None = None,
     return_window_exhaustion: bool = False,
     session_ids: tuple[str, ...] | None = None,
+    user_visible_only: bool = False,
 ) -> list[dict] | tuple[list[dict], bool]:
     """Return agent sessions projected as importable conversations.
 
@@ -773,6 +774,12 @@ def read_importable_agent_session_rows(
     ``exclude_sources=None``. ``include_sources`` is an additional narrowing
     filter; callers that want an include-only query should explicitly pass
     ``exclude_sources=None`` so the default exclusions do not also apply.
+
+    ``user_visible_only=True`` resolves full compression lineages first, then
+    omits a logical conversation if any segment is hidden or delegated. This
+    prevents hidden roots/intermediate segments from resurfacing under a tip ID.
+    Desktop delegates can inherit their parent's source, so source filtering is
+    insufficient. Archived conversations retain their archive flag for callers.
 
     ``project_assignment`` narrows to project-assigned (``'assigned'``) or
     project-free (``'unassigned'``) conversations; ``None`` returns both. The
@@ -1068,8 +1075,10 @@ def read_importable_agent_session_rows(
                 "                    s.started_at DESC"
             )
 
+        visibility_hidden_expr = 's.hidden' if user_visible_only and 'hidden' in session_cols else '0'
         select_sql = f"""
             SELECT s.id, s.title, s.model, s.message_count,
+                   {visibility_hidden_expr} AS _visibility_hidden,
                    s.started_at, s.source,
                    {session_source_expr},
                    {model_config_expr},
@@ -1092,12 +1101,31 @@ def read_importable_agent_session_rows(
         """
 
         def _project(raw_rows: list[dict]) -> list[dict]:
+            blocked_roots: set[str] = set()
+            if user_visible_only:
+                # Preserve every segment while resolving compression identity.
+                # A hidden segment hides the logical conversation, rather than
+                # making its visible continuation look like a new chat.
+                by_id = {row['id']: row for row in raw_rows}
+                for row in raw_rows:
+                    config = row.get('model_config')
+                    try:
+                        metadata = json.loads(config) if config else {}
+                        blocked = not isinstance(metadata, dict) or bool(metadata.get('_delegate_from'))
+                    except (TypeError, ValueError):
+                        blocked = True
+                    if row.get('_visibility_hidden') or blocked:
+                        blocked_roots.add(_continuation_root_id(by_id, row['id']) or row['id'])
             projected = _project_agent_session_rows(raw_rows)
+            if user_visible_only:
+                projected = [row for row in projected
+                             if (row.get('_lineage_root_id') or row['id']) not in blocked_roots]
             # model_config is selected only so the continuation classifier can
             # read the real _branched_from/_delegate_from markers; it is internal
             # agent state and must not leak into the /api/sessions response.
             for row in projected:
                 row.pop('model_config', None)
+                row.pop('_visibility_hidden', None)
             projected = [_with_normalized_source(row) for row in projected]
             return [row for row in projected if is_cli_session_row_visible(row)]
 

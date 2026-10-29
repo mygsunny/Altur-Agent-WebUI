@@ -13695,13 +13695,10 @@ async function saveSettings(andClose){
   if(pw){
     const currentPwField=$('settingsCurrentPassword');
     const currentPw=(currentPwField||{}).value||'';
-    if(_settingsPasswordAuthEnabled && !currentPw){
-      if(currentPwField) currentPwField.focus();
-      showToast(t('current_password_required'));
-      return;
-    }
+    // Reentry is optional for a signed-in password change. If provided, the
+    // server still verifies it. Disabling authentication retains its own guard.
     const payload={...body,_set_password:pw};
-    if(_settingsPasswordAuthEnabled) payload._current_password=currentPw;
+    if(currentPw) payload._current_password=currentPw;
     try{
       const saved=await _enqueueSettingsPost({method:'POST',body:JSON.stringify(payload)});
       if(modelChanged && model){

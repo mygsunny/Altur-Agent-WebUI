@@ -20139,16 +20139,18 @@ def handle_post(handler, parsed) -> bool:
                     403,
                 )
 
-        # Auth-disable safety: when password auth is currently enabled, require
-        # the current password to change, clear, or switch to passwordless.
+        # A valid signed-in cookie is sufficient to rotate a password. Reentry
+        # stays mandatory for disabling authentication/passwordless conversion,
+        # or for callers that have not authenticated with a login session.
         if auth_enabled_before and password_auth_enabled_before and (requested_password or requested_clear_password):
-            if not isinstance(current_password, str) or not current_password:
+            needs_current_password = requested_clear_password or not logged_in_before
+            if needs_current_password and (not isinstance(current_password, str) or not current_password):
                 return bad(
                     handler,
                     "Current password is required to change or disable authentication.",
                     403,
                 )
-            if not verify_password(current_password):
+            if current_password and (not isinstance(current_password, str) or not verify_password(current_password)):
                 return bad(
                     handler,
                     "Current password is incorrect.",

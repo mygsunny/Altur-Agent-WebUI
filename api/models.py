@@ -10604,6 +10604,24 @@ def _load_cli_sessions_uncached(
             except Exception:
                 logger.debug("Unassigned CLI refill pass failed", exc_info=True)
 
+        # GUI history is not a recent-CLI feed. Recover it AFTER all CLI/project
+        # budgets and refill accounting, so it cannot consume their slots.
+        try:
+            desktop_rows = read_importable_agent_session_rows(
+                db_path, limit=None, log=logger, exclude_sources=None,
+                include_sources=('desktop', 'gui', 'local'),
+                user_visible_only=True, session_ids=session_ids,
+            )
+            assert isinstance(desktop_rows, list)
+            for row in desktop_rows:
+                _merge_state_row(row)
+        except (OSError, sqlite3.Error) as exc:
+            projection_complete = False
+            logger.warning('Optional Desktop recovery unavailable at %s: %s', db_path, exc)
+        except Exception:
+            projection_complete = False
+            logger.debug('Optional Desktop recovery failed', exc_info=True)
+
     for row in state_rows:
         sid = row['id']
         raw_ts = row['last_activity'] or row['started_at']
