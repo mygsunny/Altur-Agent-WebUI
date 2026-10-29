@@ -1629,7 +1629,8 @@
               <form id="settingsPasswordForm" style="display:contents" autocomplete="off" onsubmit="return false">
               <div id="settingsCurrentPasswordBlock" style="display:none;margin-top:6px">
                 <label for="settingsCurrentPassword" style="font-size:11px;display:block;margin-bottom:4px" data-i18n="current_password_label">Current Password</label>
-                <input type="password" id="settingsCurrentPassword" autocomplete="current-password" placeholder="Enter current password…" data-i18n-placeholder="current_password_placeholder" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
+                <input type="password" id="settingsCurrentPassword" autocomplete="current-password" aria-describedby="settingsPasswordOptionalHint" placeholder="Enter current password…" data-i18n-placeholder="current_password_placeholder" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
+                <div id="settingsPasswordOptionalHint" style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="password_change_optional_hint">Current password is optional when changing your password while signed in. It is still required to disable authentication.</div>
               </div>
               <label for="settingsPassword" style="font-size:11px;display:block;margin:6px 0 4px" data-i18n="new_password_label">New password</label>
               <input type="password" id="settingsPassword" autocomplete="new-password" aria-describedby="settingsPasswordSpaces" placeholder="Enter new password…" data-i18n-placeholder="password_placeholder" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
@@ -1821,7 +1822,7 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<script src="static/i18n.js?v=__WEBUI_VERSION__" defer></script>
+<script src="static/i18n.js?v=__WEBUI_VERSION__&amp;settings-auth=2" defer></script>
 <script src="static/icons.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/assistant_turn_anchors.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/ui.js?v=__WEBUI_VERSION__" defer></script>
@@ -1831,7 +1832,7 @@
 <script src="static/commands.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/messages.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/extension_settings.js?v=__WEBUI_VERSION__" defer></script>
-<script src="static/panels.js?v=__WEBUI_VERSION__&amp;rail=3" defer></script>
+<script src="static/panels.js?v=__WEBUI_VERSION__&amp;rail=3&amp;settings-auth=2" defer></script>
 <script src="static/rail-reorder.js?v=__WEBUI_VERSION__&amp;rail=5" defer></script>
 <script src="static/onboarding.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/boot.js?v=__WEBUI_VERSION__" defer></script>

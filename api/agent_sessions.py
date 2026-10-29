@@ -757,6 +757,7 @@ def read_importable_agent_session_rows(
     project_ids: tuple[str, ...] | None = None,
     return_window_exhaustion: bool = False,
     session_ids: tuple[str, ...] | None = None,
+    user_visible_only: bool = False,
 ) -> list[dict] | tuple[list[dict], bool]:
     """Return agent sessions projected as importable conversations.
 
@@ -773,6 +774,11 @@ def read_importable_agent_session_rows(
     ``exclude_sources=None``. ``include_sources`` is an additional narrowing
     filter; callers that want an include-only query should explicitly pass
     ``exclude_sources=None`` so the default exclusions do not also apply.
+
+    ``user_visible_only=True`` excludes hidden and delegated rows before the
+    candidate window is selected. Desktop delegate runs can inherit the Desktop
+    source, so source filtering alone cannot identify user-facing GUI chats.
+    Archived conversations retain their archive flag for the caller to scope.
 
     ``project_assignment`` narrows to project-assigned (``'assigned'``) or
     project-free (``'unassigned'``) conversations; ``None`` returns both. The
@@ -935,6 +941,17 @@ def read_importable_agent_session_rows(
 
         where_clauses = ["s.source IS NOT NULL"]
         params: list[object] = []
+        if user_visible_only:
+            # Desktop delegates inherit their parent's source. They must not
+            # expand the user-chat recovery pass or reveal hidden conversations.
+            if 'hidden' in session_cols:
+                where_clauses.append("COALESCE(s.hidden, 0) = 0")
+            if 'model_config' in session_cols:
+                where_clauses.append("""
+                    CASE WHEN json_valid(s.model_config)
+                    THEN COALESCE(json_extract(s.model_config, '$._delegate_from'), '') = ''
+                    ELSE s.model_config IS NULL OR TRIM(s.model_config) = '' END
+                """)
         if include_sources:
             included = tuple(str(source) for source in include_sources if source)
             if included:
