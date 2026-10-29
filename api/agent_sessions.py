@@ -775,10 +775,11 @@ def read_importable_agent_session_rows(
     filter; callers that want an include-only query should explicitly pass
     ``exclude_sources=None`` so the default exclusions do not also apply.
 
-    ``user_visible_only=True`` excludes hidden and delegated rows before the
-    candidate window is selected. Desktop delegate runs can inherit the Desktop
-    source, so source filtering alone cannot identify user-facing GUI chats.
-    Archived conversations retain their archive flag for the caller to scope.
+    ``user_visible_only=True`` resolves full compression lineages first, then
+    omits a logical conversation if any segment is hidden or delegated. This
+    prevents hidden roots/intermediate segments from resurfacing under a tip ID.
+    Desktop delegates can inherit their parent's source, so source filtering is
+    insufficient. Archived conversations retain their archive flag for callers.
 
     ``project_assignment`` narrows to project-assigned (``'assigned'``) or
     project-free (``'unassigned'``) conversations; ``None`` returns both. The
@@ -941,17 +942,6 @@ def read_importable_agent_session_rows(
 
         where_clauses = ["s.source IS NOT NULL"]
         params: list[object] = []
-        if user_visible_only:
-            # Desktop delegates inherit their parent's source. They must not
-            # expand the user-chat recovery pass or reveal hidden conversations.
-            if 'hidden' in session_cols:
-                where_clauses.append("COALESCE(s.hidden, 0) = 0")
-            if 'model_config' in session_cols:
-                where_clauses.append("""
-                    CASE WHEN json_valid(s.model_config)
-                    THEN COALESCE(json_extract(s.model_config, '$._delegate_from'), '') = ''
-                    ELSE s.model_config IS NULL OR TRIM(s.model_config) = '' END
-                """)
         if include_sources:
             included = tuple(str(source) for source in include_sources if source)
             if included:
@@ -1085,8 +1075,10 @@ def read_importable_agent_session_rows(
                 "                    s.started_at DESC"
             )
 
+        visibility_hidden_expr = 's.hidden' if user_visible_only and 'hidden' in session_cols else '0'
         select_sql = f"""
             SELECT s.id, s.title, s.model, s.message_count,
+                   {visibility_hidden_expr} AS _visibility_hidden,
                    s.started_at, s.source,
                    {session_source_expr},
                    {model_config_expr},
@@ -1109,12 +1101,31 @@ def read_importable_agent_session_rows(
         """
 
         def _project(raw_rows: list[dict]) -> list[dict]:
+            blocked_roots: set[str] = set()
+            if user_visible_only:
+                # Preserve every segment while resolving compression identity.
+                # A hidden segment hides the logical conversation, rather than
+                # making its visible continuation look like a new chat.
+                by_id = {row['id']: row for row in raw_rows}
+                for row in raw_rows:
+                    config = row.get('model_config')
+                    try:
+                        metadata = json.loads(config) if config else {}
+                        blocked = not isinstance(metadata, dict) or bool(metadata.get('_delegate_from'))
+                    except (TypeError, ValueError):
+                        blocked = True
+                    if row.get('_visibility_hidden') or blocked:
+                        blocked_roots.add(_continuation_root_id(by_id, row['id']) or row['id'])
             projected = _project_agent_session_rows(raw_rows)
+            if user_visible_only:
+                projected = [row for row in projected
+                             if (row.get('_lineage_root_id') or row['id']) not in blocked_roots]
             # model_config is selected only so the continuation classifier can
             # read the real _branched_from/_delegate_from markers; it is internal
             # agent state and must not leak into the /api/sessions response.
             for row in projected:
                 row.pop('model_config', None)
+                row.pop('_visibility_hidden', None)
             projected = [_with_normalized_source(row) for row in projected]
             return [row for row in projected if is_cli_session_row_visible(row)]
 

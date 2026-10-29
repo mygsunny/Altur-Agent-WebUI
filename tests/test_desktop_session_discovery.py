@@ -6,6 +6,7 @@ import sqlite3
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 _HOME = tempfile.TemporaryDirectory(prefix='desktop-session-tests-')
@@ -58,7 +59,7 @@ class DesktopSessionDiscoveryTests(unittest.TestCase):
             self.home, self.db, 'default', include_claude_code=False,
             project_assigned_limit=False, cron_project_limit=False,
             webhook_project_limit=False, kanban_project_limit=False)
-        self.assertIsInstance(rows, list)
+        assert isinstance(rows, list)
         ids = {row['session_id'] for row in rows}
         self.assertTrue({'desktop-0', 'desktop-1', 'desktop-2', 'local-chat'} <= ids,
                         'Older Desktop and local chats were evicted by the recent child-session window')
@@ -122,6 +123,60 @@ class DesktopSessionDiscoveryTests(unittest.TestCase):
             kanban_project_limit=False)
         self.assertIsInstance(rows, list)
         self.assertEqual({r['session_id'] for r in rows}, {'cli'})
+
+    def test_hidden_compression_segments_never_split_or_resurface_a_lineage(self):
+        for hidden_id in ('root', 'middle', 'tip'):
+            with self.subTest(hidden=hidden_id):
+                self.conn.executescript('DELETE FROM messages; DELETE FROM sessions;')
+                self.add('root', hidden=hidden_id == 'root')
+                self.add('middle', parent='root', started=2, hidden=hidden_id == 'middle')
+                self.add('tip', parent='middle', started=3, hidden=hidden_id == 'tip')
+                self.conn.execute("UPDATE sessions SET end_reason='compression' WHERE id IN ('root','middle')")
+                self.conn.commit()
+                self.assertEqual(self.visible_desktop_rows(), [])
+        self.conn.execute('UPDATE sessions SET hidden=0')
+        self.conn.commit()
+        rows = self.visible_desktop_rows()
+        self.assertEqual(len(rows), 1)
+        self.assertEqual(rows[0].get('_lineage_root_id'), 'root')
+        self.assertEqual(rows[0].get('_lineage_tip_id'), 'tip')
+        self.assertNotIn('_visibility_hidden', rows[0])
+
+    def test_desktop_recovery_does_not_satisfy_cli_refill_budget(self):
+        for index in range(20):
+            self.add('desktop-' + str(index), started=index + 1)
+            self.add('assigned-cli-' + str(index), source='cli', started=100 + index)
+        for index in range(3):
+            self.add('unassigned-cli-' + str(index), source='cli', started=50 + index)
+        self.conn.execute("UPDATE sessions SET project_id='fixture-project' WHERE id LIKE 'assigned-cli-%'")
+        self.conn.commit()
+        with patch('api.models.profile_scoped_project_ids', return_value=frozenset({'fixture-project'})):
+            rows = _load_cli_sessions_uncached(
+                self.home, self.db, 'default', include_claude_code=False,
+                project_assigned_limit=False, cron_project_limit=False,
+                webhook_project_limit=False, kanban_project_limit=False)
+        assert isinstance(rows, list)
+        ids = {row['session_id'] for row in rows}
+        self.assertTrue({f'unassigned-cli-{i}' for i in range(3)} <= ids)
+        self.assertTrue({f'desktop-{i}' for i in range(20)} <= ids)
+
+    def test_optional_desktop_io_failure_keeps_initial_rows_and_marks_incomplete(self):
+        self.add('cli', source='cli')
+        original = read_importable_agent_session_rows
+        def reader(*args, **kwargs):
+            if kwargs.get('user_visible_only'):
+                raise sqlite3.OperationalError('fixture optional-recovery failure')
+            return original(*args, **kwargs)
+        with patch('api.models.read_importable_agent_session_rows', side_effect=reader):
+            result = _load_cli_sessions_uncached(
+                self.home, self.db, 'default', include_claude_code=False,
+                project_assigned_limit=False, cron_project_limit=False,
+                webhook_project_limit=False, kanban_project_limit=False,
+                _with_completeness=True)
+        from api.models import _CliSessionsLoadResult
+        assert isinstance(result, _CliSessionsLoadResult)
+        self.assertEqual({r['session_id'] for r in result.sessions}, {'cli'})
+        self.assertFalse(result.complete)
 
 
 if __name__ == '__main__':
