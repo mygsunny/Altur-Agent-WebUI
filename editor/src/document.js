@@ -5,7 +5,7 @@ import {closeHistory} from '@tiptap/pm/history';
 
 const paragraph=text=>({type:'paragraph',content:text?[{type:'text',text}]:[]});
 export class DocumentAdapter {
- constructor(element,snapshot){this.editor=new Editor({element,extensions:[StarterKit,TableKit],content:snapshot||{type:'doc',content:[paragraph('')]}});}
+ constructor(element,snapshot){this.editor=new Editor({element,extensions:[StarterKit,TableKit],editorProps:{attributes:{'aria-label':'Document page','data-placeholder':'Start typing your document…'}},content:snapshot||{type:'doc',content:[paragraph('')]}});}
  snapshot(){return this.editor.getJSON();}
  context(){const {from,to}=this.editor.state.selection;return {kind:'document',text:this.editor.getText().slice(0,60000),selection:{from,to,text:this.editor.state.doc.textBetween(from,to,'\n')}};}
  undo(){this.editor.commands.undo();}

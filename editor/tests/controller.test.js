@@ -1,6 +1,12 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 
+test('duplicate Apply while inference is pending admits one model request and releases busy state',async()=>{
+ const {Controller}=await import('../src/controller.js');let resolve,calls=0,applied=0;const busy=[];
+ const c=new Controller(()=>{calls++;return new Promise(r=>resolve=r)},()=>{},v=>busy.push(v));c.open('a',{context:()=>({}),apply:()=>applied++});
+ const first=c.submit('append quoted content','u');const second=c.submit('append quoted content','v');assert.equal(calls,1);assert.equal(busy.at(-1),true);
+ resolve({document_id:'a',utterance_id:'u',operations:[{type:'document.append',text:'quoted content'}]});await first;assert.equal(applied,1);assert.equal(busy.at(-1),false);
+});
 test('controller cancels stop and document switch; final transcripts deduplicated', async()=>{
  const {Controller}=await import('../src/controller.js');
  let resolve, calls=0, applied=[];

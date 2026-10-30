@@ -9,7 +9,10 @@ export async function sheetToXlsx(snapshot){
   const s=snapshot.sheets[id],ws=wb.addWorksheet(s.name);
   for(const [r,row] of Object.entries(s.cellData||{}))for(const [c,cell] of Object.entries(row)){
    if(cell.p)throw Error('Unsupported rich cell; use native snapshot export');
-   ws.getCell(+r+1,+c+1).value=cell.f?{formula:cell.f.replace(/^=/,'')}:cell.v??null;
+   const target=ws.getCell(+r+1,+c+1);
+   target.value=cell.f?{formula:cell.f.replace(/^=/,'')}:cell.v??null;
+   const color=snapshot.styles?.[cell.s]?.cl?.rgb;
+   if(color)target.font={color:{argb:'FF'+color.slice(1).toUpperCase()}};
   }
  }
  return wb.xlsx.writeBuffer();
@@ -17,7 +20,7 @@ export async function sheetToXlsx(snapshot){
 export async function xlsxToSheet(buffer){
  const wb=new ExcelJS.Workbook();await wb.xlsx.load(buffer);
  if(!wb.worksheets.length)throw Error('No worksheets');
- const sheets={},sheetOrder=[];
+ const sheets={},sheetOrder=[],styles={};
  for(const ws of wb.worksheets){
   if(ws.rowCount>1000||ws.columnCount>100)throw Error('Import limit: 1000 rows × 100 columns');
   const id='sheet'+ws.id,cellData={};sheetOrder.push(id);
@@ -28,11 +31,13 @@ export async function xlsxToSheet(buffer){
     data={f:'='+v.formula};
    }else if(['string','number','boolean'].includes(typeof v))data={v};
    else throw Error('Unsupported cell');
+   const color=cell.font?.color?.argb;
+   if(typeof color==='string'&&/^FF[0-9A-F]{6}$/.test(color)){const key='rgb'+color.slice(2);styles[key]={cl:{rgb:'#'+color.slice(2)}};data.s=key;}
    (cellData[r-1]??={})[c-1]=data;
   }));
   sheets[id]={id,name:ws.name,rowCount:1000,columnCount:100,cellData};
  }
- return {id:'import-'+Date.now(),name:'Imported spreadsheet',sheets,sheetOrder};
+ return {id:'import-'+Date.now(),name:'Imported spreadsheet',sheets,sheetOrder,...(Object.keys(styles).length?{styles}:{})};
 }
 function runs(node){
  return (node.content||[]).map(n=>{
