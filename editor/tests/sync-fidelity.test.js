@@ -5,6 +5,13 @@ import ExcelJS from 'exceljs';
 import JSZip from 'jszip';
 import {decodeOffice,encodeOffice} from '../src/office-sync.js';
 globalThis.DOMParser=class extends DOMParser{parseFromString(...args){const doc=super.parseFromString(...args);doc.querySelectorAll=()=>Array.from(doc.getElementsByTagName('*'));return doc;}};
+test('native keyboard text color survives Office roundtrip without pausing writers',async()=>{
+ const snapshot={id:'book',name:'Book',styles:{typed:{cl:{rgb:'#1B1C1F'}}},sheetOrder:['s'],sheets:{s:{id:'s',name:'Sheet1',rowCount:1000,columnCount:100,cellData:{0:{0:{v:'typed',t:1,s:'typed'}}}}}};
+ const bytes=await encodeOffice(snapshot,'sheet');const wb=new ExcelJS.Workbook();await wb.xlsx.load(bytes);
+ assert.equal(wb.worksheets[0].getCell('A1').font.color.argb,'FF1B1C1F');
+ const restored=await decodeOffice(bytes,'sheet');const cell=restored.sheets.sheet1.cellData[0][0];assert.equal(restored.styles[cell.s].cl.rgb,'#1B1C1F');
+ snapshot.styles.typed.bl=1;await assert.rejects(encodeOffice(snapshot,'sheet'),/Unsupported/);
+});
 for(const feature of ['hidden','definedName','rowHeight','columnWidth','unknownPart'])test('reject XLSX '+feature,async()=>{
  const wb=new ExcelJS.Workbook(),ws=wb.addWorksheet('Sheet1');ws.getCell('A1').value='retained';
  if(feature==='hidden')ws.state='hidden';

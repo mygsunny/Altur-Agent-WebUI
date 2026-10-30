@@ -116,15 +116,17 @@ def validate_intent(payload, document_id, utterance_id):
         fields = {
             'undo': {'type'}, 'redo': {'type'}, 'stop': {'type'},
             'sheet.set': {'type', 'sheet_id', 'range', 'values'},
+            'sheet.clear': {'type', 'sheet_id', 'range'},
             'document.replace': {'type', 'find', 'text'},
             'document.append': {'type', 'text'},
             'document.table': {'type', 'rows'},
         }.get(kind)
         if fields is None or set(op) != fields:
             raise ValueError('Unsupported operation or unexpected fields')
-        if kind == 'sheet.set':
+        if kind in ('sheet.set', 'sheet.clear'):
             if not isinstance(op['sheet_id'], str) or not _RANGE.fullmatch(str(op['range'])):
                 raise ValueError('Invalid sheet target')
+        if kind == 'sheet.set':
             values = op['values']
             if not isinstance(values, list) or not values or len(values) > 1000 or any(not isinstance(row, list) or not row or len(row) > 100 for row in values):
                 raise ValueError('Invalid cell values')
@@ -154,6 +156,11 @@ Envelope: {"document_id":same input ID,"utterance_id":same input ID,
 "operations":[one operation],"clarification":null}.
 Operations: {"type":"undo"}, {"type":"redo"}, {"type":"stop"},
 {"type":"sheet.set","sheet_id":exact live sheet ID,"range":"A1:B2","values":[[1,2],[3,4]]},
+{"type":"sheet.clear","sheet_id":exact live sheet ID,"range":"A1:CV1000"},
+Clear/delete all spreadsheet contents uses sheet.clear on the active sheet's
+A1:CV1000 range, preserving formatting and native Undo. Never generate a huge
+null matrix for deletion. If multiple sheets make the intended target unclear,
+ask clarification. A selected bounded range can also use sheet.clear.
 {"type":"document.replace","find":"unique exact live text","text":"replacement"},
 {"type":"document.append","text":"dictation or paragraph text"},
 {"type":"document.table","rows":[["heading","value"],["item","1"]]}.
@@ -161,6 +168,10 @@ Spreadsheet formulas are strings beginning =. For document edits target unique
 exact text, never stale positions. For ambiguity or unsupported operations return
 operations:[] and clarification. Compound instructions needing multiple different
 operations require clarification. No code, filesystem, URLs or external actions.'''
+
+
+class ModelResponseError(ValueError):
+    """Categorical, content-free model diagnostics, distinct from bad requests."""
 
 
 def infer_intent(body, profile):
@@ -177,8 +188,15 @@ def infer_intent(body, profile):
     answer = _llm_update_summary(SYSTEM, json.dumps({
         'document_id': document_id, 'utterance_id': utterance_id,
         'text': body['text'], 'context': context,
-    }, ensure_ascii=False), active_profile=profile)
-    return validate_intent(json.loads(answer), document_id, utterance_id)
+    }, ensure_ascii=False), active_profile=profile, interactive_intent=True)
+    try:
+        payload = json.loads(answer)
+    except (ValueError, TypeError):
+        raise ModelResponseError('model-json') from None
+    try:
+        return validate_intent(payload, document_id, utterance_id)
+    except (ValueError, TypeError, KeyError):
+        raise ModelResponseError('model-schema') from None
 
 
 def handle(handler, parsed, body=None):
@@ -266,5 +284,7 @@ def handle(handler, parsed, body=None):
         return bad(handler, str(exc), status=409)
     except OSError:
         return bad(handler, 'Office folder or snapshot storage unavailable; local work retained', status=503)
+    except ModelResponseError as exc:
+        return bad(handler, 'Configured model returned invalid JSON; no edit applied (model-json)' if str(exc) == 'model-json' else 'Configured model returned an unsupported or invalid edit schema; no edit applied (model-schema)', status=502)
     except (ValueError, TypeError, KeyError):
-        return bad(handler, 'Invalid co-work request or model response; no edit applied', status=400)
+        return bad(handler, 'Invalid co-work request; no edit applied (request-validation)', status=400)

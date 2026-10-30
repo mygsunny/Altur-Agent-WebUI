@@ -2,6 +2,39 @@
 
 This log tracks accepted fork changes. Keep it current with each related feature or fix, link the pull request or commit, and distinguish local verification from CI and deployed behavior. Do not add credentials, machine paths, private network details, user conversations, or deployment-only launchers. The release-maintained root CHANGELOG.md remains unchanged.
 
+## Co-work actual-browser usability and command repair
+
+- Fixed blank documents rendering as an unstyled 17px line: style the actual
+  wrapped editor, provide an 850×400px page and a focusable blank-page hint.
+- Native spreadsheet keyboard commits attach RGB text colors. Preserve this
+  narrow style losslessly in XLSX both directions, instead of freezing subsequent
+  input at the strict Office export gate. Other unsupported features still fail
+  closed; auth, leases, autosave, conflicts and native Undo remain enabled.
+- Unified finalized speech and typed commands in a visible immutable FIFO. New
+  draft text cannot replace Running/Waiting entries. One inference/commit runs
+  at a time; Stop, switch and connection loss invalidate bound work. Failures,
+  clarification and deadlines pause dependent entries; overflow is explicit.
+- Added bounded native content clearing rather than asking the model for a huge
+  null matrix. Sparse A1-keyed context omits blank formulas while preserving
+  zero, false, formulas and known/unknown bounds. Local configured GPT-OSS intent
+  calls use low reasoning without changing provider/model or summary behavior.
+- Request validation, model JSON and model schema now have separate safe error
+  stages. Firefox missing-input errors identify microphone acquisition and an
+  input-selection action. Plain HTTP displays a persistent trusted-HTTPS notice;
+  no browser-security bypass, microphone change or client trust install.
+- Verification: 74 Node tests, 46 focused backend tests, Chromium/Firefox/WebKit
+  real-origin visible-page, sustained typing, real-model Apply and persistence
+  regressions. Separate Firefox configured-model FIFO/clear/Undo test and real
+  recorder test using explicitly synthetic audio passed. No physical-mic claim.
+- Important deployment boundary: frontend build is exercised against the active
+  isolated trial; backend reasoning/schema changes are verified in a separate
+  disposable trial. The active trial was not restarted. Existing backend clear
+  instruction timed out at 30s without mutation; reviewed backend cleared both
+  near/far synthetic cells in 2.915s (HTTP 2.199s, native commit 87ms). Shared-model
+  contention can still exceed the deadline; no guaranteed latency is claimed.
+- See [repair evidence and limits](cowork-usability-repair.md). Updates
+  [draft review #4](https://github.com/mygsunny/Altur-Agent-WebUI/pull/4), not merged.
+
 ## Co-work LAN manual-editor repair
 
 - Fixed startup/New document/New spreadsheet failures on insecure LAN HTTP: use

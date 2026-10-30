@@ -60,7 +60,10 @@ const defaults=(obj,values)=>{for(const [k,v] of Object.entries(values))if(k in 
 export async function encodeOffice(snapshot,kind){
  if(kind==='sheet'){
   keys(snapshot,['id','name','appVersion','locale','styles','sheetOrder','sheets','resources','calculationSettings']);
-  defaults(snapshot,{styles:{},calculationSettings:{iterativeCalculation:false,maxIterations:100,maxChange:0.001}});
+  defaults(snapshot,{calculationSettings:{iterativeCalculation:false,maxIterations:100,maxChange:0.001}});
+  // Ordinary native keyboard commits carry an explicit RGB font color.
+  // Preserve that narrow style in XLSX; all other formatting remains refused.
+  if(snapshot.styles){keys(snapshot.styles,Object.keys(snapshot.styles));for(const style of Object.values(snapshot.styles)){keys(style,['cl']);keys(style.cl,['rgb']);if(!/^#[0-9a-fA-F]{6}$/.test(style.cl.rgb))unsupported('font color');}}
   const emptyResources={SHEET_RANGE_PROTECTION_PLUGIN:'',SHEET_AuthzIoMockService_PLUGIN:'{}',SHEET_WORKSHEET_PROTECTION_PLUGIN:'{}',SHEET_WORKSHEET_PROTECTION_POINT_PLUGIN:'{}',SHEET_DEFINED_NAME_PLUGIN:'',SHEET_RANGE_THEME_MODEL_PLUGIN:'{}'};
   if(snapshot.resources&&!Array.isArray(snapshot.resources))unsupported('resources');
   for(const r of snapshot.resources||[]){keys(r,['name','data']);if(!(r.name in emptyResources)||r.data!==emptyResources[r.name])unsupported('resource '+r.name);}
@@ -74,7 +77,8 @@ export async function encodeOffice(snapshot,kind){
     if(!/^(0|[1-9][0-9]*)$/.test(r)||+r>=1000)unsupported('row bounds');
     for(const [c,cell] of Object.entries(row)){
      if(!/^(0|[1-9][0-9]*)$/.test(c)||+c>=100)unsupported('column bounds');
-     keys(cell,['v','f','t']);
+     keys(cell,['v','f','t','s']);
+     if(cell.s!==undefined&&(typeof cell.s!=='string'||!Object.hasOwn(snapshot.styles||{},cell.s)))unsupported('cell style');
      if(cell.v!==null&&cell.v!==undefined&&!['number','boolean','string'].includes(typeof cell.v))unsupported('cell value');
      if(typeof cell.v==='number'&&!Number.isFinite(cell.v))unsupported('nonfinite cell');
      if(cell.f!==undefined&&(typeof cell.f!=='string'||!cell.f.startsWith('=')))unsupported('formula');

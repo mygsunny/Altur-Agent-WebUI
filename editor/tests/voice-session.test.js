@@ -17,6 +17,10 @@ function harness(){
  vm.runInContext(stop+listen,context);
  return {$,context,pending,tracks,contexts,run:s=>vm.runInContext(s,context),resolve(n){const track={stopped:false,stop(){this.stopped=true}};tracks[n]=track;pending[n].resolve({getTracks:()=>[track]})}};
 }
+test('Firefox NotFoundError identifies microphone acquisition and available input action',async()=>{
+ const h=harness(),reports=[];h.context.report=text=>reports.push(text);const enabled=h.$('listen').onclick();const error=Error('The object can not be found here.');error.name='NotFoundError';h.pending[0].reject(error);await enabled;
+ assert.match(reports.at(-1),/microphone acquisition.*NotFoundError/);assert.match(reports.at(-1),/No audio input.*connect.*select/i);
+});
 for(const switchDoc of [false,true])test(`stale acquisition cannot clean newer session after ${switchDoc?'switch':'pause'}`,async()=>{
  const h=harness(),old=h.$('listen').onclick();h.run('stopVoice();'+(switchDoc?"id='new';":''));
  const fresh=h.$('listen').onclick();assert.equal(h.pending.length,2);h.resolve(1);await fresh;h.resolve(0);await old;

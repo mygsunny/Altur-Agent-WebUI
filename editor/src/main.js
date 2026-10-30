@@ -4,8 +4,9 @@ import {PhraseGate,AudioQueue} from './voice.js';
 import {DocumentAdapter} from './document.js';
 import './style.css';
 const $=id=>document.getElementById(id), report=text=>{$('status').textContent=text};
+if(!isSecureContext){$('listen').textContent='Voice requires HTTPS';$('voice-status').textContent='Microphone unavailable on plain HTTP LAN. Ask the operator for trusted HTTPS, then allow microphone access. Manual typing and Apply still work.';}
 let csrf='',profile='',adapter,kind,id,revision=0,saved='',release,opening=false,saving=false,saveBlocked=false,owner='',leaseUntil=0;
-let officePaused=true,connectionGrant;
+let officePaused=true,connectionGrant,inferenceBusy=false;
 function ensureLease(reconciling=false){if(saveBlocked||(!reconciling&&officePaused)||performance.now()>=leaseUntil){$('editor').inert=true;controller.stop();throw Error('Writable ownership paused; waiting for connection and Office reconciliation');}}
 function pauseOffice(value,grant){const changed=value&&!officePaused;officePaused=value;connectionGrant=value?undefined:grant;$('editor').inert=value||opening||saveBlocked;if(changed){controller.stop();stopVoice();}for(const name of ['apply','undo','redo','listen'])$(name).disabled=value;}
 let recordIdentity,officeGeneration=0,officeUploading=false;
@@ -16,7 +17,7 @@ async function api(path,body,signal){
  if(response.status===401)throw Error('Sign in at the Chat page, then reload this editor and retry New document or Open.');
  const result=await response.json();if(!response.ok)throw Error((result.error||'Request failed')+(response.status===409?' — close other writable tabs, wait 30 seconds for their lease to expire, then retry Open.':''));return result;
 }
-const controller=new Controller((body,signal)=>api('intent',body,signal),report);
+const controller=new Controller((body,signal)=>api('intent',body,signal),report,busy=>{inferenceBusy=busy;$('apply').disabled=opening||officePaused;$('apply').textContent=busy?'Queue command':'Apply';$('apply').setAttribute('aria-busy',String(busy));},items=>{$('command-queue').replaceChildren(...items.slice(-12).map(item=>{const row=document.createElement('li');row.textContent=item.status+': '+item.text+(item.error?' — '+item.error:'');return row;}));});
 window.cowork={controller,pauseVoice:stopVoice,get adapter(){return adapter},get kind(){return kind},get id(){return id}};
 function stopVoice(session=recordIdentity){
  if(!session)return;
@@ -90,7 +91,7 @@ $('new-doc').onclick=()=>open('document');$('new-sheet').onclick=()=>open('sheet
 $('reopen').onclick=()=>open('document',$('identity').value);
 $('undo').onclick=()=>adapter?.undo();$('redo').onclick=()=>adapter?.redo();$('save').onclick=save;
 $('stop').onclick=()=>{controller.stop();stopVoice()};$('pause').onclick=()=>{stopVoice();controller.stop();report('Voice paused; pending work canceled. Completed edits remain.');};
-$('apply').onclick=()=>{if(adapter&&!opening)controller.submit($('request').value)};
+$('apply').onclick=()=>{if(adapter&&!opening){const text=$('request').value;if(controller.submit(text))$('request').value='';}};
 $('request').onkeydown=e=>{if(e.key==='Enter')$('apply').click()};
 document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='z'&&!e.target.closest('#editor')){e.preventDefault();e.stopImmediatePropagation();e.shiftKey?adapter?.redo():adapter?.undo();}},true);
 $('theme').onclick=()=>{const dark=document.documentElement.classList.toggle('dark');adapter?.api?.toggleDarkMode(dark);};
@@ -131,11 +132,21 @@ $('listen').onclick=async()=>{
  if(recordIdentity&&!recordIdentity.discard){if(!recordIdentity.acquiring)stopVoice();return;}
  const session={id,generation:controller.generation,discard:false,acquiring:true};recordIdentity=session;
  const valid=()=>recordIdentity===session&&!session.discard&&!opening&&!saveBlocked&&session.id===id&&session.generation===controller.generation;
+ let stage='secure context';
+ const voiceError=error=>{
+  const name=error.name||'Error';
+  const detail=stage==='microphone acquisition'&&name==='NotFoundError'?'No audio input device was found by this browser. Connect a microphone or select an available input in macOS Sound settings, then retry.':
+   stage==='microphone acquisition'&&name==='NotAllowedError'?'Microphone access denied. Allow this site in Firefox/browser permissions and macOS Privacy & Security → Microphone, then retry.':
+   stage==='microphone acquisition'&&name==='NotReadableError'?'Microphone could not be opened. Check the selected input and whether another app is using it.':
+   stage==='recorder setup'&&name==='NotSupportedError'?'This browser could not start an audio recorder with a supported codec.':error.message;
+  const message='Voice '+stage+' ('+name+'): '+detail;report(message);$('voice-status').textContent=message;
+ };
  try{
   if(!isSecureContext||!navigator.mediaDevices)throw Error('Voice requires localhost or approved HTTPS');
+  stage='microphone acquisition';
   session.media=await navigator.mediaDevices.getUserMedia({audio:true});
   if(!valid()){stopVoice(session);return;}
-  session.context=new AudioContext();await session.context.resume();
+  stage='audio context initialization';session.context=new AudioContext();await session.context.resume();
   if(!valid()){stopVoice(session);return;}
   const source=session.context.createMediaStreamSource(session.media),analyser=session.context.createAnalyser();
   analyser.fftSize=2048;source.connect(analyser);const samples=new Float32Array(analyser.fftSize),gate=new PhraseGate();
@@ -144,7 +155,9 @@ $('listen').onclick=async()=>{
    if(!valid())return;
    const started=performance.now();gate.reset(started);
    let chunks=[],bytes=0,upload=false;
+   stage='recorder setup';
    const current=new MediaRecorder(session.media);session.recorder=current;
+   current.onerror=event=>{if(valid()){stopVoice(session);voiceError(event.error||Error('Audio recorder failed'));}};
    current.ondataavailable=e=>{
     bytes+=e.data.size;
     if(bytes>2*1024*1024){chunks=[];upload=false;if(current.state==='recording')current.stop();return;}
@@ -160,7 +173,7 @@ $('listen').onclick=async()=>{
     const utterance=randomId();
     const accepted=session.queue.push(async signal=>{
      if(!valid())return;
-     const form=new FormData();form.append('file',blob,'phrase.webm');
+     const form=new FormData();const extension=blob.type.includes('ogg')?'ogg':blob.type.includes('mp4')?'m4a':'webm';form.append('file',blob,'phrase.'+extension);
      const response=await fetch('/api/transcribe',{method:'POST',headers:{'X-Hermes-CSRF-Token':csrf},body:form,signal});
      const result=await response.json();if(!response.ok)throw Error(result.error||'Transcription failed');
      if(!valid()||signal.aborted)return;
@@ -185,7 +198,7 @@ $('listen').onclick=async()=>{
    if(final||gate.rotate(now))session.finish(final||hadSpeech);
   },50);
   report('Microphone ON — silence finalizes phrases. Final Stop cancels after transcription; toolbar Pause cancels immediately.');
- }catch(e){const show=valid();stopVoice(session);if(show)report(e.message)}
+ }catch(e){const show=valid();stopVoice(session);if(show)voiceError(e)}
 };
 $('language').disabled=true;$('language').title='Language follows the existing configured STT service; no override supported';
 // Office sync integration (independent of voice capture).

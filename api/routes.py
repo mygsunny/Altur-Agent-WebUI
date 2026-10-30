@@ -17843,7 +17843,7 @@ def _resolve_new_session_workspace(body, visible_prev_session_id, profile=None):
     return str(workspace)
 
 
-def _llm_update_summary(system_prompt: str, user_prompt: str, active_profile: str | None = None) -> str:
+def _llm_update_summary(system_prompt: str, user_prompt: str, active_profile: str | None = None, *, interactive_intent: bool = False) -> str:
     from api import profiles as profiles_api
 
     profile = active_profile or profiles_api.get_active_profile_name() or "default"
@@ -17902,9 +17902,18 @@ def _llm_update_summary(system_prompt: str, user_prompt: str, active_profile: st
                 main_runtime=main_runtime,
             )
             if aux_client is not None and aux_model:
+                # Short schema-validated editor intents need no default medium
+                # reasoning. Preserve the configured model and full authority.
+                from urllib.parse import urlparse
+                intent_options = {}
+                if (interactive_intent and _main_provider == "custom"
+                        and aux_model == _main_model and aux_model.startswith("gpt-oss:")
+                        and urlparse(_main_base_url or "").hostname in ("localhost", "127.0.0.1", "::1")):
+                    intent_options["reasoning_effort"] = "low"
                 response = aux_client.chat.completions.create(
                     model=aux_model,
                     messages=messages,
+                    **intent_options,
                 )
                 return str(response.choices[0].message.content or "").strip()
         except Exception as _e:
