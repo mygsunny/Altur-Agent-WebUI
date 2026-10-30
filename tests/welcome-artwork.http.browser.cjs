@@ -26,6 +26,8 @@ const {spawn}=require('node:child_process'),path=require('node:path'),assert=req
   await page.waitForFunction(()=>typeof applyWelcomeArtwork==='function'&&document.querySelector('#emptyState').dataset.artwork);
   await page.evaluate(()=>skipOnboarding());
   async function post(data){return page.evaluate(async data=>{const r=await api('/api/settings',{method:'POST',body:JSON.stringify(data)});return r;},data);}
+  await require('./welcome-artwork-first-paint.cjs')(browser,url,context,post);
+  if(process.env.FIRST_PAINT_ONLY)return;
   let s=await post({welcome_artwork:'photo',welcome_artwork_height_desktop:240,welcome_artwork_height_mobile:160,show_token_usage:true});
   assert.equal(s.welcome_artwork,'photo');
   await page.reload();await page.waitForFunction(()=>document.querySelector('#emptyState').dataset.artwork==='photo');
@@ -86,6 +88,7 @@ const {spawn}=require('node:child_process'),path=require('node:path'),assert=req
   const invalid=await post({welcome_artwork:'invalid',welcome_artwork_height_mobile:601});assert.equal(invalid.welcome_artwork,'photo');assert.equal(invalid.welcome_artwork_height_mobile,190);
   for(const mode of ['none','original','photo']){
    await post({welcome_artwork:mode});await page.reload();await page.waitForFunction(mode=>document.querySelector('#emptyState').dataset.artwork===mode,mode);
+   if(mode==='photo')await page.waitForFunction(()=>document.querySelector('#emptyState').dataset.photoReady==='true');
    assert.equal(await page.locator('.empty-logo').isVisible(),mode==='original');assert.equal(await page.locator('.welcome-photo').isVisible(),mode==='photo');assert.equal(await page.locator('#emptyState h2').isVisible(),true);
   }
   for(const mode of ['original','photo']) {
