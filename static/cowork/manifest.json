@@ -1,0 +1,452 @@
+[
+  {
+    "path": "static/cowork/THIRD-PARTY-NOTICES.txt",
+    "bytes": 604726,
+    "sha256": "b0c5ec1e67fa23d85d48bc0ebe5a1660969ed4a307148d695f24a464c7c33c8b"
+  },
+  {
+    "path": "static/cowork/assets/_commonjs-dynamic-modules-TDtrdbi3.js",
+    "bytes": 239,
+    "sha256": "590ab8057bc032c3e14f9f1a76aaeffd01da609413fb12888819ca0433c1fae9"
+  },
+  {
+    "path": "static/cowork/assets/_commonjsHelpers-Cpj98o6Y.js",
+    "bytes": 236,
+    "sha256": "9625379badd4849610dfe6c15453cdf0c0071264c90eef177307fac094d2aa6c"
+  },
+  {
+    "path": "static/cowork/assets/af-DK_CjRn6-C81U6qP1.js",
+    "bytes": 179894,
+    "sha256": "e59264fef1df5fd96a6f7b1d3b495cd756a5ac67be0ff87ccb92be04a0728688"
+  },
+  {
+    "path": "static/cowork/assets/as-BPtSu6VN-CYxxmKqh.js",
+    "bytes": 626,
+    "sha256": "bc1d82bed6c82d3de2347575cca113b409bf9042bdefbc4affe2c100aa10d89e"
+  },
+  {
+    "path": "static/cowork/assets/be-CrQ0smca-B2EeXxUh.js",
+    "bytes": 27831,
+    "sha256": "6f878239752fd62d3fa140e78a6c337f7450a3357254b27b52de86471874f1ad"
+  },
+  {
+    "path": "static/cowork/assets/bg-CrQqGwni-Pt9yPLke.js",
+    "bytes": 56925,
+    "sha256": "c62afe06b5d9395d37bd9418f70a0677cd4c2aeebd913f623befed07dae26b07"
+  },
+  {
+    "path": "static/cowork/assets/bn-NCLZcWHi-CsgykzQM.js",
+    "bytes": 626,
+    "sha256": "07e7479b48cec8a2b24681ef1daa2fe18c081a809138e8d1ffa65e5bf95e5cd9"
+  },
+  {
+    "path": "static/cowork/assets/ca-SUf6Y2Om-Dp4lcbPL.js",
+    "bytes": 7863,
+    "sha256": "644f139b814d7cdc8a92a9d2cc1963c94f3e2cbefc52567a63cd2eae2a6fedca"
+  },
+  {
+    "path": "static/cowork/assets/cop-C3sk0IUo-Cj8cOj0I.js",
+    "bytes": 6889,
+    "sha256": "7b0e334d460b3f3cb805419337c1786950e1c87fa838dff17e3580ac0a6e24ce"
+  },
+  {
+    "path": "static/cowork/assets/cs-CmAteokq-TjIVgNl6.js",
+    "bytes": 39758,
+    "sha256": "768f9112c973c0ed8f1b3a8d9e2f77a275edd01719210bef1e45c8222bfb16b4"
+  },
+  {
+    "path": "static/cowork/assets/cu-CBUlrW6Y-BrxB2kb-.js",
+    "bytes": 168800,
+    "sha256": "ca179140d084726e4fa5ff135879666e709ee9a9c01bf7929b1e82ac635132be"
+  },
+  {
+    "path": "static/cowork/assets/cy-BBPa6z2x-BONU7bVJ.js",
+    "bytes": 80197,
+    "sha256": "c84d5defdad5d5b8792a453f972764cbb63c713c06457e454dbd1caf1fd8e174"
+  },
+  {
+    "path": "static/cowork/assets/da-CCDXfXtG-C3O8h2wc.js",
+    "bytes": 12721,
+    "sha256": "d6645713d1390ce3dd73e9a46a6bd30ce9255b47bc65b22679ac514fd7be00db"
+  },
+  {
+    "path": "static/cowork/assets/de-1901-CWoAOigE-yOXirf_M.js",
+    "bytes": 270039,
+    "sha256": "75daaaf08785794ef42c5df77920bb9b955066def84256624b88bfae98c108fd"
+  },
+  {
+    "path": "static/cowork/assets/de-1996-BL6awyxG-BSuIomZy.js",
+    "bytes": 266939,
+    "sha256": "44125234b53a0cef64622e480a12e4dc6dabe0f335325c3a26d448d65fb45b31"
+  },
+  {
+    "path": "static/cowork/assets/de-ch-1901-hVThVHVb-CC5Yf8hX.js",
+    "bytes": 264338,
+    "sha256": "9030deec6b484775fb5dd2b7de8cb401f113cf283947d0310bc1295421631a12"
+  },
+  {
+    "path": "static/cowork/assets/el-monoton-D3aKqTz2-DpMW17GV.js",
+    "bytes": 4871,
+    "sha256": "705e70ae158c356021e720f1b1c0e0c55ae3993e96fa369af48bbf7f1ef85883"
+  },
+  {
+    "path": "static/cowork/assets/el-polyton-ogVWcTzh-BOWLBXgh.js",
+    "bytes": 17626,
+    "sha256": "eb4576351dc54d42f2c3b7a16f4978d61ac21b3911fcf3906e5aab52d1a64c89"
+  },
+  {
+    "path": "static/cowork/assets/en-gb-B7Al27b_-BFFr9zKP.js",
+    "bytes": 105379,
+    "sha256": "ad7c17df70d7b77fdab02d02de231ee85016ed4a7cec2b5960bcf29e5ded132a"
+  },
+  {
+    "path": "static/cowork/assets/es-DcaaHPU_-sYKznHcq.js",
+    "bytes": 44130,
+    "sha256": "b857fde418fe90810d998f354358a5908eda0516d60c4ac3d40aa8b9b5bc8922"
+  },
+  {
+    "path": "static/cowork/assets/et-B_spaleu-BaO20FM2.js",
+    "bytes": 47209,
+    "sha256": "3f1e629adca8d8f881671837994c1d0a0cd31e5d915f4959a4c6257ae4c5876f"
+  },
+  {
+    "path": "static/cowork/assets/eu-Ctv_kq9Z-DMhU9kwg.js",
+    "bytes": 1515,
+    "sha256": "32c276b31918fae033e9055e2b28b09223046d0e3ee6146dacb186c84419a417"
+  },
+  {
+    "path": "static/cowork/assets/exchange-C_YNoeHE.js",
+    "bytes": 1124097,
+    "sha256": "472612a03bf4a380beee995faed96f9a066a8bd63d1e0243dd4c4f9c5340e3dd"
+  },
+  {
+    "path": "static/cowork/assets/fi-RW5VB8Yp-C_52fTOR.js",
+    "bytes": 3192,
+    "sha256": "979f7edac9a3ccee645c68900427d7de259a29b3a3c67cea7029e637249def5e"
+  },
+  {
+    "path": "static/cowork/assets/fr-BC2onEz9-BGmqATrI.js",
+    "bytes": 24136,
+    "sha256": "81d5fe5dd9171f631da99ba0197627570be7c297e53c6de530d45a86a07d5799"
+  },
+  {
+    "path": "static/cowork/assets/fur-AC12wySk-Ulg0Fy5V.js",
+    "bytes": 3902,
+    "sha256": "3cd05463f7cdfff09499e9d7ac7c0ccd22139c021fdbe3c68444c783efd56c22"
+  },
+  {
+    "path": "static/cowork/assets/ga-Cn6LkudM-WsF4_z3Y.js",
+    "bytes": 82145,
+    "sha256": "05c2c5388d6cbb93c2a4b7c9a801605dc648fbe272da2be359f434650dbc98e6"
+  },
+  {
+    "path": "static/cowork/assets/gl-DZGc-K_G-DLl5jmsP.js",
+    "bytes": 33642,
+    "sha256": "caa286843a7600486b9232b116f5717dd9e1f65648a46588fbfa14846af0f635"
+  },
+  {
+    "path": "static/cowork/assets/grc-DOlGgO8T-C7K_Bcib.js",
+    "bytes": 71614,
+    "sha256": "d25c15d9127b3def42b3c26f36e525d0e0e35d3c230ec4e689291d7a2b8e4373"
+  },
+  {
+    "path": "static/cowork/assets/gu-Bjl0l-cf-Bb_OSiMJ.js",
+    "bytes": 578,
+    "sha256": "48eb8a986502f27e1b8a777b1a1749682ac7718be81040ccfeb63ff12e5dcc3d"
+  },
+  {
+    "path": "static/cowork/assets/hi-DsAaTPCC-lc1bUHMk.js",
+    "bytes": 610,
+    "sha256": "9d0cd11513e65947ce9d6587802c5d575d89fb15b3f5dc7e73783c82283f8974"
+  },
+  {
+    "path": "static/cowork/assets/hr-DT1SBBes-CkK3TemH.js",
+    "bytes": 11363,
+    "sha256": "5b8be833dfcd7d5a9629b351b950e2a96a7ebcbdaf69353e5908659b484ec887"
+  },
+  {
+    "path": "static/cowork/assets/hsb-DC_ITc1e-C4pa9vvS.js",
+    "bytes": 14014,
+    "sha256": "1c247f2ca624611c7676915a09ae95806533aa42275e268f817e9b7b03b4227d"
+  },
+  {
+    "path": "static/cowork/assets/hu-DVk7Y_ka-CCTZJfqn.js",
+    "bytes": 765405,
+    "sha256": "b75659c2b1f94310c76b039a3714c068f43d573ff4729787b708cb484ab138a0"
+  },
+  {
+    "path": "static/cowork/assets/hy-e995ysyO-Cf-NYmW5.js",
+    "bytes": 11934,
+    "sha256": "ec3c41642b77aa4b202974c6a2939c6a97258fb4b45f3b16ba30f1d8187d6508"
+  },
+  {
+    "path": "static/cowork/assets/ia-Cr4TJH0c-BcFKNbxH.js",
+    "bytes": 6489,
+    "sha256": "87fa3a6e45a75500e2c50f777e5e538ebfbd834d611e8781f239b283db7cc3ee"
+  },
+  {
+    "path": "static/cowork/assets/id-DifDyWg9-1QUBE4o0.js",
+    "bytes": 2518,
+    "sha256": "a2246aeec44c48ea75c5da6f0821f2f0ba6e459d5bc80b807e96318d7dc5f2f8"
+  },
+  {
+    "path": "static/cowork/assets/index-Bb4LVD_J.css",
+    "bytes": 1883,
+    "sha256": "6916256b63eb077ee84cc952b2f840b647e1f3113e8c5e0f265bf096665311b6"
+  },
+  {
+    "path": "static/cowork/assets/index-DxTkURFK.js",
+    "bytes": 460720,
+    "sha256": "6dd54c00192e18a2c4d5e15e3620e4f419ef4231a9e9abc003677274c858b574"
+  },
+  {
+    "path": "static/cowork/assets/is-BT8UVRze-BXloJ18M.js",
+    "bytes": 48410,
+    "sha256": "6b0598673b51185695c7709fd95723a887c2fd2badd62bdd8d2665fff45120c0"
+  },
+  {
+    "path": "static/cowork/assets/it-Bt_Meacx-BwawXXgW.js",
+    "bytes": 3627,
+    "sha256": "0811fcafa9783f726af63003b3a1b860650b032277733fa31f347a8ca73fdba4"
+  },
+  {
+    "path": "static/cowork/assets/ka-jyoLzyDE-CZftRBZr.js",
+    "bytes": 26189,
+    "sha256": "a29e5ede5e5546a5a774ee3bc18fa0e7c5458d6030000030000b5ca84f1d7d76"
+  },
+  {
+    "path": "static/cowork/assets/kmr-Cfwhwuff-DNWs8Gbk.js",
+    "bytes": 2732,
+    "sha256": "82998be4bad67b1dae1126f13c5fa64d7850f3108947be0d41af065eae916f6d"
+  },
+  {
+    "path": "static/cowork/assets/kn-C6Lov-DP-D7dHjlY1.js",
+    "bytes": 634,
+    "sha256": "7f47d103776389471801cd61810d812da086e9bacc35ece47f6b8a0f9d4b3285"
+  },
+  {
+    "path": "static/cowork/assets/la-DuvHjUWw-BcBNkSEh.js",
+    "bytes": 3192,
+    "sha256": "570e54807da2660e799a963d9962e9b8ace57f7cb9c7ee14ac92095007f9d9f2"
+  },
+  {
+    "path": "static/cowork/assets/la-x-classic-yTyAOQEt-DuDJBVty.js",
+    "bytes": 8928,
+    "sha256": "0bfe4ab83ee1767461d43e4660f4040d614ef45040088e2af9c8464bd46d66fa"
+  },
+  {
+    "path": "static/cowork/assets/la-x-liturgic-CXeQb4FY-DNU_Uk5t.js",
+    "bytes": 22821,
+    "sha256": "a52b4cb74249e5c32e3d20d1f31ae48ef5e4b45ad3e0dde42faeb6812c5933ac"
+  },
+  {
+    "path": "static/cowork/assets/lt-BBe8DlDF-CObMPDIF.js",
+    "bytes": 14769,
+    "sha256": "ebd016e6f804a158ba26ed64ce389d02211ab083b30f160ba00ebfcef7c39517"
+  },
+  {
+    "path": "static/cowork/assets/lv-Q2BBHnzp-DRPSUjhQ.js",
+    "bytes": 112677,
+    "sha256": "e9c801091f954f8a8d6ab7a29377e5aa49bdb47529945e5df38b9962cd8afcef"
+  },
+  {
+    "path": "static/cowork/assets/mammoth.browser-DNs1j4n2.js",
+    "bytes": 304902,
+    "sha256": "7a2223bf9ce844e767ec49f6a7d1b482a24ab971ba8f99d87ae763f5475ccff8"
+  },
+  {
+    "path": "static/cowork/assets/ml-2xLVYkVY-CBhOFsDv.js",
+    "bytes": 808,
+    "sha256": "25aaf8179cad7ba8656785bb7dca55d14b89fa8f10e35959bab8e0cb23bdc612"
+  },
+  {
+    "path": "static/cowork/assets/mn-cyrl-lHM4n0oC-QhYuXAWB.js",
+    "bytes": 12152,
+    "sha256": "054f8b79edd9ccbb2a2fff08cf03243df2780c4865644d4b6868077e9644b45f"
+  },
+  {
+    "path": "static/cowork/assets/mn-cyrl-x-lmc-3aetruI8-mEBV16An.js",
+    "bytes": 4825,
+    "sha256": "4b79129ba4706516ec8ea09759feef6e094dae693aaa5b42654e871c996fcc56"
+  },
+  {
+    "path": "static/cowork/assets/mr-CjWJPVmH-BKMRnoAc.js",
+    "bytes": 610,
+    "sha256": "c53eac82da9c42438dd1726ac1a28813b2876ebfd4d13c79fac8134c8a59d396"
+  },
+  {
+    "path": "static/cowork/assets/mul-ethi-D_CMSMEq-2TGBnG-Z.js",
+    "bytes": 3687,
+    "sha256": "c2528d5a99e86ae74cf46e22c2c6a1465830ae02d605b5ae38b9b7e50f964d6c"
+  },
+  {
+    "path": "static/cowork/assets/nb-DI8u59ch-S2a9vUN_.js",
+    "bytes": 341920,
+    "sha256": "f63e166f5ef7066288c182bf82de778c917819541f33a0a5d27d8f1b54d34fe1"
+  },
+  {
+    "path": "static/cowork/assets/nl-BHQJ6Gvn-BMWl-SdQ.js",
+    "bytes": 138510,
+    "sha256": "f667f162f9a126c4cf733b3bb59f3e15211081c07a83dc6233f5145af48fc61f"
+  },
+  {
+    "path": "static/cowork/assets/nn-ntZvarUK-cMBifkqM.js",
+    "bytes": 341920,
+    "sha256": "9d5787ba2b950ad1bde287e579d38d587595d21bef20231e4c2f5a3fb1fb7ba6"
+  },
+  {
+    "path": "static/cowork/assets/no-B8ItS0F3-BlrHaK3Z.js",
+    "bytes": 341899,
+    "sha256": "bd5db10835ed0c45cc34185d2768c224a78b6268af28a763aa5fd71c51d5b848"
+  },
+  {
+    "path": "static/cowork/assets/oc-P_i3-xLA-Cg0Gj-PC.js",
+    "bytes": 2558,
+    "sha256": "adc067aad10e2a1b23052fd56ca888ff077f5555f2700c10368f2fa77e66312d"
+  },
+  {
+    "path": "static/cowork/assets/office-sync-Cz22ZGm-.js",
+    "bytes": 105450,
+    "sha256": "c25845b124dfe54aced029a9776e30d63be07189adc4b790d3e162054ad28045"
+  },
+  {
+    "path": "static/cowork/assets/or-50rxpoq4-B_XNinj_.js",
+    "bytes": 570,
+    "sha256": "9ef2d7ce0611f056f39652df640caa3196dcacb3be6b03acadbf0d3957d74d45"
+  },
+  {
+    "path": "static/cowork/assets/pa-C54UG8eN-EW_8hrTF.js",
+    "bytes": 530,
+    "sha256": "bfde5685fcea25fb9574b810bc5fc0534ed24d74522c18942670fd76f11be58b"
+  },
+  {
+    "path": "static/cowork/assets/pi-B9cgjyG1-v-IB86gp.js",
+    "bytes": 856,
+    "sha256": "c78137bae4eb996d5f33959b3444d5c17f1f23ec5bd868814f80772c1830ee68"
+  },
+  {
+    "path": "static/cowork/assets/pl-9fg-ESVt-DpPW5ISU.js",
+    "bytes": 46092,
+    "sha256": "a48fcdf7f279fad20d6c5deed5a3722a6f94f4141dc30ee4a13687d50d5d2b9d"
+  },
+  {
+    "path": "static/cowork/assets/pms-BRGfm5gS-DtZRgBhp.js",
+    "bytes": 3378,
+    "sha256": "85de8aab647b802ad33c0206b8714ffe497b6bb25a89ba654a534eabc1c61f86"
+  },
+  {
+    "path": "static/cowork/assets/preload-helper-C2e7_FEl.js",
+    "bytes": 1124,
+    "sha256": "ca809681479ea8307239d62fc9a44cee92751a51ba4e22436b7ea1ea4241f478"
+  },
+  {
+    "path": "static/cowork/assets/pt-Cum2_NUC-D8aZaPM_.js",
+    "bytes": 2291,
+    "sha256": "0a5f1887f07663e52994eabfbb76db77223a2469e246627a9d2f4355b2266b91"
+  },
+  {
+    "path": "static/cowork/assets/rm-C0MIK9N4-DeBfDBrx.js",
+    "bytes": 3671,
+    "sha256": "a5f131d3bcf54ca56e345957d4d0e010fc06eb8a4453bf0811712cf714fde955"
+  },
+  {
+    "path": "static/cowork/assets/ro-0fmdH0HA-1lLksn9e.js",
+    "bytes": 7269,
+    "sha256": "1725480c162583a0e2d433b44ff558735a0d0141fdd1c56273f82f951683aa38"
+  },
+  {
+    "path": "static/cowork/assets/ru-v4l-ayaq-BZkHNr9F.js",
+    "bytes": 85311,
+    "sha256": "0abd9bf845e914377aacc3f83c4ba3ca06ebad18ecee7e072473c9bae911cba6"
+  },
+  {
+    "path": "static/cowork/assets/sa-CKY9c_Vq-DzgpFnfw.js",
+    "bytes": 9712,
+    "sha256": "61b8aa794cd13fe2275c0256932cd40670dd89a75cfcc520189d5f24832c0226"
+  },
+  {
+    "path": "static/cowork/assets/sh-cyrl-BpCRFOmq-Cv4-R-p6.js",
+    "bytes": 32497,
+    "sha256": "4e63cca27ce82f5c37690fe311b5cabfd36cd312a3507154cdea6285c1625819"
+  },
+  {
+    "path": "static/cowork/assets/sh-latn-sRy4Tuaj-DcyoDtEt.js",
+    "bytes": 29784,
+    "sha256": "dcb941d4871121fcc67fd88f45bc793c064be4c122e760ccc6534ff7552d5f75"
+  },
+  {
+    "path": "static/cowork/assets/sheet-BIuZyQDr.css",
+    "bytes": 120542,
+    "sha256": "3672fa320b0a978470443651280319fb7340b0ad23d05d30b9030d318888e781"
+  },
+  {
+    "path": "static/cowork/assets/sheet-DFSQ-dy0.js",
+    "bytes": 6895225,
+    "sha256": "228b813c473189577e2489ddce7f17f32640133b4779f0c4c759b9396e9c0732"
+  },
+  {
+    "path": "static/cowork/assets/sk-_iOeDNrQ-BXQc18Za.js",
+    "bytes": 31694,
+    "sha256": "dc935517e0f1a03653002e3cb16481835c2bc49af938531fba8d2f137a2fd6f8"
+  },
+  {
+    "path": "static/cowork/assets/sl-DpiklF-D-_46w5B9b.js",
+    "bytes": 12602,
+    "sha256": "5062a94e715602fbea2856434f22723e47894ff704a6b8599942832f6c5408ef"
+  },
+  {
+    "path": "static/cowork/assets/sr-cyrl-Dpzrbd0W-DKfS_grW.js",
+    "bytes": 31599,
+    "sha256": "0ec8ed485975dbc4b63f1e6c2304804e8f5a1218207351237f4139e61c31d724"
+  },
+  {
+    "path": "static/cowork/assets/sv-CFm5y56M-I8ncZ9Nb.js",
+    "bytes": 56810,
+    "sha256": "ccb35b8f076026653f9e4b7056d54aa9f2e58441a34b24bfea369892d180a5c2"
+  },
+  {
+    "path": "static/cowork/assets/ta-BcghgTbD-D3SGVeDl.js",
+    "bytes": 712,
+    "sha256": "72677330fcac8ee62125d57d42ae45c80fa566249bc0da80d138ad46b62e87c4"
+  },
+  {
+    "path": "static/cowork/assets/te-B5Spl2Jk-DYnT8Dmf.js",
+    "bytes": 626,
+    "sha256": "a94fbf59c25e5a96c2a45e57956967679989f596de7d6106660ffa030891e1f2"
+  },
+  {
+    "path": "static/cowork/assets/th-DWX5iPSo-BI_G36o8.js",
+    "bytes": 68623,
+    "sha256": "465b3158cedb5d3f61444340bfb98a696aeb6d9108055ba9aba43af93e16020f"
+  },
+  {
+    "path": "static/cowork/assets/tk-BMbKB10q-cqtw6prh.js",
+    "bytes": 16962,
+    "sha256": "1c5407525241c52dd7421abc0177b811df8cc9d3edaaadb0e5f14f9880b56443"
+  },
+  {
+    "path": "static/cowork/assets/tr-CIHIuzqc-ZkOY1dVp.js",
+    "bytes": 3968,
+    "sha256": "fe9596aabeed8f5e2c2e405615384a716e710e54d9cd70a8176c9a2f8c0809b7"
+  },
+  {
+    "path": "static/cowork/assets/uk-Dir3oxLs-BVEQM3Jf.js",
+    "bytes": 63993,
+    "sha256": "aa3a083c7455d2dcde50044fe2e6c1b819a3586a87e5778dcbdc1abb32ce5958"
+  },
+  {
+    "path": "static/cowork/assets/zh-latn-pinyin-BdYb-Ey_-BpSBSv6m.js",
+    "bytes": 1279,
+    "sha256": "bb5c6cd10b04fcb9fa81307bc074fcd64371950207098473c4a594c8a6bf3cee"
+  },
+  {
+    "path": "static/cowork/index.html",
+    "bytes": 2392,
+    "sha256": "69f80c28ffc7bdf2abeea2972f5dd2dd4ea34b660676c7191a218dc3405ddc75"
+  },
+  {
+    "path": "static/cowork/licenses.json",
+    "bytes": 22749,
+    "sha256": "9b430e136df1d45a2858f9963018384415dd6bce940ec630c21cf76acfcef4d9"
+  }
+]

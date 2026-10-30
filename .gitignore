@@ -92,3 +92,16 @@ static/brand-cache-fixture.html
 
 # Regenerated from canonical brand and pinned locale registry.
 branding/generated-locales/
+
+# Isolated co-work build/test state (never published).
+.cowork-local/
+editor/test-results/
+!editor/package-lock.json
+!docs/superpowers/
+docs/superpowers/*
+!docs/superpowers/plans/
+docs/superpowers/plans/*
+!docs/superpowers/plans/2026-10-30-cowork.md
+!docs/superpowers/specs/
+docs/superpowers/specs/*
+!docs/superpowers/specs/2026-10-30-cowork-design.md

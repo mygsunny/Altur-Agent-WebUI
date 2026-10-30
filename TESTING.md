@@ -1,5 +1,17 @@
 # Hermes Web UI: Browser Testing Plan
 
+## Optional Co-work trial
+
+See [docs/cowork.md](docs/cowork.md) for the isolated real-Handler harness,
+backend/Node/Chromium commands and acceptance boundaries. Run only with synthetic
+state and independent credentials; the harness deliberately skips startup consumers.
+The browser suite covers real native manual/targeted editing and undo, formula
+calculation, Office UI exchange, autosave/reload, ownership refusal, authenticated
+HTTP guards and final-transcript dispatch. Its explicitly simulated model-schema
+and synthetic-microphone cases are not real inference/STT accuracy evidence.
+Real AI/voice acceptance remains blocked until independent Agent/model/STT setup
+is supplied; do not report unavailable endpoints as a successful live feature.
+
 ## Project-picker deferred repaint handoff regression
 
 Expand a parent with fork-child menus, open a picker, defer a list repaint,

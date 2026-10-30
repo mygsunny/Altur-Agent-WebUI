@@ -2,6 +2,51 @@
 
 This log tracks accepted fork changes. Keep it current with each related feature or fix, link the pull request or commit, and distinguish local verification from CI and deployed behavior. Do not add credentials, machine paths, private network details, user conversations, or deployment-only launchers. The release-maintained root CHANGELOG.md remains unchanged.
 
+## Experimental selected-folder Office sync
+
+Tracking: branch `feature/univer-cowork-review`, based on `fix/desktop-session-discovery` at `adfe642f`. Draft review only; not merged or deployed. Publication uses a sanitized cumulative snapshot, not the private trial's intermediate commit history. Historical worker statements below describe their local verification scope before publication.
+
+Publication verification: all 155 changed files were included in the privacy review; four UI images show disposable synthetic documents or an empty shell, not user conversations. Machine-specific documentation paths use `$HERMES_HOME`, `$AGENT_PYTHON` and `$AGENT_SOURCE` placeholders; original evidence stays local. The 90 generated-artifact manifest entries verify by byte length and SHA-256. Existing generated third-party string whitespace produces `git diff --check` warnings; compiled bytes were deliberately preserved rather than lint-rewritten. Local publication reruns: 64 Node tests and 38 targeted Python/macOS tests passed. Full repository CI, real Office application interoperability, physical microphone and cross-device delivery acceptance remain pending.
+
+### Approved one-editor connection workflow (current isolated feature)
+
+- Supersedes the older generation/manual-import UI described below: connection
+  loss freezes native/AI/voice writers, reconnect waits visibly and automatically
+  reloads a stable local cloud arrival before enabling editing. Late idle arrivals
+  also reload automatically; divergent native drafts require a conflict choice.
+- Connected WebUI autosave writes the same selected-folder filename using native
+  coordination and recovery copies. One cooperating editor at a time is required;
+  there is no universal Office lock or remote-upload-completion inference.
+- Current source-executing voice/session tests and real Handler/filesystem/browser
+  checks are recorded in `cowork-sync.md` and the isolated readiness report. The
+  real selected cloud proof is synthetic-only. Device delivery, physical microphone
+  and real Office application interoperability remain distinct unverified gates.
+- No production deployment, push, merge, real-document changes or production
+  profile/configuration changes were performed. Historical notes below describe
+  the superseded implementation, not the current UI.
+
+- Added an opt-in, profile-scoped operator allowlist for one Office directory;
+  clients cannot choose server paths. Disabled without configuration.
+- Added hash/stable-read external detection, preserved Office/native recovery
+  copies, explicit conflicting-version import, offline/error status, and native
+  editor reconstruction with Undo reset. Native and limited download exchange
+  remain separate; unsupported sync content is refused.
+- Existing Office targets are **never overwritten**. First publication is
+  create-if-absent; later edits produce uniquely named output generations. The
+  watched stable input is advanced only by the user's explicit Office-file
+  handoff; this is no longer advertised as in-place two-way sync.
+- Every external import is an explicit choice. Durable native import receipts
+  and idempotent acknowledgments reconcile dropped responses without repeating
+  editor replacement/Undo reset. Async operations bind immutable generations.
+- Whole-package representability checks reject hidden sheets, defined names,
+  custom geometry/layout, unsupported metadata/relationships and unknown native
+  schema fields. Private descriptor-opened state/backup handling rejects symlinks,
+  hardlinks and unrecovered SQLite sidecars.
+- Local synthetic filesystem/backend/Chromium tests are documented in
+  [cowork-sync.md](cowork-sync.md). No real iCloud or Microsoft Office test,
+  production deployment or folder selection is claimed. Exact folder handoff is
+  still required; no cloud multi-writer transaction is claimed.
+
 ## Navigation and New chat
 
 Tracking: [pull request #1](https://github.com/mygsunny/Altur-Agent-WebUI/pull/1), branch `ui/sidebar-new-chat`. Published as a reviewable feature branch; not merged into `altur-branding`. Local checks passed; GitHub reported no checks for the branch.
@@ -58,3 +103,21 @@ Tracking: branch `fix/desktop-session-discovery`, stacked on the navigation feat
 - An isolated loopback full-server test with generated fixture credentials returned 401 for unauthenticated protected access, 200 for a signed-in password rotation without reentry, 403 for disabling authentication without reentry, 401 for the old password and 200 for the new password. Authentication remained enabled.
 - The same disposable server returned all four fixture Desktop roots despite 25 newer delegated children, and Chromium rendered all four roots visibly.
 - These are local checks, not GitHub CI or a claim that a production password has been rotated.
+
+## Co-work spreadsheet and document trial
+
+Tracking: `feature/univer-cowork`, isolated provisional baseline `adfe642f`. User approved implementation explicitly; no publication, merge or production deployment is authorized by this entry.
+
+### Added
+- Lazy Co-work dialog in the existing shell, preserving mounted chat and editor state when hidden.
+- Univer OSS spreadsheets and Tiptap/ProseMirror documents with one native human/AI undo history, targeted constrained operations, final-transcript identity/deduplication, immediate pending-work Stop and document-switch cancellation.
+- Explicit microphone enable, Finish phrase and discard/pause controls using the existing server transcription endpoint. No new browser-vendor speech service.
+- Profile-scoped current/prior snapshots, revision conflicts, server writer leases and browser ownership locks; no filesystem path API.
+- Local limited XLSX/DOCX exchange with visible loss acknowledgment and unsupported-content refusals; native snapshot export for working-state preservation.
+
+### Verification and limits
+- 21 backend/auth/CSRF tests, 5 Node controller/exchange tests and 12 real Chromium checks pass; editor build, focused Ruff and production dependency audit (zero known vulnerabilities) pass locally.
+- Browser evidence includes real manual spreadsheet keyboard input, formula evaluation, targeted edits/shared native undo, document paragraph/table editing, focused-controls undo, reload, competing-tab refusal, real HTTP authorization and genuine Office import/export.
+- Synthetic recording reaches the real STT endpoint; a separate test checks real intent failure. Simulated Chinese undo/model schemas are explicitly integration fixtures, not evidence of inference or speech accuracy.
+- **Full AI/voice live acceptance remains blocked:** independent Agent runtime is absent (`run_agent` import failure), configured inference returns 503, and the existing speech endpoint returns STT-unavailable 503. No production credentials were copied. Streaming partial STT and automatic phrase segmentation are not implemented; physical microphone/bilingual recognition remains unverified.
+- See [co-work trial guide](cowork.md) for scope, reproduction, OSS versions, conversion fidelity, state ownership and remaining gates. Screenshots are synthetic isolated-state evidence, not production observations. Full repository CI and a fresh independent review are not claimed.
