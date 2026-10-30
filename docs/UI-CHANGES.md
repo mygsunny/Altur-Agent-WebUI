@@ -61,14 +61,14 @@ Tracking: branch `fix/desktop-session-discovery`, stacked on the navigation feat
 
 ## Welcome artwork and theme-matched login
 
-Tracking: local branch `feature/welcome-artwork-login-theme`, stacked on the maintained Desktop discovery/password fixes. Not published, merged or deployed by this change.
+Tracking: [pull request #3](https://github.com/mygsunny/Altur-Agent-WebUI/pull/3), branch `feature/welcome-artwork-login-theme`, stacked on the maintained Desktop discovery/password fixes. Published and locally deployed after parent verification; not merged. GitHub reports no checks.
 
 ### Added
 - Appearance choices **None**, **Original logo** (unchanged default), and **Uploaded photo**, using the intentional supplied transparent PNG. Welcome text, suggestions and composer remain intact.
 - Independent desktop/mobile saved photo targets, default 240/160 CSS px, bounded 64–600. Fixed-height natural aspect rendering, centered left/right cropping and narrow real-alpha edge masks. Width-only resizing does not scale the image; crossing the mobile breakpoint selects the other target.
 - Separate saved **Show logo glow** toggle, default on. Off removes the actual circular `::before` halo in original and photo modes, not the artwork. None mode never leaves a halo behind.
 - Independent saved desktop/mobile welcome-group positions, default centered at 0 CSS px, bounded -300..300 (negative up, positive down). Move the selected logo/artwork, heading, descriptive text and all three suggestion buttons in one wrapper; do not move composer, sidebar or header. Clamp the effective offset against available message/visual viewport and composer space, and restore it as height returns without changing saved values.
-- A conservative visual-viewport-height budget temporarily shrinks or collapses artwork on short/keyboard-constrained screens, restoring it as height increases without changing preferences.
+- Measured message/group/composer/visual-viewport geometry proportionally shrinks artwork on short/keyboard-constrained screens, keeping it visible on representative 430/530 CSS px landscape screens and restoring the target as height increases. Width-only resizing does not change the height budget; oversized content remains scrollable.
 - Narrow one-key settings writes through the existing FIFO, with hydration that never saves and profile-generation guards for queued writes and late responses. Existing settings-file ownership and unrelated preferences are preserved.
 - Shared blocking app/login prepaint appearance resolver and application stylesheet palette. Login receives normalized allowlisted theme/skin only, follows Light/Dark/System, updates on OS changes in System mode, and overrides stale browser appearance cache with saved server values. Authentication routes and security policy are unchanged.
 - Public [design](welcome-artwork-design.md) and [verification plan](welcome-artwork-plan.md), including portable commands and explicit evidence boundaries.
