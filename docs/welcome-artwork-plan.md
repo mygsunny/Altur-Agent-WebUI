@@ -9,6 +9,13 @@
 
 ## Reproducible commands
 
+### Landscape reachability synchronization follow-up
+
+The parent covering run's strict photo-top assertion was reproduced unchanged. Captured frame/write stacks (scratch `welcome-landscape-probe-6/landscape-frames.json`) show composer growth during the 250ms sidebar transition calling `boot.js`'s ResizeObserver → `_repinMessagesAfterComposerResize` → `_setMessageScrollToBottom`. After the harness reset scrollTop to zero, the helper's queued next-frame retry wrote the bottom again: scrollTop 175, photo top -128 versus message viewport top 39. This is not fractional geometry or unreachable negative-position content; it is the harness measuring after a competing pinned-transcript write. The old 100ms sleep does not establish settled geometry.
+
+Repair is test-only: await actual document animations and three animation frames (observer delivery plus queued repin), then reset scroll and verify it stays zero across the next frame. Deterministically queue the same real helper before settling. RED without settling: 175 !== 0 (`welcome-landscape-deterministic-red.log`). Original strict top comparison remains, with rect/scroll/viewport diagnostics saved as `landscape-state.json`; no tolerance, retries, product changes, or animation suppression. Three consecutive covering HTTP runs passed (`welcome-landscape-green-{1,2,3}.log`), each including the full breakpoint matrix/transient and inherited HTTP gates. Artwork/login/rail/sidebar browser suites, artwork/password Python tests, and ten Desktop discovery tests passed. Discovery requires the app venv Python; system Python 3.9 fails importing its pre-existing union annotations. Earlier parent/probe failures remain intact outside Git. No deployment/publication performed.
+
+
 Requires existing app dependencies and Playwright/Chromium; do not install them in a shared runtime just to run these tests.
 
 ```sh
