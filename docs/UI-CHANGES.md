@@ -4,7 +4,7 @@ This log tracks accepted fork changes. Keep it current with each related feature
 
 ## Experimental selected-folder Office sync
 
-Tracking: branch `feature/univer-cowork-review`, based on `fix/desktop-session-discovery` at `adfe642f`. Draft review only; not merged or deployed. Publication uses a sanitized cumulative snapshot, not the private trial's intermediate commit history. Historical worker statements below describe their local verification scope before publication.
+Tracking: [draft pull request #4](https://github.com/mygsunny/Altur-Agent-WebUI/pull/4), branch `feature/univer-cowork-review`, based on `fix/desktop-session-discovery` at `adfe642f`. Draft review only; not merged or deployed. Publication uses a sanitized cumulative snapshot, not the private trial's intermediate commit history. Historical worker statements below describe their local verification scope before publication.
 
 Publication verification: all 155 changed files were included in the privacy review; four UI images show disposable synthetic documents or an empty shell, not user conversations. Machine-specific documentation paths use `$HERMES_HOME`, `$AGENT_PYTHON` and `$AGENT_SOURCE` placeholders; original evidence stays local. The 90 generated-artifact manifest entries verify by byte length and SHA-256. Existing generated third-party string whitespace produces `git diff --check` warnings; compiled bytes were deliberately preserved rather than lint-rewritten. Local publication reruns: 64 Node tests and 38 targeted Python/macOS tests passed. Full repository CI, real Office application interoperability, physical microphone and cross-device delivery acceptance remain pending.
 
