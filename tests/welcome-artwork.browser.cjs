@@ -21,7 +21,7 @@ const root = path.resolve(__dirname, '..');
       await page.setViewportSize({width,height:1000});
       await page.waitForTimeout(80); assert.equal(await height(),160);
     }
-    await page.setViewportSize({width:320,height:450});
+    await page.setViewportSize({width:320,height:300});
     await page.waitForTimeout(80); assert.ok(await height()<160);
     await page.setViewportSize({width:320,height:1000});
     await page.waitForTimeout(80); assert.equal(await height(),160);
@@ -49,6 +49,21 @@ const root = path.resolve(__dirname, '..');
     });
     assert.equal(await page.locator('#emptyState').getAttribute('data-artwork'),'original');
     const panels=fs.readFileSync(path.join(root,'static/panels.js'),'utf8');
+    const loadFunction=panels.slice(panels.indexOf('async function loadSettingsPanel()'),panels.indexOf('\nfunction ',panels.indexOf('async function loadSettingsPanel()')));
+    await page.addScriptTag({content:'let _tabOrderSaveQueue=Promise.resolve(); window.$=id=>document.getElementById(id); window.checkWebUIVersionSkew=()=>{}; window.showToast=()=>{}; window.t=k=>k;\n'+loadFunction});
+    await page.evaluate(async()=>{
+      let finish;window.api=()=>new Promise(resolve=>finish=resolve);
+      const loading=loadSettingsPanel();
+      await Promise.resolve();
+      window.eval('_profileSwitchGeneration++');
+      applyWelcomeArtwork({welcome_artwork:'photo'});
+      finish({welcome_artwork:'none'});
+      await loading;
+    });
+    assert.equal(await page.locator('#emptyState').getAttribute('data-artwork'),'photo','Delayed actual loadSettingsPanel must not replace Profile B artwork');
+    assert.equal(await page.locator('#settingsWelcomeArtwork').inputValue(),'photo','Delayed actual loadSettingsPanel must not replace Profile B control');
+    await page.evaluate(()=>applyWelcomeArtwork({welcome_artwork:'none'},0));
+    assert.equal(await page.locator('#settingsWelcomeArtwork').inputValue(),'photo','Renderer must reject an explicitly stale owner');
     const queueFunction=panels.slice(panels.indexOf('function _enqueueSettingsPost('),panels.indexOf('// Ownership token for the shared preferences'));
     await page.addScriptTag({content:'let releaseSettingsQueue; let _settingsPanelPostQueue=new Promise(resolve=>releaseSettingsQueue=resolve);\n'+queueFunction});
     await page.evaluate(async()=>{

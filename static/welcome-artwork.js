@@ -4,6 +4,7 @@
   let saved = {}, ready = false;
   const generation = () => typeof _profileSwitchGeneration === 'undefined' ? 0 : _profileSwitchGeneration;
   let owner = generation();
+  let heightBudget = null;
   const label = (key,fallback) => typeof t === 'function' ? t(key) : fallback;
   const fields = {
     welcome_artwork: 'settingsWelcomeArtwork',
@@ -21,11 +22,25 @@
     const photo = host && host.querySelector('.welcome-photo');
     if (!photo) return;
     const target = matchMedia('(max-width: 768px)').matches ? saved.welcome_artwork_height_mobile : saved.welcome_artwork_height_desktop;
-    // Height-only budget: horizontal resizing must never derive image height.
-    // Reserve chrome, text/suggestions and composer; visualViewport covers keyboards.
     const viewport = window.visualViewport ? visualViewport.height : innerHeight;
-    const ratio = Math.min(1, Math.max(0, (viewport - 540) / Math.max(160, target)));
-    const height = target * ratio;
+    const groupForBudget = host.querySelector('.welcome-group');
+    const messages = (host.closest('.messages') || host).getBoundingClientRect();
+    const composerTop = document.querySelector('.composer-wrap')?.getBoundingClientRect().top ?? viewport;
+    const viewportTopForBudget = window.visualViewport ? visualViewport.offsetTop : 0;
+    // Cache by vertical geometry, not width or wrapped text. A width-only resize
+    // must retain the selected height even if suggestions wrap differently.
+    const key = [viewport,viewportTopForBudget,target,saved.welcome_artwork].join(':');
+    if (!heightBudget || heightBudget.key !== key) {
+      const padding = getComputedStyle(host);
+      const available = Math.max(0,Math.min(composerTop,viewportTopForBudget+viewport)-Math.max(messages.top,viewportTopForBudget)-Math.max(24,parseFloat(padding.paddingTop)+parseFloat(padding.paddingBottom)+8));
+      const previousHeight = photo.getBoundingClientRect().height;
+      const other = Math.max(0,(groupForBudget?.getBoundingClientRect().height || 0)-previousHeight);
+      // If text alone cannot fit, retain proportional artwork and normal scroll
+      // rather than erase the photo or move the independent composer.
+      const height = target*Math.min(1,available/Math.max(1,other+target));
+      heightBudget = {key,height};
+    }
+    const height = heightBudget.height;
     photo.style.height = `${height}px`;
     const image = photo.querySelector('img');
     // Fade actual image edges when it fits, and clipping edges when it doesn't.
@@ -47,8 +62,9 @@
     group.style.setProperty('--welcome-offset',`${offset}px`);
   }
   const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(layout) : null;
-  window.applyWelcomeArtwork = function(settings) {
-    owner = generation();
+  window.applyWelcomeArtwork = function(settings, expectedGeneration = generation()) {
+    if (expectedGeneration !== generation()) return;
+    owner = expectedGeneration;
     saved = {
       welcome_artwork: ['none','original','photo'].includes(settings.welcome_artwork) ? settings.welcome_artwork : 'original',
       welcome_logo_glow: settings.welcome_logo_glow !== false,
@@ -103,7 +119,7 @@
       const options = {method:'POST',body:JSON.stringify({[key]:value})};
       const result = typeof _enqueueSettingsPost === 'function' ? await _enqueueSettingsPost(options, requestOwner) : await api('/api/settings',options);
       if (requestOwner !== generation()) return;
-      applyWelcomeArtwork(result);
+      applyWelcomeArtwork(result,requestOwner);
       document.getElementById('welcomeArtworkStatus').textContent = label('settings_welcome_saved','Saved');
     } catch (error) {
       if (requestOwner !== generation()) return;
