@@ -31,6 +31,12 @@ Use the application's supported Python version/dependency environment for server
 - RED: executing the complete real `loadSettingsPanel` function with delayed A settings, B generation/hydration, then A completion changed B mode to None. GREEN asserts B mode and its control remain Photo; explicit stale renderer ownership is rejected too. Ordinary boot, queued saves and late save responses remain covered.
 - Passed focused artwork, full disposable HTTP/browser, login appearance, rail reorder, sidebar new-chat, artwork schema (1), password policy (5) and Desktop discovery (10) suites, plus JavaScript syntax and whitespace checks. These are selected regressions, not full repository certification.
 
+## Responsive-breakpoint regression
+
+`node tests/welcome-artwork.http.browser.cjs` also runs the shared `tests/welcome-artwork-breakpoints.cjs` full-shell regression. It navigates directly at each width and resizes down/up at fixed heights 1000/800/600/430. Widths are 1000, 901, 900, 850, 840, 831, 830, 829, 820, 800, 769, 768, 767, 740, 641 and 640. Capture image/natural/mask/group geometry, sidebar state, document-overflow baseline, shell fonts/zoom/transforms/padding/gaps/chrome heights, and composer stage classes. `EVIDENCE_DIR` saves `breakpoints.json` and `breakpoint-frames.json` without application/user contents.
+
+Capture animation frames while expanding and shrinking across 630–680 and 880–920; assert no transient main-column undershoot at actual 640→641 and 900→901 boundaries. Closed off-canvas drawers must not interpolate their hidden full widths into the inline flex row; real drawer open sizes and existing closing slides must remain intact. No speculative 830 media rule or global animation suppression. See UI-CHANGES for the measured RED/GREEN mechanism and the separate intended 768 artwork target switch. An approximately reported physical window width is not proof of the CSS viewport width.
+
 ## Recorded rulings and limits
 
 - The executor's scope ends at a local commit: publication, independent review and deployment remain with the parent, superseding the original plan's later publish/deploy steps.

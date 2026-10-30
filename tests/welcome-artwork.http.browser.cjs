@@ -32,6 +32,7 @@ const {spawn}=require('node:child_process'),path=require('node:path'),assert=req
   await page.locator('.welcome-photo img').evaluate(img=>img.decode());
   const alpha=await page.locator('.welcome-photo img').evaluate(img=>{const canvas=document.createElement('canvas');canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;const ctx=canvas.getContext('2d');ctx.drawImage(img,0,0);const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;let transparent=false,opaque=false;for(let i=3;i<data.length;i+=4){transparent ||= data[i]===0;opaque ||= data[i]===255;}return {transparent,opaque,background:getComputedStyle(img.parentElement).backgroundColor};});
   assert.deepEqual(alpha,{transparent:true,opaque:true,background:'rgba(0, 0, 0, 0)'});
+  await require('./welcome-artwork-breakpoints.cjs')(page,url);
   const height=()=>page.locator('.welcome-photo img').evaluate(e=>e.getBoundingClientRect().height);
   for(const [width,expected] of [[1440,240],[900,240],[430,160],[320,160]]){
    await page.setViewportSize({width,height:1000});await page.waitForTimeout(100);assert.equal(await height(),expected);

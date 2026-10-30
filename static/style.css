@@ -3246,6 +3246,9 @@
       top:0;bottom:0;width:var(--mobile-rightpanel-width)!important;max-width:100vw!important;z-index:200;padding-top:var(--app-titlebar-safe-top);box-sizing:border-box;
       box-shadow:none!important;visibility:hidden;pointer-events:none;transition:right .25s ease,visibility 0s linear .25s;}
     .rightpanel.mobile-open{right:0!important;box-shadow:-4px 0 24px rgba(0,0,0,.4)!important;visibility:visible;pointer-events:auto;transition:right .25s ease,visibility 0s;}
+    /* A closed overlay must not carry its drawer width into desktop flex
+       layout and animate 300px → 0 on expansion across this breakpoint. */
+    html[data-workspace-panel="closed"] .rightpanel:not(.mobile-open){width:0!important;transition:right .25s ease,visibility 0s linear .25s,width 0s linear .25s;}
     .rightpanel .resize-handle{display:none;}
     .rightpanel .panel-header{row-gap:8px;}
     .rightpanel .panel-actions{align-items:center;gap:8px;}
@@ -3330,6 +3333,9 @@
       visibility:hidden;pointer-events:none;
       will-change:transform;}
     .sidebar.mobile-open{transform:translateX(0);visibility:visible;pointer-events:auto;transition:transform .25s ease,visibility 0s linear 0s;}
+    /* Keep the closing slide, then park at zero width. Otherwise the hidden
+       100vw drawer briefly consumes the tablet flex row on expansion. */
+    .sidebar:not(.mobile-open){width:0;transition:transform .25s ease,visibility 0s linear .25s,width 0s linear .25s;}
     .sidebar .resize-handle{display:none;}
     /* Hamburger button (in app titlebar on mobile) */
     .app-titlebar{height:52px;justify-content:space-between;}
