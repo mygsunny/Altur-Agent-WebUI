@@ -4107,6 +4107,7 @@ window._mirrorSpeechSettingsFromServer=_mirrorSpeechSettingsFromServer;
       }
     }
     window._sessionJumpButtonsEnabled=!!s.session_jump_buttons;
+    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(s);
     window._renderUserMarkdown=!!s.render_user_markdown;
     // JSON/YAML structured code-block default view (#484): auto | on | off,
     // plus the 'auto'-mode line threshold (sanitized int 1..1000, fallback 10).
