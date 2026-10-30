@@ -1,3 +1,4 @@
+import {randomId,snapshotHash} from './browser-capabilities.js';
 import {Controller} from './controller.js';
 import {PhraseGate,AudioQueue} from './voice.js';
 import {DocumentAdapter} from './document.js';
@@ -8,11 +9,12 @@ let officePaused=true,connectionGrant;
 function ensureLease(reconciling=false){if(saveBlocked||(!reconciling&&officePaused)||performance.now()>=leaseUntil){$('editor').inert=true;controller.stop();throw Error('Writable ownership paused; waiting for connection and Office reconciliation');}}
 function pauseOffice(value,grant){const changed=value&&!officePaused;officePaused=value;connectionGrant=value?undefined:grant;$('editor').inert=value||opening||saveBlocked;if(changed){controller.stop();stopVoice();}for(const name of ['apply','undo','redo','listen'])$(name).disabled=value;}
 let recordIdentity,officeGeneration=0,officeUploading=false;
-const root=await fetch('/').then(r=>r.text());
+const root=await fetch('/').then(r=>r.text()).catch(()=> '');
 const token=root.match(/csrfToken:("(?:[^"\\]|\\.)*")/);if(token)csrf=JSON.parse(token[1]);
 async function api(path,body,signal){
  const response=await fetch('/api/cowork/'+path,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json','X-Hermes-CSRF-Token':csrf}:{},body:body?JSON.stringify({owner,connection_grant:connectionGrant,...body,profile}):undefined,signal:signal||AbortSignal.timeout(8000)});
- const result=await response.json();if(!response.ok)throw Error(result.error||'Request failed');return result;
+ if(response.status===401)throw Error('Sign in at the Chat page, then reload this editor and retry New document or Open.');
+ const result=await response.json();if(!response.ok)throw Error((result.error||'Request failed')+(response.status===409?' — close other writable tabs, wait 30 seconds for their lease to expire, then retry Open.':''));return result;
 }
 const controller=new Controller((body,signal)=>api('intent',body,signal),report);
 window.cowork={controller,pauseVoice:stopVoice,get adapter(){return adapter},get kind(){return kind},get id(){return id}};
@@ -35,19 +37,22 @@ async function save(duringOpen=false){
  }catch(e){if(active===id&&adapter===activeAdapter){pauseOffice(true);window.cowork.officeSync?.disconnect();report(e.message+' — local draft retained. Autosave paused for reconciliation.');}}
  finally{saving=false;}
 }
-async function open(nextKind,nextId=crypto.randomUUID(),snapshot){
+async function open(nextKind,nextId,snapshot){
  if(opening)return;
  if(adapter&&nextId===id){report('Ready — '+kind+'. Existing editor and shared native Undo retained.');return;}
  opening=true;officeGeneration++;officePaused=true;
  let candidate,host,unlock;const previousProfile=profile;
  $('editor').inert=true;for(const name of ['new-doc','new-sheet','reopen','apply','undo','redo','listen'])$(name).disabled=true;
  try{
+  nextId=nextId||randomId();
   stopVoice();controller.stop();
   if(adapter){if(JSON.stringify(adapter.snapshot())!==saved)await api('sync',{action:'preserve-draft',document_id:id,kind,snapshot:adapter.snapshot()});await save(true);if(saveBlocked)throw Error('Export local work and reload before switching: save is blocked');}
   if(saving)throw Error('Save still running; retry document switch');
   let loaded=await api('document?id='+encodeURIComponent(nextId));profile=loaded.profile;
   const acquired=await new Promise((resolve,reject)=>{
-   if(!navigator.locks){reject(Error('Browser lacks document ownership locks; editing disabled'));return;}
+   // HTTP LAN has no Web Locks: server atomic leases arbitrate fresh per-open owners.
+   // Never reuse sessionStorage ownership here (duplicated tabs clone it).
+   if(!navigator.locks){resolve(true);return;}
    navigator.locks.request('altur-cowork:'+profile+':'+nextId,{ifAvailable:true},lock=>{
     if(!lock){resolve(false);return;}
     resolve(true);return new Promise(done=>{unlock=done});
@@ -55,7 +60,7 @@ async function open(nextKind,nextId=crypto.randomUUID(),snapshot){
   });
   if(!acquired)throw Error('This document already has a writable browser tab. Close it before opening here.');
   const ownerKey='cowork-owner:'+profile+':'+nextId;
-  const nextOwner=sessionStorage.getItem(ownerKey)||crypto.randomUUID();
+  const nextOwner=(navigator.locks&&sessionStorage.getItem(ownerKey))||randomId();
   const claimStart=performance.now();
   try{
    await api('claim',{document_id:nextId,owner:nextOwner});
@@ -105,17 +110,17 @@ $('import').onchange=async e=>{
  try{
   const file=e.target.files[0];if(!file)return;if(file.size>8*1024*1024)throw Error('Import limit 8 MiB');
   const ext=file.name.split('.').pop().toLowerCase(),buffer=await file.arrayBuffer();
-  if(ext==='json'){const data=JSON.parse(new TextDecoder().decode(buffer));if(!['sheet','document'].includes(data.kind)||!data.snapshot)throw Error('Invalid native snapshot');return await open(data.kind,crypto.randomUUID(),data.snapshot);}
+  if(ext==='json'){const data=JSON.parse(new TextDecoder().decode(buffer));if(!['sheet','document'].includes(data.kind)||!data.snapshot)throw Error('Invalid native snapshot');return await open(data.kind,randomId(),data.snapshot);}
   if(!confirm('Import as a LIMITED editable copy; original untouched. XLSX values/formulas only (formatting, merges, charts, metadata lost). DOCX semantic paragraphs/headings/tables only (page layout, styles, comments, tracked changes not preserved). Unsupported content may be rejected. Continue?'))return;
   const {decodeOffice}=await import('./office-sync.js');
   if(!['xlsx','docx'].includes(ext))throw Error('Unsupported format');
-  const importedKind=ext==='xlsx'?'sheet':'document', importedId=crypto.randomUUID();
+  const importedKind=ext==='xlsx'?'sheet':'document', importedId=randomId();
   const decoded=await decodeOffice(buffer,importedKind);if(uploadGeneration!==officeGeneration)throw Error('Document changed during upload conversion; original retained');
   await open(importedKind,importedId,decoded);
   if(id!==importedId)throw Error('Upload was not opened; original file unchanged');
   let bytes='';for(const byte of new Uint8Array(buffer))bytes+=String.fromCharCode(byte);
   const importedGeneration=officeGeneration;
-  const nativeHash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(adapter.snapshot())))),b=>b.toString(16).padStart(2,'0')).join('');
+  const nativeHash=await snapshotHash(adapter.snapshot());
   if(id!==importedId||officeGeneration!==importedGeneration)throw Error('Document changed during upload; original retained');
   await api('sync',{action:'publish',document_id:importedId,extension:ext,base:null,bytes:btoa(bytes),native_hash:nativeHash});
  }catch(e){report(e.message)}finally{officeUploading=false;e.target.value=''}
@@ -152,7 +157,7 @@ $('listen').onclick=async()=>{
     const blob=upload&&performance.now()-started<=20500?new Blob(chunks,{type:current.mimeType}):null;chunks=[];
     record();
     if(!blob?.size)return;
-    const utterance=crypto.randomUUID();
+    const utterance=randomId();
     const accepted=session.queue.push(async signal=>{
      if(!valid())return;
      const form=new FormData();form.append('file',blob,'phrase.webm');
@@ -180,7 +185,7 @@ $('listen').onclick=async()=>{
    if(final||gate.rotate(now))session.finish(final||hadSpeech);
   },50);
   report('Microphone ON — silence finalizes phrases. Final Stop cancels after transcription; toolbar Pause cancels immediately.');
- }catch(e){if(valid())report(e.message);stopVoice(session)}
+ }catch(e){const show=valid();stopVoice(session);if(show)report(e.message)}
 };
 $('language').disabled=true;$('language').title='Language follows the existing configured STT service; no override supported';
 // Office sync integration (independent of voice capture).
@@ -198,7 +203,7 @@ window.cowork.officeSync=installAutoSync({api,report,pause:pauseOffice,
    if(activeKind==='sheet'){const {SheetAdapter}=await import('./sheet.js');check();candidate=new SheetAdapter(host,snapshot);}
    else candidate=new DocumentAdapter(host,snapshot);
    const normalized=candidate.snapshot(),json=JSON.stringify(normalized);
-   const native_hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(json))),b=>b.toString(16).padStart(2,'0')).join('');check();
+   const native_hash=await snapshotHash(normalized);check();
    const receipt={hash,native_hash,offer_id};let result;
    const latest=await api('document?id='+encodeURIComponent(active));check();revision=latest.document?.revision||0;
    try{result=await api('document',{document_id:active,kind:activeKind,revision,snapshot:normalized,office_import:receipt});}
@@ -223,4 +228,4 @@ window.addEventListener('offline',()=>{pauseOffice(true);window.cowork.officeSyn
 window.addEventListener('online',()=>window.cowork.officeSync.tick());
 for(const type of ['beforeinput','keydown','pointerdown'])$('editor').addEventListener(type,event=>{try{if(opening)throw Error('Opening document');ensureLease();}catch(error){event.preventDefault();event.stopImmediatePropagation();report(error.message)}},true);
 window.addEventListener('beforeunload',e=>{controller.stop();stopVoice();if(adapter&&JSON.stringify(adapter.snapshot())!==saved){e.preventDefault();e.returnValue='';}});
-await open('document',new URLSearchParams(location.search).get('id')||crypto.randomUUID());
+await open('document',new URLSearchParams(location.search).get('id'));
