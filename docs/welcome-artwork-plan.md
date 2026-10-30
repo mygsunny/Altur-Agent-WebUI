@@ -25,10 +25,16 @@ git diff --check
 
 Use the application's supported Python version/dependency environment for server/SQLite tests. `PLAYWRIGHT_MODULE` optionally selects an existing module. `FIXTURE_PYTHON` selects Python; `FIXTURE_PYTHON_ARGS` is an optional JSON argument array for a configured isolated interpreter/bootstrap. `EVIDENCE_DIR` optionally saves synthetic fixture screenshots outside the repository. Tests bind only an ephemeral loopback port and stop that exact disposable server on exit.
 
+## Independent-review regression verification
+
+- RED: the previous full HTTP implementation returned photo height 0 at 430 px landscape. GREEN now requires >40 px, a larger positive 530 px landscape photo, width-only short-screen height locking and a bounded composer. Inspect the landscape screenshots; scroll constrained message content to its top to inspect the photo and to its last suggestion to prove reachability.
+- RED: executing the complete real `loadSettingsPanel` function with delayed A settings, B generation/hydration, then A completion changed B mode to None. GREEN asserts B mode and its control remain Photo; explicit stale renderer ownership is rejected too. Ordinary boot, queued saves and late save responses remain covered.
+- Passed focused artwork, full disposable HTTP/browser, login appearance, rail reorder, sidebar new-chat, artwork schema (1), password policy (5) and Desktop discovery (10) suites, plus JavaScript syntax and whitespace checks. These are selected regressions, not full repository certification.
+
 ## Recorded rulings and limits
 
 - The executor's scope ends at a local commit: publication, independent review and deployment remain with the parent, superseding the original plan's later publish/deploy steps.
-- Very short screens may reduce the artwork to zero to prioritize chat usability. No saved preference is changed.
+- Short screens proportionally shrink artwork from measured chrome/group/composer geometry, retaining visible photos at 430/530 px landscape. Oversized groups remain scrollable without moving the composer. Width-only resizing locks photo height; no saved preference is changed.
 - The maintained shell's collapsed right-panel DOM can already extend the document scroll bounds. The full-server test compares artwork against the None baseline rather than claiming this feature fixes that unrelated shell condition.
 - Preserve the maintained authentication lifecycle rather than adding all-session revocation to password rotation. Logout revocation is tested separately.
 - UI translations fall back to new English keys until translations are supplied.

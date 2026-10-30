@@ -7074,7 +7074,7 @@ function _refreshProfileSwitchBackground(gen){
   Promise.resolve(api('/api/settings')).then(function(s){
     if (gen !== _profileSwitchGeneration) return;
     var hidden = (s && Array.isArray(s.hidden_tabs)) ? s.hidden_tabs : [];
-    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(s||{});
+    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(s||{},gen);
     hidden = hidden.filter(function(x){ return typeof x === 'string' && x.trim(); });
     var order = (s && Array.isArray(s.tab_order)) ? s.tab_order : [];
     order = order.filter(function(x){ return typeof x === 'string' && x.trim(); });
@@ -9780,11 +9780,14 @@ function _syncSettingsMaxTokensPlaceholder(field, fallbackValue){
 }
 
 async function loadSettingsPanel(){
+  const requestGeneration = _profileSwitchGeneration;
   try{
     // A just-completed rail gesture owns a pending order-only write. Read after it,
     // so opening Settings cannot hydrate the previous order over the new one.
     await _tabOrderSaveQueue;
+    if (requestGeneration !== _profileSwitchGeneration) return;
     const settings=await api('/api/settings');
+    if (requestGeneration !== _profileSwitchGeneration) return;
     checkWebUIVersionSkew(settings);
     // Populate the version badges from the server — keeps them in sync with git
     // tags automatically without any manual release step.
@@ -9810,7 +9813,7 @@ async function loadSettingsPanel(){
       agentBadge.textContent = `Agent: ${agentVersion}`;
     }
     // Hydrate appearance controls first so a slow /api/models request
-    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(settings);
+    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(settings,requestGeneration);
     // cannot overwrite an in-progress theme/skin selection.
     const themeSel=$('settingsTheme');
     const themeVal=settings.theme||'dark';
@@ -10039,6 +10042,7 @@ async function loadSettingsPanel(){
       let models=null;
       try{
         models=await api('/api/models');
+        if (requestGeneration !== _profileSwitchGeneration) return;
         for(const g of ((models||{}).groups||[])){
           const og=document.createElement('optgroup');
           og.label=g.provider;
@@ -10541,6 +10545,7 @@ async function loadSettingsPanel(){
     // Show auth buttons only when auth is active
     try{
       const authStatus=await api('/api/auth/status');
+      if (requestGeneration !== _profileSwitchGeneration) return;
       _settingsPasswordAuthEnabled=!!authStatus.password_auth_enabled;
       _setSettingsAuthButtonsVisible(!!authStatus.auth_enabled);
       _syncPasswordlessButton(authStatus);

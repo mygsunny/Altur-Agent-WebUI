@@ -55,7 +55,8 @@ const {spawn}=require('node:child_process'),path=require('node:path'),assert=req
    await post({welcome_artwork_height_desktop:600,welcome_artwork_height_mobile:600});
    await page.reload();await page.waitForFunction(()=>document.querySelector('#emptyState').dataset.artwork==='photo');
    await page.setViewportSize({width,height:heightPx});await page.waitForTimeout(100);
-   const fit=await page.evaluate(()=>{const c=document.querySelector('.composer-wrap').getBoundingClientRect(),i=document.querySelector('.welcome-photo').getBoundingClientRect();return {bottom:i.bottom,top:i.top,composer:c.top,end:c.bottom,viewport:innerHeight};});
+   await page.locator('.messages').evaluate(e=>e.scrollTop=0);
+   const fit=await page.evaluate(()=>{const c=document.querySelector('.composer-wrap').getBoundingClientRect(),i=document.querySelector('.welcome-photo').getBoundingClientRect();return {bottom:i.bottom,top:i.top,composer:c.top,end:c.bottom,viewport:innerHeight, details:[".messages","#emptyState",".welcome-group"].map(s=>{const e=document.querySelector(s),r=e.getBoundingClientRect();return [s,r.top,r.bottom,r.height,getComputedStyle(e).padding,getComputedStyle(e).minHeight]})};});
    assert.ok((fit.top>=0 || fit.bottom===fit.top) && fit.bottom<=fit.composer && fit.end<=fit.viewport+1,JSON.stringify(fit));
   }
   await post({welcome_artwork_height_desktop:240,welcome_artwork_height_mobile:160});
@@ -111,8 +112,15 @@ const {spawn}=require('node:child_process'),path=require('node:path'),assert=req
    await post({welcome_offset_mobile:offset});await page.reload();await page.waitForFunction(()=>document.querySelector('#emptyState').dataset.artwork==='photo');
    await page.setViewportSize({width:430,height:heightPx});await page.waitForTimeout(100);
    const clamped=await page.evaluate(()=>{const group=document.querySelector('.welcome-group').getBoundingClientRect(),composer=document.querySelector('.composer-wrap').getBoundingClientRect(),buttons=[...document.querySelectorAll('.suggestion')].map(e=>e.getBoundingClientRect().bottom);return {top:group.top,bottom:group.bottom,composer:composer.top,buttons,offset:parseFloat(document.querySelector('.welcome-group').style.getPropertyValue('--welcome-offset'))};});
-   assert.ok(Math.abs(clamped.offset)<300&&clamped.top>=0&&clamped.bottom<=clamped.composer,JSON.stringify({heightPx,offset,...clamped}));
-   assert.ok(clamped.buttons.every(bottom=>bottom<=clamped.composer));
+   const oversized=await page.locator('.welcome-group').evaluate(e=>e.getBoundingClientRect().height>document.querySelector('.messages').clientHeight-16);
+   if(oversized){
+    assert.equal(clamped.offset,0,'Oversized group retains scroll instead of unsafe translation');
+    await page.locator('.suggestion').last().scrollIntoViewIfNeeded();
+    assert.ok(await page.locator('.suggestion').last().evaluate(e=>e.getBoundingClientRect().bottom<=document.querySelector('.composer-wrap').getBoundingClientRect().top));
+   }else{
+    assert.ok(Math.abs(clamped.offset)<300&&clamped.top>=0&&clamped.bottom<=clamped.composer,JSON.stringify({heightPx,offset,...clamped}));
+    assert.ok(clamped.buttons.every(bottom=>bottom<=clamped.composer));
+   }
   }
   await post({welcome_offset_mobile:300});await page.reload();await page.waitForFunction(()=>document.querySelector('#emptyState').dataset.artwork==='photo');await page.setViewportSize({width:430,height:1600});await page.waitForTimeout(100);
   assert.equal(await page.locator('.welcome-group').evaluate(e=>parseFloat(e.style.getPropertyValue('--welcome-offset'))),300);
@@ -125,7 +133,20 @@ const {spawn}=require('node:child_process'),path=require('node:path'),assert=req
   await mobile.locator('.welcome-photo img').evaluate(e=>e.decode());
   if(process.env.EVIDENCE_DIR){fs.mkdirSync(process.env.EVIDENCE_DIR,{recursive:true});await mobile.screenshot({path:path.join(process.env.EVIDENCE_DIR,'artwork-mobile.png')});await mobile.evaluate(()=>_applyTheme('dark'));await mobile.waitForTimeout(400);await mobile.screenshot({path:path.join(process.env.EVIDENCE_DIR,'artwork-mobile-dark.png')});}
   await mobile.setViewportSize({width:932,height:430});await mobile.waitForTimeout(100);
-  assert.equal(await mobile.locator('.welcome-photo').evaluate(e=>e.getBoundingClientRect().height),0);
+  await mobile.locator('.messages').evaluate(e=>e.scrollTop=0);
+  const landscapeHeight=await mobile.locator('.welcome-photo').evaluate(e=>e.getBoundingClientRect().height);
+  assert.ok(landscapeHeight>40&&landscapeHeight<240,`Landscape must retain proportional artwork: ${landscapeHeight}`);
+  assert.ok(await mobile.locator('.welcome-photo').evaluate(e=>e.getBoundingClientRect().top>=document.querySelector('.messages').getBoundingClientRect().top));
+  await mobile.setViewportSize({width:820,height:430});await mobile.waitForTimeout(100);
+  assert.equal(await mobile.locator('.welcome-photo').evaluate(e=>e.getBoundingClientRect().height),landscapeHeight,'Short-screen width-only resize must lock photo height');
+  await mobile.setViewportSize({width:932,height:430});await mobile.waitForTimeout(100);
+  await mobile.locator('.messages').evaluate(e=>e.scrollTop=0);
+  if(process.env.EVIDENCE_DIR)await mobile.screenshot({path:path.join(process.env.EVIDENCE_DIR,'artwork-landscape-430.png')});
+  await mobile.setViewportSize({width:932,height:530});await mobile.waitForTimeout(100);
+  const tallerLandscape=await mobile.locator('.welcome-photo').evaluate(e=>e.getBoundingClientRect().height);
+  assert.ok(tallerLandscape>landscapeHeight&&tallerLandscape<=240);
+  if(process.env.EVIDENCE_DIR)await mobile.screenshot({path:path.join(process.env.EVIDENCE_DIR,'artwork-landscape-530.png')});
+  await mobile.setViewportSize({width:932,height:430});await mobile.waitForTimeout(100);
   const mobileComposer=await mobile.locator('.composer-wrap').boundingBox();assert.ok(mobileComposer.y+mobileComposer.height<=431);
   await phone.close();
   await page.setViewportSize({width:1440,height:1000});await page.waitForTimeout(100);
