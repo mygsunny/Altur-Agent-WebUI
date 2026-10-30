@@ -133,11 +133,26 @@ const {spawn}=require('node:child_process'),path=require('node:path'),assert=req
   for(const width of [430,320]){await mobile.setViewportSize({width,height:932});await mobile.waitForTimeout(100);assert.equal(await mobile.locator('.welcome-photo img').evaluate(e=>e.getBoundingClientRect().height),190);}
   await mobile.locator('.welcome-photo img').evaluate(e=>e.decode());
   if(process.env.EVIDENCE_DIR){fs.mkdirSync(process.env.EVIDENCE_DIR,{recursive:true});await mobile.screenshot({path:path.join(process.env.EVIDENCE_DIR,'artwork-mobile.png')});await mobile.evaluate(()=>_applyTheme('dark'));await mobile.waitForTimeout(400);await mobile.screenshot({path:path.join(process.env.EVIDENCE_DIR,'artwork-mobile-dark.png')});}
+  // Real landscape resize can grow the composer during the sidebar transition.
+  // Its pinned-transcript observer queues a second bottom write on the next frame.
+  async function settleLandscape(){
+   await mobile.evaluate(async()=>{
+    await Promise.all(document.getAnimations().map(a=>a.finished.catch(()=>{})));
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+   });
+  }
   await mobile.setViewportSize({width:932,height:430});await mobile.waitForTimeout(100);
+  // Deterministically exercise the exact observer's pending next-frame retry.
+  await mobile.evaluate(()=>_setMessageScrollToBottom());
+  await settleLandscape();
   await mobile.locator('.messages').evaluate(e=>e.scrollTop=0);
+  await mobile.evaluate(()=>new Promise(resolve=>requestAnimationFrame(resolve)));
+  assert.equal(await mobile.locator('.messages').evaluate(e=>e.scrollTop),0,'A pending composer repin must finish before positioning the reachability probe');
   const landscapeHeight=await mobile.locator('.welcome-photo').evaluate(e=>e.getBoundingClientRect().height);
   assert.ok(landscapeHeight>40&&landscapeHeight<240,`Landscape must retain proportional artwork: ${landscapeHeight}`);
-  assert.ok(await mobile.locator('.welcome-photo').evaluate(e=>e.getBoundingClientRect().top>=document.querySelector('.messages').getBoundingClientRect().top));
+  const landscapeState=await mobile.evaluate(()=>({viewport:[innerWidth,innerHeight,visualViewport.height,visualViewport.offsetTop],nodes:['.welcome-photo','.welcome-group','#emptyState','.messages','.composer-wrap'].map(s=>{const e=document.querySelector(s),r=e.getBoundingClientRect(),c=getComputedStyle(e);return {selector:s,rect:r.toJSON(),scrollTop:e.scrollTop,scrollHeight:e.scrollHeight,clientHeight:e.clientHeight,transform:c.transform,padding:c.padding,offset:e.style.getPropertyValue('--welcome-offset')};})}));
+  if(process.env.EVIDENCE_DIR)fs.writeFileSync(path.join(process.env.EVIDENCE_DIR,'landscape-state.json'),JSON.stringify(landscapeState,null,2));
+  assert.ok(await mobile.locator('.welcome-photo').evaluate(e=>e.getBoundingClientRect().top>=document.querySelector('.messages').getBoundingClientRect().top),JSON.stringify(landscapeState));
   await mobile.setViewportSize({width:820,height:430});await mobile.waitForTimeout(100);
   assert.equal(await mobile.locator('.welcome-photo').evaluate(e=>e.getBoundingClientRect().height),landscapeHeight,'Short-screen width-only resize must lock photo height');
   await mobile.setViewportSize({width:932,height:430});await mobile.waitForTimeout(100);
