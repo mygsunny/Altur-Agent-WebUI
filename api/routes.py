@@ -16270,6 +16270,10 @@ def handle_get(handler, parsed) -> bool:
     if proxy_result is not False:
         return proxy_result
 
+    if parsed.path.startswith("/api/cowork/"):
+        from api.cowork import handle as handle_cowork
+        return handle_cowork(handler, parsed)
+
     if parsed.path.startswith("/session/static/"):
         # Strip the leading "/session" so _serve_static() sees a path that
         # starts with "/static/" (its required prefix). _serve_static enforces
@@ -18039,6 +18043,10 @@ def handle_post(handler, parsed) -> bool:
         if diag:
             diag.finish()
         return True
+
+    if parsed.path.startswith("/api/cowork/"):
+        from api.cowork import handle as handle_cowork
+        return handle_cowork(handler, parsed, body)
 
     if parsed.path == "/api/escape/authorize":
         return _handle_escape_authorize(handler, parsed, body)
