@@ -2,6 +2,21 @@
 
 This log tracks accepted fork changes. Keep it current with each related feature or fix, link the pull request or commit, and distinguish local verification from CI and deployed behavior. Do not add credentials, machine paths, private network details, user conversations, or deployment-only launchers. The release-maintained root CHANGELOG.md remains unchanged.
 
+## Co-work LAN manual-editor repair
+
+- Fixed startup/New document/New spreadsheet failures on insecure LAN HTTP: use
+  CSPRNG UUIDs and a pinned MIT SHA-256 fallback without global API polyfills.
+- Missing Web Locks now uses fresh per-open server lease owners, not cloned tab
+  session ownership. Existing server auth, CSRF, revision and Office grants remain
+  unchanged. Close a prior LAN tab and wait for its lease before reopening.
+- Login and ownership errors are actionable in the editor; insecure-origin voice
+  refusal survives recorder cleanup and does not claim microphone availability.
+- Regression: actual insecure-origin Chromium synthetic document/cell editing,
+  persistence, cloned-tab refusal and real HTTP security checks; 65 Node tests.
+  Build includes updated dependency notices/manifest. No production restart,
+  real-document changes, merge or deployment. Updates the existing
+  [draft review #4](https://github.com/mygsunny/Altur-Agent-WebUI/pull/4).
+
 ## Experimental selected-folder Office sync
 
 Tracking: [draft pull request #4](https://github.com/mygsunny/Altur-Agent-WebUI/pull/4), branch `feature/univer-cowork-review`, based on `fix/desktop-session-discovery` at `adfe642f`. Draft review only; not merged or deployed. Publication uses a sanitized cumulative snapshot, not the private trial's intermediate commit history. Historical worker statements below describe their local verification scope before publication.

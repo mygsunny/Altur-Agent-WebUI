@@ -32,6 +32,38 @@ The harness clears inherited environment variables and pins independent OS HOME,
 - SQLite snapshots are authoritative for persistence only, not for undo. Transactions retain current and one prior snapshot; revision compare-and-swap refuses stale writes. `GET /api/cowork/document?id=ID&previous=1` reads the recoverable prior version. Database connections close on success and error. Snapshots have an 8 MiB limit.
 - GET/POST routes retain the existing auth and CSRF boundary. The server derives the profile from request context; writes must match the current profile and have the current server lease. Clients cannot provide filesystem paths. Storage is under WebUI state, scoped by validated profile and document IDs.
 
+## Insecure LAN HTTP manual editing
+
+Manual document and spreadsheet editors also work on an HTTP LAN origin. They use
+`crypto.getRandomValues` UUIDs and the pinned MIT `@noble/hashes` SHA-256 fallback
+when secure-context UUID/digest APIs are absent; browser security APIs are not
+polyfilled globally. HTTP does **not** encrypt passwords, cookies or documents:
+use trusted HTTPS for non-disposable use. Voice still requires localhost or HTTPS.
+
+Where Web Locks are unavailable, every open gets a fresh unpredictable server
+owner, never the sessionStorage owner copied by browser Duplicate Tab. The atomic
+server claim, 30-second lease, conservative 25-second browser input deadline,
+revision CAS and Office connection grants remain authoritative. A competing tab
+cannot initialize a writable editor. After closing a LAN tab, allow up to 30
+seconds before reopening its ID; no immediate lease takeover is attempted.
+Authentication failures visibly direct users to sign in and reload the editor;
+conflicts show close/wait/retry instructions instead of leaving dead buttons.
+
+Regression command against an already running, explicitly approved disposable LAN
+trial (do not point it at production or existing documents):
+
+```sh
+cd editor
+COWORK_LAN_URL="$APPROVED_LAN_ORIGIN" \
+COWORK_PASSWORD_FILE="$PRIVATE_TRIAL_PASSWORD_FILE" \
+npx playwright test tests/lan.spec.js tests/lan-security.spec.js --workers=1
+```
+
+This runs actual insecure-origin Chromium, not a localhost secure-context override.
+It creates only new synthetic fixture IDs; checks rendered manual document/cell
+editing and server persistence, duplicated-session tab exclusion, visible login and
+HTTPS-voice errors, and real HTTP auth/CSRF/competing-claim/revision enforcement.
+
 ## Intent and voice
 
 `POST /api/cowork/intent` calls the existing **configured, profile-scoped tool-free model path** (`_llm_update_summary`), preserving its complete provider/protocol/credential routing. It asks for a strict JSON editing envelope, then validates IDs, operation names, exact fields, coordinate/value shapes and response limits. No regex command simulation, arbitrary code, shell or filesystem execution is provided. Document text is explicitly untrusted model input. One coherent operation per instruction is supported; compound/unsupported instructions require clarification.

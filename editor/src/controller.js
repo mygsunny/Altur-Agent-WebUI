@@ -1,3 +1,4 @@
+import {randomId} from './browser-capabilities.js';
 // One synchronous adapter commit boundary, never an AI snapshot replacement.
 export class Controller {
  constructor(infer, report) { this.infer=infer; this.report=report; this.generation=0; this.seen=new Set(); this.pending=new Set(); this.voiceTail=Promise.resolve(); this.voiceCount=0; }
@@ -10,7 +11,7 @@ export class Controller {
   const task=this.voiceTail.then(()=>{if(generation===this.generation)return this.submit(text,id)}).finally(()=>{if(generation===this.generation)this.voiceCount--;});
   this.voiceTail=task;return task;
  } }
- async submit(text,id=crypto.randomUUID()) {
+ async submit(text,id=randomId()) {
   if(this.seen.has(id)) return; this.seen.add(id);
   const generation=this.generation, document_id=this.id, adapter=this.adapter;
   const abort=new AbortController(); this.pending.add(abort);

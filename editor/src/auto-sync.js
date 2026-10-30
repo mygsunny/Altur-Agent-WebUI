@@ -1,5 +1,5 @@
 import {decodeOffice,encodeOffice} from './office-sync.js';
-const fingerprint=async snapshot=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(snapshot)))),b=>b.toString(16).padStart(2,'0')).join('');
+import {snapshotHash as fingerprint} from './browser-capabilities.js';
 const b64=bytes=>{let s='';for(const b of new Uint8Array(bytes))s+=String.fromCharCode(b);return btoa(s)};
 // Heartbeat is browser presence, NOT remote Office/iCloud-upload completion.
 export function installAutoSync({api,current,reload,pause,report,waitMs=5000,

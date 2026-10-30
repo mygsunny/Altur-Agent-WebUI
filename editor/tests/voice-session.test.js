@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {randomId,snapshotHash} from '../src/browser-capabilities.js';
 import {PhraseGate,AudioQueue} from '../src/voice.js';
 import {Controller} from '../src/controller.js';
 import {execFileSync} from 'node:child_process';
@@ -9,7 +10,7 @@ const source=process.env.COWORK_VOICE_BASELINE?execFileSync('git',['show',proces
 function harness(){
  const elements=new Map();const $=id=>{if(!elements.has(id))elements.set(id,{textContent:''});return elements.get(id)};
  let pending=[];const tracks=[];const contexts=[];
- const context=vm.createContext({$,PhraseGate,AudioQueue,AbortController,Blob,FormData,crypto,performance,clearInterval,setInterval:()=>1,isSecureContext:true,report:()=>{},navigator:{mediaDevices:{getUserMedia:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))}},AudioContext:class{constructor(){contexts.push(this)}resume(){return Promise.resolve()}close(){this.closed=true}createMediaStreamSource(){return {connect(){}}}createAnalyser(){return {fftSize:2048,getFloatTimeDomainData(){}}}},MediaRecorder:class{constructor(){this.state='inactive'}start(){this.state='recording'}stop(){this.state='inactive';this.onstop?.()}},fetch:()=>{throw Error('unexpected request')}});
+ const context=vm.createContext({randomId,snapshotHash,$,PhraseGate,AudioQueue,AbortController,Blob,FormData,crypto,performance,clearInterval,setInterval:()=>1,isSecureContext:true,report:()=>{},navigator:{mediaDevices:{getUserMedia:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))}},AudioContext:class{constructor(){contexts.push(this)}resume(){return Promise.resolve()}close(){this.closed=true}createMediaStreamSource(){return {connect(){}}}createAnalyser(){return {fftSize:2048,getFloatTimeDomainData(){}}}},MediaRecorder:class{constructor(){this.state='inactive'}start(){this.state='recording'}stop(){this.state='inactive';this.onstop?.()}},fetch:()=>{throw Error('unexpected request')}});
  vm.runInContext("let id='old',opening=false,adapter={},saveBlocked=false,officePaused=false; const controller={generation:0,stop(){this.generation++}};let recorder,media,recordIdentity,acquiring=false,voiceContext,voiceTimer,voiceAbort,voiceQueue=Promise.resolve();",context);
  const stop=source.slice(source.indexOf('function stopVoice('),source.indexOf('async function save('));
  const listen=source.slice(source.indexOf("$('listen').onclick=async()=>"),source.indexOf("$('language').disabled"));

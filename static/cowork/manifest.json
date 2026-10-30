@@ -1,8 +1,8 @@
 [
   {
     "path": "static/cowork/THIRD-PARTY-NOTICES.txt",
-    "bytes": 604726,
-    "sha256": "b0c5ec1e67fa23d85d48bc0ebe5a1660969ed4a307148d695f24a464c7c33c8b"
+    "bytes": 605869,
+    "sha256": "f48e0317756b6592ae8d1db84346e14ed6ccc91a51c513e56e1fc60db9154dc7"
   },
   {
     "path": "static/cowork/assets/_commonjs-dynamic-modules-TDtrdbi3.js",
@@ -38,6 +38,11 @@
     "path": "static/cowork/assets/bn-NCLZcWHi-CsgykzQM.js",
     "bytes": 626,
     "sha256": "07e7479b48cec8a2b24681ef1daa2fe18c081a809138e8d1ffa65e5bf95e5cd9"
+  },
+  {
+    "path": "static/cowork/assets/browser-capabilities-DCSLKHOL.js",
+    "bytes": 5181,
+    "sha256": "639ddc176d34535b4cb29a64b7eaab5094431437e5c33ccccd105a15df7de970"
   },
   {
     "path": "static/cowork/assets/ca-SUf6Y2Om-Dp4lcbPL.js",
@@ -195,9 +200,9 @@
     "sha256": "6916256b63eb077ee84cc952b2f840b647e1f3113e8c5e0f265bf096665311b6"
   },
   {
-    "path": "static/cowork/assets/index-DxTkURFK.js",
-    "bytes": 460720,
-    "sha256": "6dd54c00192e18a2c4d5e15e3620e4f419ef4231a9e9abc003677274c858b574"
+    "path": "static/cowork/assets/index-C0Jg028Q.js",
+    "bytes": 460508,
+    "sha256": "d5099fce9da2156a75ac3f84f7664bfe461b3b42db5107ad268ac4255b0ec823"
   },
   {
     "path": "static/cowork/assets/is-BT8UVRze-BXloJ18M.js",
@@ -380,9 +385,9 @@
     "sha256": "3672fa320b0a978470443651280319fb7340b0ad23d05d30b9030d318888e781"
   },
   {
-    "path": "static/cowork/assets/sheet-DFSQ-dy0.js",
-    "bytes": 6895225,
-    "sha256": "228b813c473189577e2489ddce7f17f32640133b4779f0c4c759b9396e9c0732"
+    "path": "static/cowork/assets/sheet-gCHZljLY.js",
+    "bytes": 6895268,
+    "sha256": "0deaa21a6a9ac24968dd41b2f64e7dd919b2578a0a634b966806bd10c11bd397"
   },
   {
     "path": "static/cowork/assets/sk-_iOeDNrQ-BXQc18Za.js",
@@ -441,12 +446,12 @@
   },
   {
     "path": "static/cowork/index.html",
-    "bytes": 2392,
-    "sha256": "69f80c28ffc7bdf2abeea2972f5dd2dd4ea34b660676c7191a218dc3405ddc75"
+    "bytes": 2495,
+    "sha256": "7bfdb5bf9965a8d7536f38808ee7cb0573700ec8970655ed8df15aaec1c5fe3b"
   },
   {
     "path": "static/cowork/licenses.json",
-    "bytes": 22749,
-    "sha256": "9b430e136df1d45a2858f9963018384415dd6bce940ec630c21cf76acfcef4d9"
+    "bytes": 22832,
+    "sha256": "e18b9590e1e673739938af0c97cae9acb44984fb230a75727ac3afe5e9e58ab9"
   }
 ]

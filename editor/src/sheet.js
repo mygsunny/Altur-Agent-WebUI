@@ -1,3 +1,4 @@
+import {randomId} from './browser-capabilities.js';
 import {createUniver,LocaleType,mergeLocales} from '@univerjs/presets';
 import {UniverSheetsCorePreset} from '@univerjs/preset-sheets-core';
 import enUS from '@univerjs/preset-sheets-core/locales/en-US';
@@ -13,7 +14,7 @@ export function bounds(notation){
 export class SheetAdapter {
  constructor(element,snapshot){
   const {univer,univerAPI}=createUniver({locale:LocaleType.EN_US,locales:{[LocaleType.EN_US]:mergeLocales(enUS)},presets:[UniverSheetsCorePreset({container:element})]});
-  this.univer=univer;this.api=univerAPI;this.book=univerAPI.createWorkbook(snapshot||{id:crypto.randomUUID(),name:'Spreadsheet',sheetOrder:['sheet1'],sheets:{sheet1:{id:'sheet1',name:'Sheet1',rowCount:1000,columnCount:100,cellData:{}}}});
+  this.univer=univer;this.api=univerAPI;this.book=univerAPI.createWorkbook(snapshot||{id:randomId(),name:'Spreadsheet',sheetOrder:['sheet1'],sheets:{sheet1:{id:'sheet1',name:'Sheet1',rowCount:1000,columnCount:100,cellData:{}}}});
  }
  snapshot(){return this.book.save();}
  context(){const sheet=this.book.getActiveSheet();return {kind:'sheet',sheet_id:sheet.getSheetId(),sheets:this.book.getSheets().map(s=>({id:s.getSheetId(),name:s.getSheetName()})),selection:sheet.getActiveRange()?.getA1Notation()||'A1',values:sheet.getRange('A1:T50').getValues(),formulas:sheet.getRange('A1:T50').getFormulas(),context_limit:'Only A1:T50 included; ask for clarification for unknown semantic targets'};}
