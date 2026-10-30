@@ -95,6 +95,14 @@
         photo.append(image);
         group.prepend(photo);
       }
+      const image = host.querySelector('.welcome-photo img');
+      if (host.dataset.photoReady !== 'true') {
+        image.decode().then(() => {
+          if (expectedGeneration !== generation() || !image.isConnected) return;
+          host.dataset.photoReady = 'true';
+          layout();
+        }).catch(() => {}); // Failed artwork stays blank, never falls back to another selection.
+      }
     }
     for (const [key,id] of Object.entries(fields)) {
       const control = document.getElementById(id);

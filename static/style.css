@@ -2764,6 +2764,9 @@
   .empty-state.no-welcome{display:none}
   .welcome-group{display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;width:100%;min-width:0;flex:none;transform:translateY(var(--welcome-offset,0px));}
   @media(max-height:540px){.empty-state:has(.welcome-group){padding-top:8px;padding-bottom:8px;justify-content:flex-start;}.welcome-group{gap:8px;}.welcome-group .suggestion-grid{margin-top:0;}}
+  /* Keep the artwork slot, but never paint an unowned default or undecoded halo. */
+  .empty-state:not([data-artwork]) .empty-logo,
+  .empty-state:not([data-photo-ready="true"]) .welcome-photo{visibility:hidden;}
   .welcome-photo{display:none;position:relative;width:100%;flex:none;overflow:hidden;mask-image:linear-gradient(to right,transparent,#000 18px,#000 calc(100% - 18px),transparent);}
   .welcome-photo img{position:absolute;left:50%;top:0;transform:translateX(-50%);height:100%;width:auto;max-width:none;display:block;}
   .empty-state[data-artwork="photo"] .welcome-photo{display:block;}
