@@ -5,6 +5,19 @@
 
 const LOCALES = {
   en: {
+    settings_welcome_artwork: 'New-chat artwork',
+    settings_welcome_glow: 'Show logo glow',
+    settings_welcome_offset_desktop: 'Desktop welcome position (CSS px)',
+    settings_welcome_offset_mobile: 'Mobile welcome position (CSS px)',
+    settings_welcome_offset_help: 'Move the artwork, heading, text and suggestions together: negative moves up, positive moves down. Short screens clamp the position to keep chat usable.',
+    settings_welcome_none: 'None',
+    settings_welcome_original: 'Original logo',
+    settings_welcome_photo: 'Uploaded photo',
+    settings_welcome_desktop: 'Desktop photo height (CSS px)',
+    settings_welcome_mobile: 'Mobile photo height (CSS px)',
+    settings_welcome_help: 'Photo height stays fixed when width changes. Short screens temporarily reduce it to leave room for chat.',
+    settings_welcome_saved: 'Saved',
+    settings_welcome_failed: 'Save failed; retry your change.',
     settings_updates_disabled: 'Automatic update checks and installation are disabled for this fork. See the local setup guide for manual updates.',
     offline_title: 'Connection lost',
     offline_browser_detail: 'Your browser reports that this device is offline.',

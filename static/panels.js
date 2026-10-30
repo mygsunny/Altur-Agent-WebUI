@@ -7074,6 +7074,7 @@ function _refreshProfileSwitchBackground(gen){
   Promise.resolve(api('/api/settings')).then(function(s){
     if (gen !== _profileSwitchGeneration) return;
     var hidden = (s && Array.isArray(s.hidden_tabs)) ? s.hidden_tabs : [];
+    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(s||{});
     hidden = hidden.filter(function(x){ return typeof x === 'string' && x.trim(); });
     var order = (s && Array.isArray(s.tab_order)) ? s.tab_order : [];
     order = order.filter(function(x){ return typeof x === 'string' && x.trim(); });
@@ -9493,10 +9494,14 @@ function _speechPreferencesPayloadFromUi(){
 // Keep same-page settings merges FIFO so one response cannot race the next read-modify-write.
 let _settingsPanelPostQueue=Promise.resolve();
 
-function _enqueueSettingsPost(options){
+function _enqueueSettingsPost(options, ownerGeneration){
   const requestOptions={...(options||{})};
   if(typeof requestOptions.body==='string') requestOptions.body=String(requestOptions.body);
   const run=_settingsPanelPostQueue.then(async()=>{
+    // Opt-in ownership for narrow profile-bound writers waiting in this queue.
+    if(ownerGeneration!==undefined && ownerGeneration!==_profileSwitchGeneration){
+      throw new Error('Settings profile changed before save');
+    }
     const saved=await api('/api/settings',requestOptions);
     if(!saved||typeof saved!=='object'||Array.isArray(saved)){
       throw new Error('Invalid settings response');
@@ -9805,6 +9810,7 @@ async function loadSettingsPanel(){
       agentBadge.textContent = `Agent: ${agentVersion}`;
     }
     // Hydrate appearance controls first so a slow /api/models request
+    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(settings);
     // cannot overwrite an in-progress theme/skin selection.
     const themeSel=$('settingsTheme');
     const themeVal=settings.theme||'dark';

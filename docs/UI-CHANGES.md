@@ -58,3 +58,27 @@ Tracking: branch `fix/desktop-session-discovery`, stacked on the navigation feat
 - An isolated loopback full-server test with generated fixture credentials returned 401 for unauthenticated protected access, 200 for a signed-in password rotation without reentry, 403 for disabling authentication without reentry, 401 for the old password and 200 for the new password. Authentication remained enabled.
 - The same disposable server returned all four fixture Desktop roots despite 25 newer delegated children, and Chromium rendered all four roots visibly.
 - These are local checks, not GitHub CI or a claim that a production password has been rotated.
+
+## Welcome artwork and theme-matched login
+
+Tracking: local branch `feature/welcome-artwork-login-theme`, stacked on the maintained Desktop discovery/password fixes. Not published, merged or deployed by this change.
+
+### Added
+- Appearance choices **None**, **Original logo** (unchanged default), and **Uploaded photo**, using the intentional supplied transparent PNG. Welcome text, suggestions and composer remain intact.
+- Independent desktop/mobile saved photo targets, default 240/160 CSS px, bounded 64–600. Fixed-height natural aspect rendering, centered left/right cropping and narrow real-alpha edge masks. Width-only resizing does not scale the image; crossing the mobile breakpoint selects the other target.
+- Separate saved **Show logo glow** toggle, default on. Off removes the actual circular `::before` halo in original and photo modes, not the artwork. None mode never leaves a halo behind.
+- Independent saved desktop/mobile welcome-group positions, default centered at 0 CSS px, bounded -300..300 (negative up, positive down). Move the selected logo/artwork, heading, descriptive text and all three suggestion buttons in one wrapper; do not move composer, sidebar or header. Clamp the effective offset against available message/visual viewport and composer space, and restore it as height returns without changing saved values.
+- A conservative visual-viewport-height budget temporarily shrinks or collapses artwork on short/keyboard-constrained screens, restoring it as height increases without changing preferences.
+- Narrow one-key settings writes through the existing FIFO, with hydration that never saves and profile-generation guards for queued writes and late responses. Existing settings-file ownership and unrelated preferences are preserved.
+- Shared blocking app/login prepaint appearance resolver and application stylesheet palette. Login receives normalized allowlisted theme/skin only, follows Light/Dark/System, updates on OS changes in System mode, and overrides stale browser appearance cache with saved server values. Authentication routes and security policy are unchanged.
+- Public [design](welcome-artwork-design.md) and [verification plan](welcome-artwork-plan.md), including portable commands and explicit evidence boundaries.
+
+### Local verification
+- Observed RED then GREEN for missing artwork settings/rendering and login palette, stale-profile responses, queued-profile writes, maximum-height short-screen geometry and malformed artwork enum types.
+- The added glow/position requirements also ran RED → GREEN. Real browser controls sent exactly one setting each. Persisted glow false/true removed/restored the selected pseudo-element in both artwork modes. All three modes moved every visible welcome child equally at desktop/mobile widths, while composer, header and sidebar coordinates stayed fixed. Independent offsets round-tripped; both positive/negative extreme offsets clamped at short heights and restored when tall again.
+- `python3 -m unittest discover -s tests -p test_welcome_artwork.py -v`: settings schema/default/range contract passed.
+- `node tests/welcome-artwork.browser.cjs`: three modes, independent targets, desktop/mobile width-only resizing, vertical shrink/restore, alpha mask, late-response and queued-write ownership guards passed.
+- `node tests/login-appearance.browser.cjs`: six first-frame Light/Dark/System × OS cases with palette and live System updates passed.
+- `node tests/welcome-artwork.http.browser.cjs`: real disposable loopback HTTP server and Chromium desktop/touch-mobile fixtures passed persisted reloads, independent heights, one-key writes preserving unrelated preferences, malformed/out-of-range rejection, decoded PNG transparency, aspect/centering/crop/mask geometry, maximum-height short viewports, portrait/landscape composer bounds and six authoritative login first-frame cases. Generated-password login, protected API rejection, browser CSRF refusal, signed-in optional reentry, disable-auth refusal, exact password spaces and logout revocation also passed.
+- Existing rail and sidebar Chromium suites, five password-policy tests and ten disposable SQLite Desktop discovery tests passed. Changed JavaScript syntax and whitespace checks passed.
+- Synthetic screenshots were inspected locally; no user conversations, production account state or credentials are included. These are local tests, not GitHub CI, a production deployment, hardware passkey/external OIDC certification or physical-phone keyboard testing. Existing collapsed-right-panel document overflow and password-rotation session lifetime policy are preserved, not repaired by this feature.

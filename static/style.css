@@ -2762,11 +2762,19 @@
   .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;color:var(--muted);}
   .empty-state.no-suggestions .suggestion-grid{display:none}
   .empty-state.no-welcome{display:none}
+  .welcome-group{display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;width:100%;min-width:0;flex:none;transform:translateY(var(--welcome-offset,0px));}
+  @media(max-height:540px){.empty-state:has(.welcome-group){padding-top:8px;padding-bottom:8px;justify-content:flex-start;}.welcome-group{gap:8px;}.welcome-group .suggestion-grid{margin-top:0;}}
+  .welcome-photo{display:none;position:relative;width:100%;flex:none;overflow:hidden;mask-image:linear-gradient(to right,transparent,#000 18px,#000 calc(100% - 18px),transparent);}
+  .welcome-photo img{position:absolute;left:50%;top:0;transform:translateX(-50%);height:100%;width:auto;max-width:none;display:block;}
+  .empty-state[data-artwork="photo"] .welcome-photo{display:block;}
+  .empty-state[data-artwork="photo"] .empty-logo,.empty-state[data-artwork="none"] .empty-logo{display:none;}
+  .empty-state:has(.welcome-photo){min-width:0;max-width:100%;}
   /* Empty-state brand mark: a free-breathing winged caduceus with a soft
      "spirit" bloom behind it — no app-icon tile. Glow + mark gradient are
      tuned separately for dark vs light themes (see --logo-glow / .hm-g* below). */
   .empty-logo{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:10px;background:none;border:none;border-radius:0;box-shadow:none;}
-  .empty-logo::before{content:"";position:absolute;left:50%;top:50%;width:190px;height:190px;transform:translate(-50%,-50%);border-radius:50%;background:var(--logo-glow);z-index:0;pointer-events:none;}
+  .empty-logo::before,.welcome-photo::before{content:"";position:absolute;left:50%;top:50%;width:190px;height:190px;transform:translate(-50%,-50%);border-radius:50%;background:var(--logo-glow);z-index:0;pointer-events:none;}
+  .empty-state[data-logo-glow="false"] .empty-logo::before,.empty-state[data-logo-glow="false"] .welcome-photo::before,.empty-state[data-artwork="none"] .empty-logo::before,.empty-state[data-artwork="none"] .welcome-photo::before{content:none;display:none;background:none;}
   .empty-logo svg{position:relative;z-index:1;width:88px;height:88px;display:block;}
   /* Light themes (default :root): deeper, richer gradient holds contrast on
      a pale background; cooler, restrained bloom. */
