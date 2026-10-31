@@ -2,6 +2,28 @@
 
 This log tracks accepted fork changes. Keep it current with each related feature or fix, link the pull request or commit, and distinguish local verification from CI and deployed behavior. Do not add credentials, machine paths, private network details, user conversations, or deployment-only launchers. The release-maintained root CHANGELOG.md remains unchanged.
 
+## Co-work inline clarification answers
+
+- Each active clarification now has a command-bound reply field and Answer button.
+  Answer retries the same logical FIFO head and immutable command ID with the
+  original instruction and up to three question/answer turns serialized as bound
+  context through the existing tool-free intent endpoint. Reply text is limited
+  to 2,000 characters; composed requests above the existing 20,000-character
+  endpoint limit are refused visibly without releasing the barrier.
+- Reclarification updates the same row. Ordinary answer failures keep the draft
+  and dependents paused for explicit retry. Dismiss skips/resumes; Stop, document
+  switch and disconnect invalidate replies. Security barriers remain closed.
+- Focus the inline reply to direct finalized voice transcription into that draft,
+  then click Answer. A visible focus indicator explains this target. Speech
+  outside this field remains a separate command; exact spoken Stop still cancels.
+- Verification: 99 Node tests and 12 Firefox fixture tests passed. The baseline
+  built bundle independently fails the Answer UI test because no reply field
+  exists. All 91 manifest artifacts matched exact isolated served bytes.
+- Local Firefox uses the built bundle and real editor/recorder with synthetic
+  audio and controlled inference/transcription fixtures; it is not real-model or
+  microphone-hardware acceptance. No backend change or production restart.
+- Updates [draft review #4](https://github.com/mygsunny/Altur-Agent-WebUI/pull/4).
+
 ## Co-work clarification dismissal resumes FIFO
 
 - Dismiss now releases only the current document/session-bound clarification
