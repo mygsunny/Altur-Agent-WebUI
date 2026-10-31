@@ -10,7 +10,7 @@ const source=process.env.COWORK_VOICE_BASELINE?execFileSync('git',['show',proces
 function harness(){
  const elements=new Map();const $=id=>{if(!elements.has(id))elements.set(id,{textContent:''});return elements.get(id)};
  let pending=[];const tracks=[];const contexts=[];
- const context=vm.createContext({randomId,snapshotHash,$,PhraseGate,AudioQueue,AbortController,Blob,FormData,crypto,performance,clearInterval,setInterval:()=>1,isSecureContext:true,report:()=>{},navigator:{mediaDevices:{getUserMedia:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))}},AudioContext:class{constructor(){contexts.push(this)}resume(){return Promise.resolve()}close(){this.closed=true}createMediaStreamSource(){return {connect(){}}}createAnalyser(){return {fftSize:2048,getFloatTimeDomainData(){}}}},MediaRecorder:class{constructor(){this.state='inactive'}start(){this.state='recording'}stop(){this.state='inactive';this.onstop?.()}},fetch:()=>{throw Error('unexpected request')}});
+ const context=vm.createContext({document:{activeElement:null},randomId,snapshotHash,$,PhraseGate,AudioQueue,AbortController,Blob,FormData,crypto,performance,clearInterval,setInterval:()=>1,isSecureContext:true,report:()=>{},navigator:{mediaDevices:{getUserMedia:()=>new Promise((resolve,reject)=>pending.push({resolve,reject}))}},AudioContext:class{constructor(){contexts.push(this)}resume(){return Promise.resolve()}close(){this.closed=true}createMediaStreamSource(){return {connect(){}}}createAnalyser(){return {fftSize:2048,getFloatTimeDomainData(){}}}},MediaRecorder:class{constructor(){this.state='inactive'}start(){this.state='recording'}stop(){this.state='inactive';this.onstop?.()}},fetch:()=>{throw Error('unexpected request')}});
  vm.runInContext("let id='old',opening=false,adapter={},saveBlocked=false,officePaused=false; const controller={generation:0,stop(){this.generation++}};let recorder,media,recordIdentity,acquiring=false,voiceContext,voiceTimer,voiceAbort,voiceQueue=Promise.resolve();",context);
  const stop=source.slice(source.indexOf('function stopVoice('),source.indexOf('async function save('));
  const listen=source.slice(source.indexOf("$('listen').onclick=async()=>"),source.indexOf("$('language').disabled"));
@@ -75,6 +75,16 @@ test('capture recognizes final Stop while previous full inference is still pendi
  const enabled=h.$('listen').onclick();h.resolve(0);await enabled;
  for(const [clock,level] of [[0,.1],[300,.1],[1200,0],[1500,.1],[1800,.1],[2700,0]]){Object.assign(h.context,{clock,level});h.context.tick();await new Promise(r=>setImmediate(r));}
  const aborted=inferenceSignal?.aborted;real.stop();h.run('stopVoice()');assert.equal(recognitions,2);assert.equal(aborted,true);
+});
+test('focused clarification receives final speech as draft; Stop still cancels',async()=>{
+ const h=harness();let commands=[];const field={dataset:{commandId:'a'},value:'',dispatchEvent(){}};
+ Object.assign(h.context,{Event:class{},document:{activeElement:field},clock:0,level:.1,csrf:'',setInterval:fn=>{h.context.tick=fn;return 1},performance:{now:()=>h.context.clock},fetch:async()=>({ok:true,json:async()=>({text:commands.length?'Stop':'hello reply'})})});
+ h.context.commands=commands;h.run(`controller.pauseOwner={id:'a'};controller.transcript=text=>commands.push(text);AudioContext.prototype.createAnalyser=function(){return {fftSize:2048,getFloatTimeDomainData(samples){samples.fill(level)}}};MediaRecorder.prototype.stop=function(){this.state='inactive';this.ondataavailable({data:new Blob(['audio'])});this.onstop()};`);
+ const enabled=h.$('listen').onclick();h.resolve(0);await enabled;
+ for(const [clock,level] of [[0,.1],[300,.1],[1200,0]]){Object.assign(h.context,{clock,level});h.context.tick();await new Promise(r=>setImmediate(r));}
+ assert.equal(field.value,'hello reply');assert.deepEqual(commands,[]);commands.push('sentinel');
+ for(const [clock,level] of [[1500,.1],[1800,.1],[2700,0]]){Object.assign(h.context,{clock,level});h.context.tick();await new Promise(r=>setImmediate(r));}
+ assert.deepEqual(commands,['sentinel','Stop']);h.run('stopVoice()');
 });
 test('opening beginning during AudioContext resume invalidates setup',async()=>{
  const h=harness();h.run('AudioContext.prototype.resume=function(){return new Promise(r=>globalThis.resume=r)}');
