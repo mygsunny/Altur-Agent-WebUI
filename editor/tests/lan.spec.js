@@ -1,0 +1,31 @@
+import {test,expect} from '@playwright/test';
+import fs from 'node:fs';
+const base=process.env.COWORK_LAN_URL;
+test.skip(!base,'Set COWORK_LAN_URL to an actual insecure LAN trial origin');
+const url=base+'/static/cowork/index.html';
+test('unauthenticated static editor reports actionable login error',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(url);await expect(page.locator('#status')).toContainText('Sign in');
+ await page.locator('#new-doc').click();await expect(page.locator('#status')).toContainText('Sign in');expect(errors).toEqual([]);
+});
+test('insecure LAN manual editors, cloned tab exclusion, authenticated persistence',async({page,context})=>{
+ test.setTimeout(120000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const login=await context.request.post(base+'/api/auth/login',{data:{password:fs.readFileSync(process.env.COWORK_PASSWORD_FILE,'utf8')},headers:{Origin:base}});expect(login.status()).toBe(200);
+ await page.goto(url);expect(await page.evaluate(()=>({secure:isSecureContext,locks:!!navigator.locks,uuid:typeof crypto.randomUUID}))).toEqual({secure:false,locks:false,uuid:'undefined'});
+ await expect(page.locator('#apply')).toBeEnabled({timeout:40000});
+ await page.locator('#new-doc').click();await expect(page.locator('.tiptap')).toBeVisible();await expect(page.locator('#apply')).toBeEnabled({timeout:40000});
+ await page.locator('.tiptap').fill('LAN disposable document fixture');await page.locator('#save').click();await expect(page.locator('#save-status')).toContainText('Saved revision');
+ const docURL=page.url();const second=await context.newPage();
+ const stored=await page.evaluate(()=>({...sessionStorage}));await second.addInitScript(data=>Object.entries(data).forEach(([k,v])=>sessionStorage.setItem(k,v)),stored);
+ await second.goto(docURL);await expect(second.locator('#status')).toContainText(/writable|owned|another|lease/i);await expect(second.locator('.tiptap')).toHaveCount(0);await second.close();
+ await page.locator('#listen').click();await expect(page.locator('#status')).toContainText('HTTPS');
+ await page.locator('#new-sheet').click();await page.waitForFunction(()=>window.cowork?.kind==='sheet');await expect(page.locator('#apply')).toBeEnabled({timeout:40000});
+ const grid=page.locator('#editor canvas').last();await expect(grid).toBeVisible();
+ await grid.dblclick({position:{x:90,y:32}});await page.keyboard.type('LAN manual cell');await page.keyboard.press('Enter');
+ await expect.poll(()=>page.evaluate(()=>window.cowork.adapter.book.getActiveSheet().getRange('A1').getValues()[0][0])).toBe('LAN manual cell');
+ await page.evaluate(()=>{const a=window.cowork.adapter;a.book.getActiveSheet().getRange('B1').setValue('LAN sheet fixture')});
+ await page.locator('#save').click();await expect(page.locator('#save-status')).toContainText('Saved revision');
+ const id=await page.evaluate(()=>window.cowork.id);
+ await expect.poll(async()=>JSON.stringify(await (await context.request.get(base+'/api/cowork/document?id='+id)).json())).toContain('LAN sheet fixture');
+ expect(errors).toEqual([]);console.log('LAN document:',docURL,'LAN sheet:',page.url());
+});
