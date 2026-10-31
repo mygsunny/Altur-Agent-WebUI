@@ -2619,6 +2619,7 @@ async function newSession(flash, options={}){
     }
     updateQueueBadge(S.session.session_id);
     syncTopbar();renderMessages();
+    if(typeof _resetEmptyWelcomeScroll==='function') _resetEmptyWelcomeScroll();
     if(typeof _announceNewSessionWorkspace==='function') _announceNewSessionWorkspace(S.session);
     // Keep new-chat first paint instant. The workspace tree / git badge can
     // refresh right after paint unless this caller explicitly needs it loaded

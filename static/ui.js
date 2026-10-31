@@ -9501,7 +9501,26 @@ document.addEventListener('DOMContentLoaded',function(){
   tooltip.addEventListener('click',function(e){e.stopPropagation();});
 });
 
+// Welcome artwork is scrollable content, not a transcript tail. Late composer
+// growth and already-queued transcript retries must not bottom-pin it.
+function _isEmptyWelcomeScrollState(){
+  const welcome=$('emptyState');
+  return !!welcome && welcome.style.display!=='none';
+}
+function _resetEmptyWelcomeScroll(){
+  if(!_isEmptyWelcomeScrollState()) return;
+  ++_bottomSettleToken;
+  cancelAnimationFrame(_settleRAF);
+  if(_settleRO){_settleRO.disconnect();_settleRO=null;}
+  clearTimeout(_settleTimer);clearTimeout(_settleFinalTimer);
+  const el=$('messages');
+  if(el)el.scrollTop=0;
+  // Only called at entry to a new empty view, never during later hydration.
+  if(document.scrollingElement)document.scrollingElement.scrollTop=0;
+}
 function _setMessageScrollToBottom(){
+  if(_isEmptyWelcomeScrollState()) return;
+  const scrollOwner=_bottomSettleToken;
   const el=$('messages');
   if(!el) return;
   _programmaticScroll=true;_programmaticScrollSetAt=performance.now();
@@ -9516,7 +9535,7 @@ function _setMessageScrollToBottom(){
     // scrolled up — under the sticky-unpin model (#3343) _messageUserUnpinned
     // is the authoritative "user scrolled away" signal, so DON'T snap them back
     // or re-pin if so; only release the programmatic-scroll latch.
-    if(_messageUserUnpinned || !_scrollPinned || _recentNonMessageScrollIntent()){
+    if(scrollOwner!==_bottomSettleToken || _isEmptyWelcomeScrollState() || _messageUserUnpinned || !_scrollPinned || _recentNonMessageScrollIntent()){
       _deferClearProgrammaticScroll();
       return;
     }
@@ -9572,6 +9591,7 @@ function _followMessagesAfterDomReplace(){
   return false;
 }
 function _settleMessageScrollToBottom(force, explicit){
+  if(_isEmptyWelcomeScrollState()) return;
   // `explicit` = a user-invoked scroll-to-bottom (End button / scrollToBottom()).
   // When explicit, late-layout settling runs even if Auto-follow is OFF — the
   // setting only suppresses AUTOMATIC streaming follow, not a deliberate jump
@@ -9657,6 +9677,7 @@ function _settleMessageScrollToBottom(force, explicit){
 }
 
 function _settleFinalScroll(token){
+  if(_isEmptyWelcomeScrollState()) return;
   if(token!==_bottomSettleToken) return;
   const el=document.getElementById('messages');
   if(!el){ _programmaticScroll=false; return; }
@@ -21203,7 +21224,9 @@ function renderMessages(options){
 
   const preservedCompressionTaskMessages=_latestPreservedCompressionTaskListMessages(S.messages);
   const visWithIdx=_getVisibleMessagesWithIdx();
+  const wasWelcome=$('emptyState').style.display!=='none';
   $('emptyState').style.display=(visWithIdx.length||preservedCompressionTaskMessages.length)?'none':'';
+  if(!wasWelcome && typeof _resetEmptyWelcomeScroll==='function') _resetEmptyWelcomeScroll();
   const virtualWindow=virtualFallback
     ? {virtualized:false,start:0,end:visWithIdx.length,topPad:0,bottomPad:0,total:visWithIdx.length,tailStart:visWithIdx.length}
     : _currentMessageVirtualWindow(visWithIdx,_messageVirtualKeepTailCount());

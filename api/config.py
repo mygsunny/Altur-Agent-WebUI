@@ -13316,6 +13316,12 @@ _SETTINGS_DEFAULTS = {
     "show_conversation_outline": False,  # show opt-in desktop jump-to-question outline panel
     "show_busy_placeholder_hint": False,  # opt-in busy composer placeholder hint
     "hide_empty_state_suggestions": False,  # hide the default new-chat suggestion buttons
+    "welcome_artwork": "original",  # none | original | photo
+    "welcome_artwork_height_desktop": 240,
+    "welcome_artwork_height_mobile": 160,
+    "welcome_logo_glow": True,
+    "welcome_offset_desktop": 0,
+    "welcome_offset_mobile": 0,
     "hide_empty_state_panel": False,  # hide the complete new-chat welcome panel
     "new_chat_on_workspace_switch": False,  # #5473 opt-in: switching to a DIFFERENT workspace starts a new chat (leaving the current conversation on its original workspace) instead of mutating the current session's workspace in place. Default OFF preserves the shipped in-place-switch behavior.
     "virtualize_transcript": False,  # #4343: virtualize long (>80 msg) transcripts. EXPERIMENTAL, opt-IN (default OFF). Was opt-out/default-on in #4325 but caused scroll-up flicker on long sessions with tall tool-call rows (variable-height anchor oscillation) — flipped off for everyone in #4343; re-enabling requires an explicit opt-in (see virtualize_transcript_optin migration in load_settings).
@@ -13664,6 +13670,7 @@ _SETTINGS_ALLOWED_KEYS = set(_SETTINGS_DEFAULTS.keys()) - {
     "language",
 }
 _SETTINGS_ENUM_VALUES = {
+    "welcome_artwork": {"none", "original", "photo"},
     "send_key": {"enter", "ctrl+enter", "shift+enter"},
     "sidebar_density": {"compact", "detailed"},
     "update_channel": {"stable", "experimental"},
@@ -13674,6 +13681,10 @@ _SETTINGS_ENUM_VALUES = {
     "structured_code_default_view": {"auto", "on", "off"},
 }
 _SETTINGS_INT_RANGES = {
+    "welcome_artwork_height_desktop": (64, 600),
+    "welcome_artwork_height_mobile": (64, 600),
+    "welcome_offset_desktop": (-300, 300),
+    "welcome_offset_mobile": (-300, 300),
     "pinned_sessions_limit": (1, 99),
     "inflight_state_max_sessions": (1, 25),
     "inflight_state_max_messages": (1, 100),
@@ -13894,6 +13905,8 @@ def save_settings(settings: dict) -> dict:
                     skin_was_explicit = True
                 continue
             # Validate enum-constrained keys
+            if k == "welcome_artwork" and not isinstance(v, str):
+                continue
             if k in _SETTINGS_ENUM_VALUES and v not in _SETTINGS_ENUM_VALUES[k]:
                 continue
             # Validate bounded integer settings.

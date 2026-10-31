@@ -2762,11 +2762,22 @@
   .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px;color:var(--muted);}
   .empty-state.no-suggestions .suggestion-grid{display:none}
   .empty-state.no-welcome{display:none}
+  .welcome-group{display:flex;flex-direction:column;align-items:center;gap:12px;position:relative;width:100%;min-width:0;flex:none;transform:translateY(var(--welcome-offset,0px));}
+  @media(max-height:540px){.empty-state:has(.welcome-group){padding-top:8px;padding-bottom:8px;justify-content:flex-start;}.welcome-group{gap:8px;}.welcome-group .suggestion-grid{margin-top:0;}}
+  /* Keep the artwork slot, but never paint an unowned default or undecoded halo. */
+  .empty-state:not([data-artwork]) .empty-logo,
+  .empty-state:not([data-photo-ready="true"]) .welcome-photo{visibility:hidden;}
+  .welcome-photo{display:none;position:relative;width:100%;flex:none;overflow:hidden;mask-image:linear-gradient(to right,transparent,#000 18px,#000 calc(100% - 18px),transparent);}
+  .welcome-photo img{position:absolute;left:50%;top:0;transform:translateX(-50%);height:100%;width:auto;max-width:none;display:block;}
+  .empty-state[data-artwork="photo"] .welcome-photo{display:block;}
+  .empty-state[data-artwork="photo"] .empty-logo,.empty-state[data-artwork="none"] .empty-logo{display:none;}
+  .empty-state:has(.welcome-photo){min-width:0;max-width:100%;}
   /* Empty-state brand mark: a free-breathing winged caduceus with a soft
      "spirit" bloom behind it — no app-icon tile. Glow + mark gradient are
      tuned separately for dark vs light themes (see --logo-glow / .hm-g* below). */
   .empty-logo{position:relative;display:flex;align-items:center;justify-content:center;margin-bottom:10px;background:none;border:none;border-radius:0;box-shadow:none;}
-  .empty-logo::before{content:"";position:absolute;left:50%;top:50%;width:190px;height:190px;transform:translate(-50%,-50%);border-radius:50%;background:var(--logo-glow);z-index:0;pointer-events:none;}
+  .empty-logo::before,.welcome-photo::before{content:"";position:absolute;left:50%;top:50%;width:190px;height:190px;transform:translate(-50%,-50%);border-radius:50%;background:var(--logo-glow);z-index:0;pointer-events:none;}
+  .empty-state[data-logo-glow="false"] .empty-logo::before,.empty-state[data-logo-glow="false"] .welcome-photo::before,.empty-state[data-artwork="none"] .empty-logo::before,.empty-state[data-artwork="none"] .welcome-photo::before{content:none;display:none;background:none;}
   .empty-logo svg{position:relative;z-index:1;width:88px;height:88px;display:block;}
   /* Light themes (default :root): deeper, richer gradient holds contrast on
      a pale background; cooler, restrained bloom. */
@@ -3238,6 +3249,9 @@
       top:0;bottom:0;width:var(--mobile-rightpanel-width)!important;max-width:100vw!important;z-index:200;padding-top:var(--app-titlebar-safe-top);box-sizing:border-box;
       box-shadow:none!important;visibility:hidden;pointer-events:none;transition:right .25s ease,visibility 0s linear .25s;}
     .rightpanel.mobile-open{right:0!important;box-shadow:-4px 0 24px rgba(0,0,0,.4)!important;visibility:visible;pointer-events:auto;transition:right .25s ease,visibility 0s;}
+    /* A closed overlay must not carry its drawer width into desktop flex
+       layout and animate 300px → 0 on expansion across this breakpoint. */
+    html[data-workspace-panel="closed"] .rightpanel:not(.mobile-open){width:0!important;transition:right .25s ease,visibility 0s linear .25s,width 0s linear .25s;}
     .rightpanel .resize-handle{display:none;}
     .rightpanel .panel-header{row-gap:8px;}
     .rightpanel .panel-actions{align-items:center;gap:8px;}
@@ -3322,6 +3336,9 @@
       visibility:hidden;pointer-events:none;
       will-change:transform;}
     .sidebar.mobile-open{transform:translateX(0);visibility:visible;pointer-events:auto;transition:transform .25s ease,visibility 0s linear 0s;}
+    /* Keep the closing slide, then park at zero width. Otherwise the hidden
+       100vw drawer briefly consumes the tablet flex row on expansion. */
+    .sidebar:not(.mobile-open){width:0;transition:transform .25s ease,visibility 0s linear .25s,width 0s linear .25s;}
     .sidebar .resize-handle{display:none;}
     /* Hamburger button (in app titlebar on mobile) */
     .app-titlebar{height:52px;justify-content:space-between;}

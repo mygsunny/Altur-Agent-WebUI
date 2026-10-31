@@ -57,7 +57,7 @@ const root=path.resolve(__dirname,'..');
  const beforeClick=await page.evaluate(()=>activations);await chat.click();assert.equal(await page.evaluate(()=>activations),beforeClick+1,'Escape during drag restores normal clicks');
  // Opening Settings immediately waits for the order write before reading settings.
  const settingsPrefix=panels.slice(panels.indexOf('async function loadSettingsPanel(){'),panels.indexOf('    checkWebUIVersionSkew(settings);',panels.indexOf('async function loadSettingsPanel(){')));
- await page.addScriptTag({content:settingsPrefix+'return settings;}catch(error){throw error;}}'});
+ await page.addScriptTag({content:'let _profileSwitchGeneration=0;\n'+settingsPrefix+'return settings;}catch(error){throw error;}}'});
  assert(await page.evaluate(async()=>{
   let release;let read=false;
   _tabOrderSaveQueue=new Promise(resolve=>release=resolve);

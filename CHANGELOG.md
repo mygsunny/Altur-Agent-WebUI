@@ -3,6 +3,11 @@
 
 ## [Unreleased]
 
+### Welcome artwork review fixes
+
+- Retain proportional welcome photos in landscape using measured available space rather than a fixed 540 px cutoff; preserve width-only height locking, scrolling, offsets and the composer.
+- Reject stale Settings hydration after profile changes, including delayed panel loads, and pass captured ownership tokens through artwork hydration.
+
 ### Added
 
 - **Pinch, pan and zoom in the image lightbox.** An enlarged chat image can now be pinched to zoom and panned with two fingers on touch screens, zoomed with the mouse wheel at the cursor and dragged on desktop, and zoomed or reset with `+`, `-` and `F` on the keyboard. A Fit button next to close returns it to fit, the zoom carries across previous/next images, and the image can no longer be dragged out of view. An edge swipe inside the open lightbox no longer opens the session drawer behind it, and keyboard focus now moves into the dialog. A maintainer fold makes both buttons 44×44 on touch screens with a gap between them, gives them a hover state you can see over the dark backdrop and over bright images (the close button in the diagram lightbox included), and keeps Tab order in visual order. Thanks @silent-reader-cn. (#6896)

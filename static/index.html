@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Altur-Agent">
 <link rel="apple-touch-icon" sizes="512x512" href="static/apple-touch-icon.png">
-<script>(function(){try{var _hadAppearance=localStorage.getItem('hermes-theme')!==null||localStorage.getItem('hermes-skin')!==null;var themes={light:1,dark:1,system:1},skins={codex:1,terracotta:1,default:1,ares:1,mono:1,graphite:1,github:1,slate:1,poseidon:1,sisyphus:1,charizard:1,sienna:1,catppuccin:1,hepburn:1,nous:1,'geist-contrast':1,neon:1,'neon-soft':1,'neon-paint':1,zeus:1,'verdigris':1},legacy={slate:['dark','slate'],solarized:['dark','poseidon'],monokai:['dark','sisyphus'],nord:['dark','slate'],oled:['dark','default']},t=(localStorage.getItem('hermes-theme')||'dark').toLowerCase(),s=(localStorage.getItem('hermes-skin')||'').toLowerCase(),m=legacy[t],theme=m?m[0]:(themes[t]?t:'dark');var pendingExt=s&&s!=='default'&&!skins[s]&&!legacy[s];var skin=skins[s]?s:(pendingExt?s:(m?m[1]:'default'));if(_hadAppearance){localStorage.setItem('hermes-theme',theme);localStorage.setItem('hermes-skin',skin);}if(theme==='system')theme=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';if(theme==='dark')document.documentElement.classList.add('dark');if(skin!=='default')document.documentElement.dataset.skin=skin;}catch(e){document.documentElement.classList.add('dark');}})()</script>
+<script src="static/appearance.js?v=__WEBUI_VERSION__"></script>
 <script>(function(){try{var fs=localStorage.getItem('hermes-font-size');if(fs&&fs!=='default')document.documentElement.dataset.fontSize=fs;}catch(e){}})()</script>
 <!-- theme-color: surfaces the active app chrome color to native status bars (Safari status bar, PWA, native WKWebView wrappers). Updated dynamically by boot.js when theme/skin changes. The light/dark default values match style.css :root --sidebar / :root.dark --sidebar. -->
 <meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)">
@@ -71,7 +71,7 @@
     };
   }
 })()</script>
-<link rel="stylesheet" href="static/style.css?v=__WEBUI_VERSION__&amp;rail=4">
+<link rel="stylesheet" href="static/style.css?v=__WEBUI_VERSION__&amp;rail=4&amp;welcome=3">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" integrity="sha384-LJcOxlx9IMbNXDqJ2axpfEQKkAYbFjJfhXexLfiRJhjDU81mzgkiQq8rkV0j6dVh" crossorigin="anonymous">
   <!-- KaTeX math rendering CSS (loaded eagerly from vendored assets to prevent font CSP noise) -->
   <link rel="stylesheet" href="static/vendor/katex/0.16.22/katex.min.css">
@@ -1198,6 +1198,24 @@
               <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="settings_desc_composer_situational_controls">These controls do not always appear, depending on viewport, mode, or runtime state. You can still toggle them off if needed.</div>
             </div>
             <div id="settingsAppearanceAutosaveStatus" class="settings-autosave-status" aria-live="polite"></div>
+            <div class="settings-section">
+              <label for="settingsWelcomeArtwork" data-i18n="settings_welcome_artwork">New-chat artwork</label>
+              <select id="settingsWelcomeArtwork" disabled onchange="saveWelcomeArtwork(this)">
+                <option value="none" data-i18n="settings_welcome_none">None</option><option value="original" selected data-i18n="settings_welcome_original">Original logo</option><option value="photo" data-i18n="settings_welcome_photo">Uploaded photo</option>
+              </select>
+              <label><input id="settingsWelcomeLogoGlow" type="checkbox" checked disabled onchange="saveWelcomeArtwork(this)"> <span data-i18n="settings_welcome_glow">Show logo glow</span></label>
+              <label for="settingsWelcomeHeightDesktop" data-i18n="settings_welcome_desktop">Desktop photo height (CSS px)</label>
+              <input id="settingsWelcomeHeightDesktop" type="number" min="64" max="600" step="1" value="240" disabled onchange="saveWelcomeArtwork(this)">
+              <label for="settingsWelcomeHeightMobile" data-i18n="settings_welcome_mobile">Mobile photo height (CSS px)</label>
+              <input id="settingsWelcomeHeightMobile" type="number" min="64" max="600" step="1" value="160" disabled onchange="saveWelcomeArtwork(this)">
+              <label for="settingsWelcomeOffsetDesktop" data-i18n="settings_welcome_offset_desktop">Desktop welcome position (CSS px)</label>
+              <input id="settingsWelcomeOffsetDesktop" type="number" min="-300" max="300" step="1" value="0" disabled onchange="saveWelcomeArtwork(this)">
+              <label for="settingsWelcomeOffsetMobile" data-i18n="settings_welcome_offset_mobile">Mobile welcome position (CSS px)</label>
+              <input id="settingsWelcomeOffsetMobile" type="number" min="-300" max="300" step="1" value="0" disabled onchange="saveWelcomeArtwork(this)">
+              <p data-i18n="settings_welcome_offset_help">Move the artwork, heading, text and suggestions together: negative moves up, positive moves down. Short screens clamp the position to keep chat usable.</p>
+              <p data-i18n="settings_welcome_help">Photo height stays fixed when width changes. Short screens temporarily reduce it to leave room for chat.</p>
+              <span id="welcomeArtworkStatus" aria-live="polite"></span>
+            </div>
           </div>
           <div class="settings-pane" id="settingsPanePreferences">
             <div class="settings-section-head">
@@ -1822,20 +1840,21 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<script src="static/i18n.js?v=__WEBUI_VERSION__&amp;settings-auth=2" defer></script>
+<script src="static/i18n.js?v=__WEBUI_VERSION__&amp;settings-auth=2&amp;welcome=1" defer></script>
 <script src="static/icons.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/assistant_turn_anchors.js?v=__WEBUI_VERSION__" defer></script>
-<script src="static/ui.js?v=__WEBUI_VERSION__" defer></script>
+<script src="static/ui.js?v=__WEBUI_VERSION__&amp;welcome-startup=1" defer></script>
 <script src="static/workspace.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/terminal.js?v=__WEBUI_VERSION__" defer></script>
-<script src="static/sessions.js?v=__WEBUI_VERSION__" defer></script>
+<script src="static/sessions.js?v=__WEBUI_VERSION__&amp;welcome-startup=1" defer></script>
 <script src="static/commands.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/messages.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/extension_settings.js?v=__WEBUI_VERSION__" defer></script>
-<script src="static/panels.js?v=__WEBUI_VERSION__&amp;rail=3&amp;settings-auth=2" defer></script>
+<script src="static/panels.js?v=__WEBUI_VERSION__&amp;rail=3&amp;settings-auth=2&amp;welcome=1" defer></script>
 <script src="static/rail-reorder.js?v=__WEBUI_VERSION__&amp;rail=5" defer></script>
 <script src="static/onboarding.js?v=__WEBUI_VERSION__" defer></script>
-<script src="static/boot.js?v=__WEBUI_VERSION__" defer></script>
+<script src="static/welcome-artwork.js?v=__WEBUI_VERSION__&amp;startup=1" defer></script>
+<script src="static/boot.js?v=__WEBUI_VERSION__&amp;welcome=1" defer></script>
 <script src="static/outline.js?v=__WEBUI_VERSION__" defer></script>
 
 <!-- Kanban: create/rename board modal — used for both flows. -->

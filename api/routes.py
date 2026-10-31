@@ -13309,10 +13309,12 @@ def _login_locale_from_accept_language(header: str | None) -> str | None:
             return key
     return None
 
-# ── Login page (self-contained, no external deps) ────────────────────────────
+# ── Login page (shared application appearance, no third-party deps) ───────────
 _LOGIN_PAGE_HTML = """<!doctype html>
-<html lang="{{LANG}}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="{{LANG}}" data-appearance-theme="{{APPEARANCE_THEME}}" data-appearance-skin="{{APPEARANCE_SKIN}}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{{BOT_NAME}} — {{LOGIN_TITLE}}</title>
+<script src="static/appearance.js?v={{WEBUI_VERSION}}"></script>
+<link rel="stylesheet" href="static/style.css?v={{WEBUI_VERSION}}&amp;welcome=1">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:#1a1a2e;color:#e8e8f0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
@@ -13338,6 +13340,14 @@ button:hover{background:rgba(124,185,255,.25)}
 .oidc-login:hover{background:rgba(111,214,164,.12)}
 .passkey-login{margin-top:10px;background:rgba(255,255,255,.04);border-color:rgba(232,160,48,.35);color:#e8a030}
 .err{color:#e94560;font-size:12px;margin-top:10px;display:none}
+body{background:var(--bg);color:var(--text);min-height:100dvh;height:auto;padding:24px;}
+.card{background:var(--surface);border-color:var(--border);max-width:100%;}
+.sub{color:var(--muted);}
+input{background:var(--input-bg);color:var(--text);border-color:var(--border2);}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-bg);}
+button,.passkey-login,.oidc-login{background:var(--accent-bg);border-color:var(--accent);color:var(--accent-text);}
+button:hover,.oidc-login:hover{background:var(--accent-bg-strong);}
+.err{color:var(--error);}
 </style></head><body>
 <div class="card">
   <img class="logo" src="static/brand-logo.svg" alt="Altur-Agent logo">
@@ -16414,8 +16424,13 @@ def handle_get(handler, parsed) -> bool:
         else:
             _password_form_html = ""
         version_token = quote(WEBUI_VERSION, safe="")
+        # Strict allowlist only: never serialize settings or profile metadata.
+        from api.config import _normalize_appearance
+        _login_theme, _login_skin = _normalize_appearance(_settings.get("theme"), _settings.get("skin"))
         _page = (
             _LOGIN_PAGE_HTML.replace("{{BOT_NAME}}", _bn)
+            .replace("{{APPEARANCE_THEME}}", _html.escape(_login_theme, quote=True))
+            .replace("{{APPEARANCE_SKIN}}", _html.escape(_login_skin, quote=True))
             .replace("{{BOT_NAME_INITIAL}}", _bn[0].upper())
             .replace("{{WEBUI_VERSION}}", version_token)
             .replace("{{LANG}}", _html.escape(_login_strings["lang"]))
