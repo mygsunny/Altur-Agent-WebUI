@@ -2,6 +2,28 @@
 
 This log tracks accepted fork changes. Keep it current with each related feature or fix, link the pull request or commit, and distinguish local verification from CI and deployed behavior. Do not add credentials, machine paths, private network details, user conversations, or deployment-only launchers. The release-maintained root CHANGELOG.md remains unchanged.
 
+## Co-work command-queue failure isolation
+
+- Ordinary invalid intent responses, inference deadlines and command errors now
+  fail only their own entry and advance the shared typed/final-speech FIFO.
+  Failed entries offer explicit Retry (with a partial-application warning) and
+  Dismiss; no destructive command is retried automatically.
+- Authentication, ownership, disconnect and document-clarification barriers
+  still stop dependent execution and disclose their reason. Stop and document
+  switches keep generation/adapter guards against duplicate or late commits.
+- Applied/canceled entries leave the active list immediately. Internal completion
+  history retains at most ten ID/status records, without command transcripts.
+  Running and Waiting are not hidden behind a truncated success list.
+- Regression tests reproduced FIFO stalls and retained completions on the old
+  source. Current source: 81 Node tests passed. Firefox fixture tests: seven
+  passed, including loopback and plain-HTTP LAN invalid-response/timeout queues
+  and authentication/ownership/disconnect barriers. Actual browser/editor/server
+  paths were used; intent replies and 100ms deadlines were controlled mocks, not
+  configured-model performance measurements. All 91 manifest artifacts matched
+  the isolated trial's served bytes on both origins without a server restart.
+- Updates [draft review #4](https://github.com/mygsunny/Altur-Agent-WebUI/pull/4).
+  No production deployment, merge or existing user-document edits.
+
 ## Co-work actual-browser usability and command repair
 
 - Fixed blank documents rendering as an unstyled 17px line: style the actual
