@@ -2,6 +2,23 @@
 
 This log tracks accepted fork changes. Keep it current with each related feature or fix, link the pull request or commit, and distinguish local verification from CI and deployed behavior. Do not add credentials, machine paths, private network details, user conversations, or deployment-only launchers. The release-maintained root CHANGELOG.md remains unchanged.
 
+## Co-work clarification dismissal resumes FIFO
+
+- Dismiss now releases only the current document/session-bound clarification
+  owner, restores waiting entries and immediately pumps FIFO exactly once. It
+  skips the dismissed command; it never applies or automatically retries it.
+- Unresolved clarification still pauses dependents. Authentication, ownership,
+  disconnect and independent document barriers remain closed. Stop/switch and
+  stale dismissal cannot resurrect canceled work; explicit failed-entry Retry
+  retains its existing new-ID behavior.
+- TDD reproduced the stall in actual controller source and Firefox on loopback
+  and LAN before the fix. Verification: 89 Node tests and nine Firefox fixture
+  tests passed. Intent responses were controlled mocks, not live-model evidence.
+  Build succeeded with existing third-party/chunk-size warnings; all 91 manifest
+  artifacts matched exact served bytes on both isolated origins, without restart.
+- Updates [draft review #4](https://github.com/mygsunny/Altur-Agent-WebUI/pull/4).
+  No merge, production restart, relay restart or existing-document edits.
+
 ## Co-work command-queue failure isolation
 
 - Ordinary invalid intent responses, inference deadlines and command errors now
