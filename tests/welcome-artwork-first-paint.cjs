@@ -20,7 +20,7 @@ module.exports=async function(browser,url,context,post){
     let releaseSettings,releasePhoto;
     const settingsGate=new Promise(r=>releaseSettings=r),photoGate=new Promise(r=>releasePhoto=r);
     await page.route('**/api/settings',async route=>{if(route.request().method()==='GET')await settingsGate;await route.continue();});
-    await page.route('**/static/images/welcome-feast.png',async route=>{await photoGate;await route.continue();});
+    await page.route('**/static/images/welcome-feast-*.webp',async route=>{await photoGate;await route.continue();});
     if(reload)await page.reload({waitUntil:'domcontentloaded'});else await page.goto(url+'/',{waitUntil:'domcontentloaded'});
     await page.waitForFunction(()=>window.artworkFrames.some(f=>f.heading));
     await page.waitForTimeout(150);
