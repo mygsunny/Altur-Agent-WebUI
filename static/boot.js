@@ -4005,6 +4005,7 @@ window._mirrorSpeechSettingsFromServer=_mirrorSpeechSettingsFromServer;
 (async()=>{
   // Load send key preference
   let _bootSettings={};
+  const artworkBootGeneration = typeof _profileSwitchGeneration === 'undefined' ? 0 : _profileSwitchGeneration;
   const prefillIntent=(typeof _composerPrefillIntentFromLocation==='function')?_composerPrefillIntentFromLocation():null;
   try{
     const s=await api('/api/settings');
@@ -4107,6 +4108,7 @@ window._mirrorSpeechSettingsFromServer=_mirrorSpeechSettingsFromServer;
       }
     }
     window._sessionJumpButtonsEnabled=!!s.session_jump_buttons;
+    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(s,artworkBootGeneration);
     window._renderUserMarkdown=!!s.render_user_markdown;
     // JSON/YAML structured code-block default view (#484): auto | on | off,
     // plus the 'auto'-mode line threshold (sanitized int 1..1000, fallback 10).

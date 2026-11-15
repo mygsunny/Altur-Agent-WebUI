@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Altru">
 <link rel="apple-touch-icon" sizes="512x512" href="static/apple-touch-icon.png">
-<script>(function(){try{var _hadAppearance=localStorage.getItem('hermes-theme')!==null||localStorage.getItem('hermes-skin')!==null;var themes={light:1,dark:1,system:1},skins={codex:1,terracotta:1,default:1,ares:1,mono:1,graphite:1,github:1,slate:1,poseidon:1,sisyphus:1,charizard:1,sienna:1,catppuccin:1,hepburn:1,nous:1,'geist-contrast':1,neon:1,'neon-soft':1,'neon-paint':1,zeus:1,'verdigris':1},legacy={slate:['dark','slate'],solarized:['dark','poseidon'],monokai:['dark','sisyphus'],nord:['dark','slate'],oled:['dark','default']},t=(localStorage.getItem('hermes-theme')||'dark').toLowerCase(),s=(localStorage.getItem('hermes-skin')||'').toLowerCase(),m=legacy[t],theme=m?m[0]:(themes[t]?t:'dark');var pendingExt=s&&s!=='default'&&!skins[s]&&!legacy[s];var skin=skins[s]?s:(pendingExt?s:(m?m[1]:'default'));if(_hadAppearance){localStorage.setItem('hermes-theme',theme);localStorage.setItem('hermes-skin',skin);}if(theme==='system')theme=window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';if(theme==='dark')document.documentElement.classList.add('dark');if(skin!=='default')document.documentElement.dataset.skin=skin;}catch(e){document.documentElement.classList.add('dark');}})()</script>
+<script src="static/appearance.js?v=__WEBUI_VERSION__"></script>
 <script>(function(){try{var fs=localStorage.getItem('hermes-font-size');if(fs&&fs!=='default')document.documentElement.dataset.fontSize=fs;}catch(e){}})()</script>
 <!-- theme-color: surfaces the active app chrome color to native status bars (Safari status bar, PWA, native WKWebView wrappers). Updated dynamically by boot.js when theme/skin changes. The light/dark default values match style.css :root --sidebar / :root.dark --sidebar. -->
 <meta name="theme-color" content="#FAF7F0" media="(prefers-color-scheme: light)">
@@ -71,7 +71,7 @@
     };
   }
 })()</script>
-<link rel="stylesheet" href="static/style.css?v=__WEBUI_VERSION__">
+<link rel="stylesheet" href="static/style.css?v=__WEBUI_VERSION__&amp;rail=4&amp;welcome=3">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" integrity="sha384-LJcOxlx9IMbNXDqJ2axpfEQKkAYbFjJfhXexLfiRJhjDU81mzgkiQq8rkV0j6dVh" crossorigin="anonymous">
   <!-- KaTeX math rendering CSS (loaded eagerly from vendored assets to prevent font CSP noise) -->
   <link rel="stylesheet" href="static/vendor/katex/0.16.22/katex.min.css">
@@ -157,6 +157,7 @@
 </header>
 <div class="layout">
   <nav class="rail" aria-label="Primary navigation">
+    <button class="rail-btn has-tooltip" id="btnRailNewChat" type="button" onclick="openRailNewChat()" aria-label="New chat" data-tooltip="New chat" data-i18n-title="sidebar_new_chat" data-i18n-aria-label="sidebar_new_chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3H6a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-4"/><path d="m16.5 3.5 4 4M9 15l1-4L18.5 2.5a2.12 2.12 0 0 1 3 3L13 14l-4 1Z"/></svg></button>
     <button class="rail-btn nav-tab active has-tooltip" data-panel="chat" onclick="switchPanel('chat',{fromRailClick:true})" data-tooltip="Chat" data-i18n-title="tab_chat" aria-label="Chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
     <button class="rail-btn nav-tab has-tooltip" data-panel="tasks" onclick="switchPanel('tasks',{fromRailClick:true})" data-tooltip="Tasks" data-i18n-title="tab_tasks" aria-label="Tasks"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></button>
     <button class="rail-btn nav-tab has-tooltip" data-panel="kanban" onclick="switchPanel('kanban',{fromRailClick:true})" data-tooltip="Kanban" data-i18n-title="tab_kanban" aria-label="Kanban"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 4v16"/><path d="M16 4v16"/><path d="M3 10h18"/></svg></button>
@@ -194,7 +195,7 @@
          before any paint. Mirrors the theme/skin/font-size inline scripts in <head>.
          The boot.js _restoreTabVisibility IIFE is a secondary fallback that also
          handles the active-tab switch. -->
-    <script>(function(){try{var fixed=new Set(['chat','settings']);var clean=function(v){var o=[];if(!Array.isArray(v))return o;v.forEach(function(id){if(typeof id!=='string')return;id=id.trim();if(!id||fixed.has(id)||o.indexOf(id)!==-1)return;o.push(id);});return o;};var reorder=function(order){order=clean(order);if(!order.length)return;['.rail','.sidebar-nav'].forEach(function(sel){var c=document.querySelector(sel);if(!c)return;var available=[];c.querySelectorAll('.nav-tab[data-panel]').forEach(function(el){var id=el.dataset.panel;if(!id||fixed.has(id)||el.classList.contains('dashboard-link')||el.hasAttribute('data-dashboard-link'))return;if(available.indexOf(id)===-1)available.push(id);});var final=[];order.forEach(function(id){if(available.indexOf(id)!==-1&&final.indexOf(id)===-1)final.push(id);});available.forEach(function(id){if(final.indexOf(id)===-1)final.push(id);});var anchor=Array.prototype.find.call(c.children,function(el){if(el.classList&&el.classList.contains('rail-spacer'))return true;if(el.classList&&el.classList.contains('dashboard-link'))return true;if(el.hasAttribute&&el.hasAttribute('data-dashboard-link'))return true;return el.dataset&&el.dataset.panel==='settings';});final.forEach(function(id){var el=c.querySelector('.nav-tab[data-panel="'+id+'"]');if(el)c.insertBefore(el,anchor||null);});});};var o=localStorage.getItem('hermes-webui-tab-order');if(o)reorder(JSON.parse(o));var h=localStorage.getItem('hermes-webui-hidden-tabs');var p=h?clean(JSON.parse(h)):[];try{var ct=localStorage.getItem('hermes-webui-chat-todos');if(ct==='1'&&p.indexOf('todos')===-1)p.push('todos');}catch(e){}if(!p.length)return;p.forEach(function(id){document.querySelectorAll('[data-panel="'+id+'"]').forEach(function(el){el.classList.add('nav-tab-hidden');});});try{var ac=document.querySelector('.rail .rail-btn.nav-tab.active[data-panel]')||document.querySelector('.sidebar-nav .nav-tab.active[data-panel]');if(ac&&ac.classList.contains('nav-tab-hidden')){ac.classList.remove('active');var c=document.querySelector('.rail .rail-btn.nav-tab[data-panel="chat"]')||document.querySelector('.sidebar-nav .nav-tab[data-panel="chat"]');if(c)c.classList.add('active');}}catch(_){}}catch(e){}})();</script>
+    <script>(function(){try{var fixed=new Set(['chat','settings']);var clean=function(v,ordering){var o=[];if(!Array.isArray(v))return o;v.forEach(function(id){if(typeof id!=='string')return;id=id.trim();if(!id||(ordering?id==='settings':fixed.has(id))||o.indexOf(id)!==-1)return;o.push(id);});return o;};var reorder=function(order){order=clean(order,true);if(!order.length)return;if(order.indexOf('chat')===-1)order.unshift('chat');if(order.indexOf('__new_chat__')===-1)order.unshift('__new_chat__');['.rail','.sidebar-nav'].forEach(function(sel){var c=document.querySelector(sel);if(!c)return;var available=c.querySelector('#btnRailNewChat')?['__new_chat__']:[];c.querySelectorAll('.nav-tab[data-panel]').forEach(function(el){var id=el.dataset.panel;if(!id||id==='settings'||el.classList.contains('dashboard-link')||el.hasAttribute('data-dashboard-link'))return;if(available.indexOf(id)===-1)available.push(id);});var final=[];order.forEach(function(id){if(available.indexOf(id)!==-1&&final.indexOf(id)===-1)final.push(id);});available.forEach(function(id){if(final.indexOf(id)===-1)final.push(id);});var anchor=Array.prototype.find.call(c.children,function(el){if(el.classList&&el.classList.contains('rail-spacer'))return true;if(el.classList&&el.classList.contains('dashboard-link'))return true;if(el.hasAttribute&&el.hasAttribute('data-dashboard-link'))return true;return el.dataset&&el.dataset.panel==='settings';});final.forEach(function(id){var el=id==='__new_chat__'?c.querySelector('#btnRailNewChat'):c.querySelector('.nav-tab[data-panel="'+id+'"]');if(el)c.insertBefore(el,anchor||null);});});};var o=localStorage.getItem('hermes-webui-tab-order');if(o)reorder(JSON.parse(o));var h=localStorage.getItem('hermes-webui-hidden-tabs');var p=h?clean(JSON.parse(h)):[];try{var ct=localStorage.getItem('hermes-webui-chat-todos');if(ct==='1'&&p.indexOf('todos')===-1)p.push('todos');}catch(e){}if(!p.length)return;p.forEach(function(id){document.querySelectorAll('[data-panel="'+id+'"]').forEach(function(el){el.classList.add('nav-tab-hidden');});});try{var ac=document.querySelector('.rail .rail-btn.nav-tab.active[data-panel]')||document.querySelector('.sidebar-nav .nav-tab.active[data-panel]');if(ac&&ac.classList.contains('nav-tab-hidden')){ac.classList.remove('active');var c=document.querySelector('.rail .rail-btn.nav-tab[data-panel="chat"]')||document.querySelector('.sidebar-nav .nav-tab[data-panel="chat"]');if(c)c.classList.add('active');}}catch(_){}}catch(e){}})();</script>
     <!-- Chat panel -->
     <div class="panel-view active" id="panelChat">
       <div class="panel-head">
@@ -206,6 +207,10 @@
         </div>
       </div>
       <div class="session-search sidebar-search"><div class="session-search-field"><svg class="sidebar-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input id="sessionSearch" type="search" placeholder="Filter conversations..." data-i18n-placeholder="filter_conversations" oninput="filterSessions()" autocomplete="off" data-1p-ignore data-lpignore="true" data-bwignore="true" data-form-type="other"><button type="button" id="sessionSearchClear" class="session-search-clear has-tooltip has-tooltip--bottom-right" aria-label="Clear conversation filter" data-tooltip="Clear conversation filter" onclick="clearSessionSearch()" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+      <button class="sidebar-new-chat" id="btnSidebarNewChat" type="button" onclick="$('btnNewChat').click()" aria-label="New chat" data-i18n-aria-label="sidebar_new_chat">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3H6a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3v-4"/><path d="m16.5 3.5 4 4M9 15l1-4L18.5 2.5a2.12 2.12 0 0 1 3 3L13 14l-4 1Z"/></svg>
+        <span data-i18n="sidebar_new_chat">New chat</span>
+      </button>
       <div class="session-list" id="sessionList"></div>
     </div>
     <!-- Tasks (cron) panel -->
@@ -1194,6 +1199,24 @@
               <div style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="settings_desc_composer_situational_controls">These controls do not always appear, depending on viewport, mode, or runtime state. You can still toggle them off if needed.</div>
             </div>
             <div id="settingsAppearanceAutosaveStatus" class="settings-autosave-status" aria-live="polite"></div>
+            <div class="settings-section">
+              <label for="settingsWelcomeArtwork" data-i18n="settings_welcome_artwork">New-chat artwork</label>
+              <select id="settingsWelcomeArtwork" disabled onchange="saveWelcomeArtwork(this)">
+                <option value="none" data-i18n="settings_welcome_none">None</option><option value="original" selected data-i18n="settings_welcome_original">Original logo</option><option value="photo" data-i18n="settings_welcome_photo">Uploaded photo</option>
+              </select>
+              <label><input id="settingsWelcomeLogoGlow" type="checkbox" checked disabled onchange="saveWelcomeArtwork(this)"> <span data-i18n="settings_welcome_glow">Show logo glow</span></label>
+              <label for="settingsWelcomeHeightDesktop" data-i18n="settings_welcome_desktop">Desktop photo height (CSS px)</label>
+              <input id="settingsWelcomeHeightDesktop" type="number" min="64" max="600" step="1" value="240" disabled onchange="saveWelcomeArtwork(this)">
+              <label for="settingsWelcomeHeightMobile" data-i18n="settings_welcome_mobile">Mobile photo height (CSS px)</label>
+              <input id="settingsWelcomeHeightMobile" type="number" min="64" max="600" step="1" value="160" disabled onchange="saveWelcomeArtwork(this)">
+              <label for="settingsWelcomeOffsetDesktop" data-i18n="settings_welcome_offset_desktop">Desktop welcome position (CSS px)</label>
+              <input id="settingsWelcomeOffsetDesktop" type="number" min="-300" max="300" step="1" value="0" disabled onchange="saveWelcomeArtwork(this)">
+              <label for="settingsWelcomeOffsetMobile" data-i18n="settings_welcome_offset_mobile">Mobile welcome position (CSS px)</label>
+              <input id="settingsWelcomeOffsetMobile" type="number" min="-300" max="300" step="1" value="0" disabled onchange="saveWelcomeArtwork(this)">
+              <p data-i18n="settings_welcome_offset_help">Move the artwork, heading, text and suggestions together: negative moves up, positive moves down. Short screens clamp the position to keep chat usable.</p>
+              <p data-i18n="settings_welcome_help">Photo height stays fixed when width changes. Short screens temporarily reduce it to leave room for chat.</p>
+              <span id="welcomeArtworkStatus" aria-live="polite"></span>
+            </div>
           </div>
           <div class="settings-pane" id="settingsPanePreferences">
             <div class="settings-section-head">
@@ -1625,7 +1648,8 @@
               <form id="settingsPasswordForm" style="display:contents" autocomplete="off" onsubmit="return false">
               <div id="settingsCurrentPasswordBlock" style="display:none;margin-top:6px">
                 <label for="settingsCurrentPassword" style="font-size:11px;display:block;margin-bottom:4px" data-i18n="current_password_label">Current Password</label>
-                <input type="password" id="settingsCurrentPassword" autocomplete="current-password" placeholder="Enter current password…" data-i18n-placeholder="current_password_placeholder" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
+                <input type="password" id="settingsCurrentPassword" autocomplete="current-password" aria-describedby="settingsPasswordOptionalHint" placeholder="Enter current password…" data-i18n-placeholder="current_password_placeholder" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
+                <div id="settingsPasswordOptionalHint" style="font-size:11px;color:var(--muted);margin-top:4px" data-i18n="password_change_optional_hint">Current password is optional when changing your password while signed in. It is still required to disable authentication.</div>
               </div>
               <label for="settingsPassword" style="font-size:11px;display:block;margin:6px 0 4px" data-i18n="new_password_label">New password</label>
               <input type="password" id="settingsPassword" autocomplete="new-password" aria-describedby="settingsPasswordSpaces" placeholder="Enter new password…" data-i18n-placeholder="password_placeholder" style="width:100%;padding:8px;background:var(--code-bg);color:var(--text);border:1px solid var(--border2);border-radius:6px;font-size:13px">
@@ -1817,19 +1841,21 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<script src="static/i18n.js?v=__WEBUI_VERSION__" defer></script>
+<script src="static/i18n.js?v=__WEBUI_VERSION__&amp;settings-auth=2&amp;welcome=1" defer></script>
 <script src="static/icons.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/assistant_turn_anchors.js?v=__WEBUI_VERSION__" defer></script>
-<script src="static/ui.js?v=__WEBUI_VERSION__" defer></script>
+<script src="static/ui.js?v=__WEBUI_VERSION__&amp;welcome-startup=1" defer></script>
 <script src="static/workspace.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/terminal.js?v=__WEBUI_VERSION__" defer></script>
-<script src="static/sessions.js?v=__WEBUI_VERSION__" defer></script>
+<script src="static/sessions.js?v=__WEBUI_VERSION__&amp;welcome-startup=1" defer></script>
 <script src="static/commands.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/messages.js?v=__WEBUI_VERSION__" defer></script>
 <script src="static/extension_settings.js?v=__WEBUI_VERSION__" defer></script>
-<script src="static/panels.js?v=__WEBUI_VERSION__" defer></script>
+<script src="static/panels.js?v=__WEBUI_VERSION__&amp;rail=3&amp;settings-auth=2&amp;welcome=1" defer></script>
+<script src="static/rail-reorder.js?v=__WEBUI_VERSION__&amp;rail=5" defer></script>
 <script src="static/onboarding.js?v=__WEBUI_VERSION__" defer></script>
-<script src="static/boot.js?v=__WEBUI_VERSION__" defer></script>
+<script src="static/welcome-artwork.js?v=__WEBUI_VERSION__&amp;startup=1&amp;art=webp" defer></script>
+<script src="static/boot.js?v=__WEBUI_VERSION__&amp;welcome=1" defer></script>
 <script src="static/outline.js?v=__WEBUI_VERSION__" defer></script>
 
 <!-- Kanban: create/rename board modal — used for both flows. -->
