@@ -7074,6 +7074,7 @@ function _refreshProfileSwitchBackground(gen){
   Promise.resolve(api('/api/settings')).then(function(s){
     if (gen !== _profileSwitchGeneration) return;
     var hidden = (s && Array.isArray(s.hidden_tabs)) ? s.hidden_tabs : [];
+    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(s||{},gen);
     hidden = hidden.filter(function(x){ return typeof x === 'string' && x.trim(); });
     var order = (s && Array.isArray(s.tab_order)) ? s.tab_order : [];
     order = order.filter(function(x){ return typeof x === 'string' && x.trim(); });
@@ -8086,6 +8087,7 @@ let _settingsPreferencesAutosaveRetryPayload = null;
 const _ALWAYS_VISIBLE_TABS = new Set(['chat','settings']);
 const _HIDDEN_TABS_LS_KEY = 'hermes-webui-hidden-tabs';
 const _TAB_ORDER_LS_KEY = 'hermes-webui-tab-order';
+let _tabOrderSaveQueue=Promise.resolve();
 const _COMPOSER_CONTROL_ORDER_LS_KEY = 'hermes-webui-composer-control-order';
 let _tabVisibilityDragSuppressUntil = 0;
 let _composerControlDragSuppressUntil = 0;
@@ -8139,21 +8141,33 @@ if(typeof window!=='undefined'&&window.addEventListener){
   });
 }
 
+function _sanitizeTabOrderList(panels){
+  if(!Array.isArray(panels)) return [];
+  var out=[];
+  panels.forEach(function(panel){
+    if(typeof panel!=='string') return;
+    panel=panel.trim();
+    if(panel&&panel!=='settings'&&out.indexOf(panel)===-1) out.push(panel);
+  });
+  return out;
+}
+
 function _getTabOrder(){
-  try{var h=localStorage.getItem(_TAB_ORDER_LS_KEY);if(h)return _sanitizeTabPanelList(JSON.parse(h));}catch(e){}
+  try{var h=localStorage.getItem(_TAB_ORDER_LS_KEY);if(h)return _sanitizeTabOrderList(JSON.parse(h));}catch(e){}
   return[];
 }
 
 function _setTabOrder(panels){
-  try{localStorage.setItem(_TAB_ORDER_LS_KEY,JSON.stringify(_sanitizeTabPanelList(panels)));}catch(e){}
+  try{localStorage.setItem(_TAB_ORDER_LS_KEY,JSON.stringify(_sanitizeTabOrderList(panels)));}catch(e){}
 }
 
 function _availableSidebarPanels(){
   var out=[];
+  if(document.getElementById('btnRailNewChat')) out.push('__new_chat__');
   var tabs=document.querySelectorAll('.rail .rail-btn.nav-tab[data-panel], .sidebar-nav .nav-tab[data-panel]');
   tabs.forEach(function(tab){
     var panel=tab.dataset.panel;
-    if(!panel||_ALWAYS_VISIBLE_TABS.has(panel)) return;
+    if(!panel||panel==='settings') return;
     if(tab.classList.contains('dashboard-link')||tab.hasAttribute('data-dashboard-link')) return;
     if(out.indexOf(panel)===-1) out.push(panel);
   });
@@ -8162,7 +8176,10 @@ function _availableSidebarPanels(){
 
 function _orderedSidebarPanels(order){
   var available=_availableSidebarPanels();
-  var requested=_sanitizeTabPanelList(Array.isArray(order)?order:_getTabOrder());
+  var requested=_sanitizeTabOrderList(Array.isArray(order)?order:_getTabOrder());
+  // Old preferences never contained Chat: preserve their Chat-first placement.
+  if(requested.indexOf('chat')===-1) requested.unshift('chat');
+  if(requested.indexOf('__new_chat__')===-1) requested.unshift('__new_chat__');
   var out=[];
   requested.forEach(function(panel){ if(available.indexOf(panel)!==-1&&out.indexOf(panel)===-1) out.push(panel); });
   available.forEach(function(panel){ if(out.indexOf(panel)===-1) out.push(panel); });
@@ -8209,7 +8226,7 @@ function _applyTabOrder(order){
       return child.dataset&&child.dataset.panel==='settings';
     });
     ordered.forEach(function(panel){
-      var node=container.querySelector('.nav-tab[data-panel="'+panel+'"]');
+      var node=panel==='__new_chat__'?container.querySelector('#btnRailNewChat'):container.querySelector('.nav-tab[data-panel="'+panel+'"]');
       if(node) container.insertBefore(node,anchor||null);
     });
   });
@@ -8256,6 +8273,7 @@ function _renderTabVisibilityChips(){
   var panels=_orderedSidebarPanels();
   container.innerHTML='';
   panels.forEach(function(panel){
+    if(panel==='__new_chat__') return; // Action can move, but is not a hideable navigation tab.
     var tab=document.querySelector('.rail .rail-btn.nav-tab[data-panel="'+panel+'"]')
       ||document.querySelector('.sidebar-nav .nav-tab[data-panel="'+panel+'"]');
     var label=(tab&&(tab.dataset.tooltip||tab.dataset.label))||panel;
@@ -8312,7 +8330,15 @@ function _moveTabOrderPanel(sourcePanel,targetPanel){
   _setTabOrder(order);
   _applyTabOrder(order);
   _renderTabVisibilityChips();
-  _scheduleAppearanceAutosave();
+  // This action is available before Settings is hydrated: persist only its owned field.
+  var profile=(typeof S!=='undefined'&&S&&S.activeProfile)||'default';
+  _tabOrderSaveQueue=_tabOrderSaveQueue.catch(function(){}).then(function(){
+    if(((typeof S!=='undefined'&&S&&S.activeProfile)||'default')!==profile) return;
+    return api('/api/settings',{method:'POST',body:JSON.stringify({tab_order:order})});
+  }).catch(function(error){
+    console.error('Could not save navigation order',error);
+    if(typeof toast==='function') toast('Could not save navigation order. Please try again.','error');
+  });
   return true;
 }
 
@@ -9468,10 +9494,14 @@ function _speechPreferencesPayloadFromUi(){
 // Keep same-page settings merges FIFO so one response cannot race the next read-modify-write.
 let _settingsPanelPostQueue=Promise.resolve();
 
-function _enqueueSettingsPost(options){
+function _enqueueSettingsPost(options, ownerGeneration){
   const requestOptions={...(options||{})};
   if(typeof requestOptions.body==='string') requestOptions.body=String(requestOptions.body);
   const run=_settingsPanelPostQueue.then(async()=>{
+    // Opt-in ownership for narrow profile-bound writers waiting in this queue.
+    if(ownerGeneration!==undefined && ownerGeneration!==_profileSwitchGeneration){
+      throw new Error('Settings profile changed before save');
+    }
     const saved=await api('/api/settings',requestOptions);
     if(!saved||typeof saved!=='object'||Array.isArray(saved)){
       throw new Error('Invalid settings response');
@@ -9750,8 +9780,14 @@ function _syncSettingsMaxTokensPlaceholder(field, fallbackValue){
 }
 
 async function loadSettingsPanel(){
+  const requestGeneration = _profileSwitchGeneration;
   try{
+    // A just-completed rail gesture owns a pending order-only write. Read after it,
+    // so opening Settings cannot hydrate the previous order over the new one.
+    await _tabOrderSaveQueue;
+    if (requestGeneration !== _profileSwitchGeneration) return;
     const settings=await api('/api/settings');
+    if (requestGeneration !== _profileSwitchGeneration) return;
     checkWebUIVersionSkew(settings);
     // Populate the version badges from the server — keeps them in sync with git
     // tags automatically without any manual release step.
@@ -9777,6 +9813,7 @@ async function loadSettingsPanel(){
       agentBadge.textContent = `Agent: ${agentVersion}`;
     }
     // Hydrate appearance controls first so a slow /api/models request
+    if(typeof applyWelcomeArtwork==='function') applyWelcomeArtwork(settings,requestGeneration);
     // cannot overwrite an in-progress theme/skin selection.
     const themeSel=$('settingsTheme');
     const themeVal=settings.theme||'dark';
@@ -10005,6 +10042,7 @@ async function loadSettingsPanel(){
       let models=null;
       try{
         models=await api('/api/models');
+        if (requestGeneration !== _profileSwitchGeneration) return;
         for(const g of ((models||{}).groups||[])){
           const og=document.createElement('optgroup');
           og.label=g.provider;
@@ -10507,6 +10545,7 @@ async function loadSettingsPanel(){
     // Show auth buttons only when auth is active
     try{
       const authStatus=await api('/api/auth/status');
+      if (requestGeneration !== _profileSwitchGeneration) return;
       _settingsPasswordAuthEnabled=!!authStatus.password_auth_enabled;
       _setSettingsAuthButtonsVisible(!!authStatus.auth_enabled);
       _syncPasswordlessButton(authStatus);
@@ -13667,13 +13706,10 @@ async function saveSettings(andClose){
   if(pw){
     const currentPwField=$('settingsCurrentPassword');
     const currentPw=(currentPwField||{}).value||'';
-    if(_settingsPasswordAuthEnabled && !currentPw){
-      if(currentPwField) currentPwField.focus();
-      showToast(t('current_password_required'));
-      return;
-    }
+    // Reentry is optional for a signed-in password change. If provided, the
+    // server still verifies it. Disabling authentication retains its own guard.
     const payload={...body,_set_password:pw};
-    if(_settingsPasswordAuthEnabled) payload._current_password=currentPw;
+    if(currentPw) payload._current_password=currentPw;
     try{
       const saved=await _enqueueSettingsPost({method:'POST',body:JSON.stringify(payload)});
       if(modelChanged && model){
