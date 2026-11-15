@@ -90,7 +90,14 @@
         photo.className = 'welcome-photo';
         const image = document.createElement('img');
         image.addEventListener('load',layout);
-        image.src = 'static/images/welcome-feast.png';
+        // Resized WebP copies of welcome-feast.png (5600x1586, kept as the
+        // untouched original). Artwork is sized by height, so derive the
+        // displayed width from the saved target height and let srcset pick
+        // the smallest copy that is sharp at this screen's pixel density.
+        const target = matchMedia('(max-width: 768px)').matches ? saved.welcome_artwork_height_mobile : saved.welcome_artwork_height_desktop;
+        image.sizes = `${Math.ceil(target * 5600 / 1586)}px`;
+        image.srcset = ['1200','2400','3600'].map(w => `static/images/welcome-feast-${w}.webp ${w}w`).join(', ');
+        image.src = 'static/images/welcome-feast-2400.webp';
         image.alt = '';
         photo.append(image);
         group.prepend(photo);

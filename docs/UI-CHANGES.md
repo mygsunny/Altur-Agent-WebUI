@@ -2,6 +2,14 @@
 
 This log tracks accepted fork changes. Keep it current with each related feature or fix, link the pull request or commit, and distinguish local verification from CI and deployed behavior. Do not add credentials, machine paths, private network details, user conversations, or deployment-only launchers. The release-maintained root CHANGELOG.md remains unchanged.
 
+## Welcome photo download size (local source only)
+
+- The Photo artwork loaded the 11.5 MB, 5600×1586 `welcome-feast.png` on every cold load. Slow links painted it top-down, so the table looked cut off with an empty slot beneath until the download finished.
+- Added resized WebP copies (`welcome-feast-1200.webp` 107 KB, `-2400` 331 KB, `-3600` 589 KB, alpha preserved). The original PNG is kept unchanged as the source asset. `welcome-artwork.js` now sets `srcset` with `sizes` derived from the saved desktop/mobile target height, so the browser fetches one copy matched to pixel density. The `index.html` script URL gains `art=webp` because static JS is served `immutable`.
+- `tests/welcome-artwork-first-paint.cjs` now gates `welcome-feast-*.webp` instead of the PNG.
+- Verified in Chromium against the live shell with mocked settings: 1440×900@1x fetched only `-2400`; 1512×860@2x, 390×844@3x and 655×874@2x fetched only `-3600`. Layout geometry is identical to the PNG. Also passed `python -I -m unittest tests.test_welcome_artwork` and `git diff --check`.
+- Not verified: `node tests/welcome-artwork.http.browser.cjs` could not start its fixture (it timed out preparing an isolated Hermes runtime). `node tests/welcome-artwork.browser.cjs` fails `240 !== 160` at the 430px viewport both with and without this change, so it was already failing.
+
 ## New chat startup/refresh follow-up (local source only)
 
 - Fixed first-paint ownership: the HTML's Original logo used to paint before the asynchronous settings GET selected Photo/None. CSS now keeps only the unresolved artwork slot invisible (space retained); welcome text, suggestions and composer are not hidden. Original reappears normally when authoritative settings select it. No localStorage artwork cache or new backend metadata is introduced.
