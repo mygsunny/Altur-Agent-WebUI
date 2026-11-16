@@ -295,6 +295,34 @@ PY314_UPSTREAM = [
 ]
 
 
+# Upstream tests that assume Linux and fail on our macOS hosts, also on plain
+# upstream (verified 2026-11-16); they pass in Linux CI, so they are non-strict
+# and apply on macOS only. Install requests, psutil and put uv on PATH first.
+DARWIN_UPSTREAM = {
+    "Apple's git always adds the osxkeychain credential helper": [
+        'test_update_git_security.py::test_authenticated_fetch_never_runs_host_credential_helpers[updates-emulated-host-with-sentinel-helpers]',
+        'test_update_git_security.py::test_authenticated_fetch_never_runs_host_credential_helpers[workspace-emulated-host-with-sentinel-helpers]',
+        'test_update_git_security.py::test_authenticated_fetch_never_runs_host_credential_helpers[diagnostic-emulated-host-with-sentinel-helpers]',
+        'test_workspace_git.py::test_git_fetch_never_runs_host_credential_helpers[emulated-host-with-sentinel-helpers]',
+    ],
+    'docker_init.bash needs Linux bash 4+; macOS ships bash 3.2': [
+        'test_issue8113_venv_rebuild_keeps_previous.py::test_a_completed_rebuild_replaces_the_venv_and_removes_the_old_copies',
+        'test_issue8113_venv_rebuild_keeps_previous.py::test_a_rebuild_without_a_named_interpreter_uses_uvs_default',
+        'test_issue8113_venv_rebuild_keeps_previous.py::test_an_interrupted_rebuild_is_rolled_back_on_the_next_boot',
+        'test_issue8524_docker_agent_uv_overrides.py::test_the_agents_overrides_are_passed_to_uv',
+        'test_issue8524_docker_agent_uv_overrides.py::test_the_overrides_file_is_removed_afterwards',
+        'test_issue8524_docker_agent_uv_overrides.py::test_an_unwritable_tmpdir_falls_back_to_the_stage_parent',
+    ],
+    'macOS temporary folders do not keep the setgid bit': [
+        'test_5774b_atomic_config_writes.py::test_atomic_write_preserves_existing_permissions',
+    ],
+    'Starting a full server with the installed Hermes runtime can exceed the 45 s limit on these hosts': [
+        'test_conftest_skills_isolation.py::test_skill_writes_never_touch_the_real_skills_dir[no-agent]',
+        'test_conftest_skills_isolation.py::test_skill_writes_never_touch_the_real_skills_dir[agent]',
+    ],
+}
+
+
 def _index():
     index = {}
     for name, (reason, nodeids) in DIVERGENCES.items():
@@ -303,6 +331,10 @@ def _index():
     if sys.version_info[:2] >= (3, 14):
         for nodeid in PY314_UPSTREAM:
             index[nodeid] = ('Upstream test is platform-dependent under Python 3.14', False)
+    if sys.platform == 'darwin':
+        for reason, nodeids in DARWIN_UPSTREAM.items():
+            for nodeid in nodeids:
+                index.setdefault(nodeid, (f'macOS host: {reason}', False))
     return index
 
 
