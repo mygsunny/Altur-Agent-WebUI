@@ -32,7 +32,7 @@ installs requirements into `.venv` and restarts the service.
 |---|---|
 | `ALTRU_WEBUI_HOST` | Bind address. Defaults to 127.0.0.1; a LAN address needs persisted auth. |
 | `ALTRU_WEBUI_PORT` | Port, default 8787. |
-| `ALTRU_HERMES_PROFILE` | Optional named profile (`~/.hermes/profiles/<name>`). Pins the UI to that profile and hides the others. |
+| `ALTRU_HERMES_PROFILE` | Optional named profile (`~/.hermes/profiles/<name>`). Pins the UI to that profile and hides the others (.26 uses `miaaa`); unset, the sidebar "Show N from other profiles" link shows every profile. |
 | `ALTRU_WEBUI_DATA` | State directory, default `~/.local/share/hermes-webui-evaluation`. |
 | `HERMES_WEBUI_TLS_CERT`, `HERMES_WEBUI_TLS_KEY` | Serve HTTPS with this certificate and key (see below). |
 
