@@ -59,9 +59,8 @@ when it is configured the UI remains locked rather than changing that credential
 ## Upstream updates
 
 `.github/workflows/altru-upstream-sync.yml` runs weekly (and on demand). It
-fast-forwards `master` from upstream and opens or refreshes a pull request from
-`master` into `altur-branding` showing how far behind the product is. Merging is
-manual and reviewed:
+fast-forwards `master` from upstream and opens or refreshes an "Upstream merge due"
+issue saying how far behind `altur-branding` is. Merging is manual and reviewed:
 
 1. Branch from `altur-branding` (for example `chore/upstream-sync-YYYY-MM`).
 2. `git fetch upstream` and `git merge upstream/master`.
