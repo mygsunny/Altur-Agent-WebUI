@@ -365,15 +365,15 @@ def _setup_agent_worktree(repo_root: str) -> dict:
         spec.loader.exec_module(cli_mod)
         _setup_worktree = cli_mod._setup_worktree
     except Exception as exc:
-        raise RuntimeError("Altur-Agent worktree helper is unavailable") from exc
+        raise RuntimeError("Altru worktree helper is unavailable") from exc
     output = StringIO()
     with redirect_stdout(output), redirect_stderr(output):
         info = _setup_worktree(repo_root)
     emitted = output.getvalue().strip()
     if emitted:
-        logger.debug("Altur-Agent worktree helper output: %s", emitted)
+        logger.debug("Altru worktree helper output: %s", emitted)
     if not info:
-        raise RuntimeError("Altur-Agent failed to create a git worktree")
+        raise RuntimeError("Altru failed to create a git worktree")
     return info
 
 
@@ -383,7 +383,7 @@ def create_worktree_for_workspace(workspace: str | Path) -> dict:
     path = info.get("path")
     branch = info.get("branch")
     if not path or not branch:
-        raise RuntimeError("Altur-Agent returned incomplete worktree metadata")
+        raise RuntimeError("Altru returned incomplete worktree metadata")
     return {
         "path": str(Path(path).expanduser().resolve()),
         "branch": str(branch),

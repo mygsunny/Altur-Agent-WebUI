@@ -15,6 +15,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 BRAND = json.loads((ROOT / 'branding/brand.json').read_text())
 SUPPORTED = {'en', 'it', 'ja', 'ru', 'es', 'de', 'zh', 'zh-Hant', 'pt', 'ko', 'fr', 'cs', 'tr', 'pl', 'vi'}
+THIRD_PARTY_IDENTIFIERS = re.compile(r'\bmnemosyne-hermes\b')
 OWNED_UPSTREAM = re.compile(r'\bh[eèé]rm|nesquena|nousresearch|(?<![A-Za-z])(?:nous|naus)(?![A-Za-z])', re.I)
 
 
@@ -56,7 +57,9 @@ JSON.stringify((()=>{
 def test_all_supported_locale_values_and_real_fallback_are_brand_neutral(locale_audit):
     assert set(locale_audit['codes']) == SUPPORTED
     assert any(row['fallback'] for row in locale_audit['values']), 'The real English fallback path must be exercised'
-    failures = [row for row in locale_audit['values'] if OWNED_UPSTREAM.search(row['value'])]
+    # Real third-party package names keep their identity (docs/ALTUR.md).
+    failures = [row for row in locale_audit['values']
+                if OWNED_UPSTREAM.search(THIRD_PARTY_IDENTIFIERS.sub('', row['value']))]
     assert not failures, failures
 
 

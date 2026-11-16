@@ -146,7 +146,7 @@ fi
 
 if [[ -n "${_hermes_already_up}" ]]; then
   cat >&2 <<EOF
-[==] Altur-Agent is already running at ${_hermes_probe_scheme}://${_hermes_probe_host}:${_hermes_port}
+[==] Altru is already running at ${_hermes_probe_scheme}://${_hermes_probe_host}:${_hermes_port}
      The server was NOT started again (start.sh does not double-start).
 
      If you need to restart the server, do the following:

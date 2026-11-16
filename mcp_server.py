@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Altur-Agent MCP Server — exposes project and session management
+Altru MCP Server — exposes project and session management
 as MCP tools for any MCP-compatible agent.
 
 Option A rewrite (2026-05-08): imports api.models and api.profiles

@@ -460,7 +460,7 @@ def _patch_task(conn, task_id: str, body: dict):
         if not current:
             raise LookupError("task not found")
         if not hasattr(kb, "schedule_task"):
-            raise RuntimeError("scheduling requires a newer Altur-Agent")
+            raise RuntimeError("scheduling requires a newer Altru")
         reason = body.get("reason") or None
         if not kb.schedule_task(conn, task_id, reason=reason):
             raise ValueError(f"cannot schedule task from status: {current.status}")
@@ -621,7 +621,8 @@ def _update_config_payload(body):
 
     config_path = config._get_config_path()
     with config._cfg_lock:
-        config_data = config._load_yaml_config_file(config_path)
+        # RAW load (#8032 write rule): never persist env-expanded values.
+        config_data = config._load_yaml_config_file_raw(config_path)
         dashboard_cfg = config_data.get("dashboard")
         if not isinstance(dashboard_cfg, dict):
             dashboard_cfg = {}

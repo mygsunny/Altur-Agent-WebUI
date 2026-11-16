@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
 LABEL maintainer="ArtemisProject"
-LABEL description="Altur-Agent — browser interface for the agent runtime"
+LABEL description="Altru — browser interface for the agent runtime"
 
 # Install system packages
 ENV DEBIAN_FRONTEND=noninteractive

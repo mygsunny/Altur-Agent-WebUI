@@ -7,7 +7,7 @@
 
 // Cache version is injected by the server at request time (routes.py /sw.js handler).
 // Bumps automatically whenever the git commit changes — no manual edits needed.
-const CACHE_NAME = 'altur-shell-d205f3aca15e-__WEBUI_VERSION__';
+const CACHE_NAME = 'altur-shell-d3f1a0c32742-__WEBUI_VERSION__';
 
 // Static assets that form the app shell.
 //
@@ -22,10 +22,12 @@ const CACHE_NAME = 'altur-shell-d205f3aca15e-__WEBUI_VERSION__';
 // Navigations populate './' only after a successful non-redirect network load.
 const VQ = '?v=__WEBUI_VERSION__';
 const SHELL_ASSETS = [
+  './static/branding.js' + VQ,
   './static/style.css' + VQ,
   './static/pwa-startup.js' + VQ,
   './static/boot.js' + VQ,
   './static/assistant_turn_anchors.js' + VQ,
+  './static/a11y-helpers.js' + VQ,
   './static/ui.js' + VQ,
   './static/messages.js' + VQ,
   './static/sessions.js' + VQ,
@@ -134,7 +136,7 @@ self.addEventListener('fetch', (event) => {
         return caches.match('./').then((cached) => cached || new Response(
           '<html><body style="font-family:sans-serif;padding:2rem;background:#1a1a1a;color:#ccc">' +
           '<h2>You are offline</h2>' +
-          '<p>Altur-Agent requires a server connection. Please check your network and try again.</p>' +
+          '<p>Altru requires a server connection. Please check your network and try again.</p>' +
           '</body></html>',
           { headers: { 'Content-Type': 'text/html' } }
         ));

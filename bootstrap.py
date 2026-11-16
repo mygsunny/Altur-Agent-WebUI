@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One-shot bootstrap launcher for Altur-Agent."""
+"""One-shot bootstrap launcher for Altru."""
 
 from __future__ import annotations
 
@@ -277,7 +277,7 @@ def install_hermes_agent() -> None:
     """Compatibility entry point: installation is explicit and checkout-local."""
     raise RuntimeError(
         "The agent runtime is unavailable. Automatic runtime installation is disabled "
-        "for Altur-Agent. Create an isolated Python 3.14 environment, then use its "
+        "for Altru. Create an isolated Python 3.14 environment, then use its "
         "Python to run scripts/setup-altur.py and scripts/start-altur.py. "
         "See README.md for the supported setup procedure."
     )
@@ -451,7 +451,7 @@ def open_browser(url: str) -> None:
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Bootstrap Altur-Agent onboarding.")
+    parser = argparse.ArgumentParser(description="Bootstrap Altru onboarding.")
     parser.add_argument("port", nargs="?", type=int, default=DEFAULT_PORT)
     parser.add_argument("--host", default=DEFAULT_HOST)
     parser.add_argument(
@@ -738,7 +738,7 @@ def _probe_host(host: str) -> str:
 
 
 def _already_serving_scheme(host: str, port: int) -> str:
-    """Scheme of a healthy Altur-Agent already answering on host:port, else "".
+    """Scheme of a healthy Altru already answering on host:port, else "".
 
     Bounded, TLS-aware probe (``wait_for_health``, one second) of the port the
     bind preflight just found occupied. The listener there may be OUR OWN
@@ -806,7 +806,7 @@ def main() -> int:
         # dir, the outcome #8111 exists to prevent.
         if args.foreground or _detect_supervisor():
             raise PortInUseError(
-                f"Altur-Agent is already running at {_url}. Stop that instance first."
+                f"Altru is already running at {_url}. Stop that instance first."
             ) from None
         info(f"Web UI is already running: {_url}")
         if not args.no_browser:
@@ -853,7 +853,7 @@ def main() -> int:
     foreground_reason = "--foreground" if args.foreground else _detect_supervisor()
     if foreground_reason:
         info(
-            f"Starting Altur-Agent on {scheme}://{_url_host(args.host)}:{args.port} "
+            f"Starting Altru on {scheme}://{_url_host(args.host)}:{args.port} "
             f"(foreground mode: {foreground_reason})"
         )
         try:
@@ -920,7 +920,7 @@ def main() -> int:
     # /health, then return. Suitable for an interactive `bash start.sh` run.
     log_path = state_dir / f"bootstrap-{args.port}.log"
 
-    info(f"Starting Altur-Agent on {scheme}://{_url_host(args.host)}:{args.port}")
+    info(f"Starting Altru on {scheme}://{_url_host(args.host)}:{args.port}")
     with log_path.open("ab") as log_file:
         proc = subprocess.Popen(
             [python_exe, server_path],

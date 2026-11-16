@@ -1,0 +1,15 @@
+{
+  "name": "Altru",
+  "logo": "branding/assets/source/portrait-icon.svg",
+  "publisher": "ArtemisProject",
+  "description": "{name} AI workspace by {publisher}",
+  "logo_framing": {
+    "source": "branding/assets/source/portrait-icon.svg",
+    "view_box": [
+      32.8082506555233,
+      68.235406698374,
+      957.145828971385,
+      957.145828971385
+    ]
+  }
+}

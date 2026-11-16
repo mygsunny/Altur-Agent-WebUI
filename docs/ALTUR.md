@@ -1,8 +1,8 @@
-# Altur-Agent fork maintenance
+# Altru fork maintenance
 
 ## Brand source and desktop relationship
 
-`branding/brand.json` is canonical for product/short name, publisher, artwork, accessibility label, assistant identity, description, distribution destinations and upstream/runtime pins. The schema follows the desktop brand's schema_version/product/organization/assets/distribution/upstream structure. `branding/assets/source/portrait-icon.svg` is copied byte-for-byte from the desktop recipe's maintained SVG; the original Desktop path was unavailable. The desktop crop is recorded as view_box. The artwork is neither traced nor replaced. The web fork and desktop do not automatically synchronize.
+`BRANDING.json` is the canonical editable source for the UI name, publisher, SVG and fallback assistant name. Generated `branding/brand.json` resolves these values alongside distribution destinations and upstream/runtime pins. The schema follows the desktop brand's schema_version/product/organization/assets/distribution/upstream structure. `branding/assets/source/portrait-icon.svg` is copied byte-for-byte from the desktop recipe's maintained SVG; the original Desktop path was unavailable. The desktop crop is recorded as view_box. The artwork is neither traced nor replaced. The web fork and desktop do not automatically synchronize.
 
 Run `python scripts/generate-branding.py` with requirements-branding.txt installed after editing brand inputs. `branding/literals.json` records approved application-owned source literal templates and their generated values, including all locale bundles and fallback strings. It is a source catalog, not a runtime message filter. If upstream changes a slot, generation fails for review rather than silently missing it. SVG framing, rasterization, PNG sizes (16/32/180/192/512), ICO, manifest and service-worker cache namespace are deterministic. Light/dark use the same transparent portrait; opaque icons use a neutral tile and 20% maskable inset.
 
@@ -22,10 +22,11 @@ scripts/start-altur.py binds 127.0.0.1, requires an explicit valid runtime check
 
 ## Login password
 
-To change the WebUI login password, open Settings → System, enter the current
-password and the explicitly labeled New password, then select Change password.
-The action uses the existing authenticated settings endpoint and current-password
-verification. General Save Settings also applies a populated new-password field;
+To change the WebUI login password, open Settings → System, enter the explicitly
+labeled New password, then select Change password. A signed-in session does not
+need to re-enter the current password; if the current password is typed it is
+still verified. Unauthenticated callers, disabling authentication and going
+passwordless always require the current password. General Save Settings also applies a populated new-password field;
 if only the current-password field is populated, its confirmation explicitly says
 the password was unchanged. No password value or hash is returned to the browser.
 The new labels use the existing English fallback in locales without a translation.
@@ -44,18 +45,64 @@ when it is configured the UI remains locked rather than changing that credential
 - Nous/Nous Portal and model/provider IDs refer to actual third-party services. Technical runtime commands and factual provider destinations retain their real identities. Application-owned setup and troubleshooting guidance uses bundled Help and this fork’s local procedure.
 - LICENSE, contributors, Git provenance, historical upstream documentation and third-party notices preserve attribution. The upstream skin key `nous` remains; its display label is ArtemisProject.
 
+## Branches and releases
+
+- `master` mirrors nesquena/hermes-webui and is never committed to directly.
+- `altur-branding` (default branch) is the product. Changes reach it only through
+  pull requests from feature branches; it is protected and requires the
+  "Altru tests" checks.
+- Releases are tags named `altru-vMAJOR.MINOR.PATCH` on `altur-branding`. Deployed
+  machines run a tag, never a branch tip or hand-edited files (`deploy/macos/`).
+- Fork-only changes are recorded in `docs/ALTRU-CHANGELOG.md`; upstream's
+  `CHANGELOG.md` is left untouched so merges do not conflict there.
+
 ## Upstream updates
 
-No scheduled synchronization or automatic merging is configured. GitHub Actions is disabled in repository settings, and inherited workflow YAML is retained under `.github/workflows-disabled/`.
+`.github/workflows/altru-upstream-sync.yml` ("Upstream check") runs weekly and on
+demand. It compares `altur-branding` with upstream and fails when it is behind, so
+GitHub emails the owner. Keep `master` mirrored with
+`gh repo sync mygsunny/Altur-Agent-WebUI --branch master` (the built-in workflow
+token cannot update upstream's workflow files). Merging is manual and reviewed:
 
-1. Commit or back up local work and checkout altur-branding.
-2. `git fetch upstream` and review the intended upstream commit and workflows.
-3. Merge that explicit commit manually; resolve conflicts without reactivating workflows.
-4. Review new customer-facing strings, locale/fallback bundles, icons/vector art, login/SSO/passkey pages, share/export templates, runtime prompt producers and update/distribution actions.
-5. Update the upstream baseline only when the merge is accepted. Regenerate branding, run tests and repeat browser acceptance.
-6. Runtime upgrades are separate: while the old registry/pin are still available, restore only the known overlay with `python scripts/runtime-branding.py restore`. Choose an explicit new commit, review source/dependencies, update the file hashes and expression registry, then rerun setup, generation, runtime safety tests and prompt-boundary/provider checks. An unreviewed pin must fail closed; never bypass the guard or overwrite unknown edits.
+1. Branch from `altur-branding` (for example `chore/upstream-sync-YYYY-MM`).
+2. `git fetch upstream` and `git merge upstream/master`.
+3. Resolve conflicts by taking upstream code and keeping Altru naming. Keep our
+   `README.md`; upstream's is `docs/UPSTREAM-README.md`.
+4. Run `python scripts/generate-branding.py`. It stops if upstream changed a
+   branded line; update that line's entry in `branding/literals.json` (one entry
+   per branded line) and rerun.
+5. Review new customer-facing strings, locale/fallback bundles, icons/vector art,
+   login/SSO/passkey pages, share/export templates, runtime prompt producers and
+   update/distribution actions. `tests/test_altur_localization_audit.py` flags new
+   upstream brand words in every locale.
+6. Run the test suite. Tests that fail because of an intentional Altru change are
+   listed in `tests/altru_known_divergences.py` (strict expected failures), so a
+   clean run means no unexpected breakage. Do not edit upstream test files.
+7. Open a pull request into `altur-branding`, then tag a release.
 
-Brand-sensitive files: static/index.html, i18n.js, boot.js, onboarding.js, sw.js, manifest.json, share.html/js, icons and CSS artwork; api/routes.py, config.py, passkeys.py, streaming.py, session_export_html.py, updates.py; startup/path discovery and packaging/install scripts.
+Upstream workflow YAML stays under `.github/workflows-disabled/` for reference;
+`.github/workflows/altru-tests.yml` is our copy of upstream's test workflow aimed
+at `altur-branding` (Python 3.12 and 3.14). Runtime upgrades are separate: while
+the old registry/pin are still available, restore only the known overlay with
+`python scripts/runtime-branding.py restore`, choose an explicit new commit,
+update the file hashes and expression registry, then rerun setup, generation and
+runtime safety tests. An unreviewed pin must fail closed.
+
+## Production deployment (current)
+
+The LAN machines run `deploy/macos/` (launchd + `run-webui.py`) against the
+machine's own Hermes install in `~/.hermes`, not the isolated, pinned runtime that
+`scripts/setup-altur.py` builds. Consequences:
+
+- The runtime source overlay (`branding/runtime-literals.json`) is not applied
+  there, so text produced by the Hermes runtime itself (CLI help, some
+  diagnostics) can still say Hermes. WebUI-owned text is fully branded.
+- The Hermes version is whatever that machine has installed, not the pin in
+  `branding/brand.json`.
+- The updater and gateway lifecycle controls are disabled by the launcher;
+  update with `deploy/macos/update.sh`.
+- Production Python is 3.14 (Hermes' bundled interpreter); the suite runs on
+  3.12 and 3.14.
 
 Application update checks and application-owned apply actions are disabled. Never point customer update/download actions at an unbranded upstream installer. The upstream bootstrap remains historical compatibility code; this fork's supported setup is the isolated procedure in README.md.
 
@@ -73,13 +120,13 @@ See VALIDATION.md for actual commands/results and browser evidence. Local fixtur
 
 Manual jobs run through the web application. Scheduled execution needs a gateway service configured for the same isolated profile and kept running by the operator. This branding task does not start that service or enable schedules. The local web launcher does not run a scheduler. Configure the gateway only inside this web instance’s private environment; do not reuse a desktop profile or its credentials.
 
-The multi-container recipes now build the WebUI from this fork’s local source instead of pulling an upstream WebUI image. They require the exact reviewed runtime source. The container brands only its writable staged copy and refuses unmatched sources. They remain deployment references requiring their own Docker and gateway acceptance checks before use. No published Altur-Agent container image is claimed. Keep local development bound to loopback.
+The multi-container recipes now build the WebUI from this fork’s local source instead of pulling an upstream WebUI image. They require the exact reviewed runtime source. The container brands only its writable staged copy and refuses unmatched sources. They remain deployment references requiring their own Docker and gateway acceptance checks before use. No published Altru container image is claimed. Keep local development bound to loopback.
 
 ## Runtime locale defaults and plugin copy
 
 The runtime has its own 17-language catalog, separate from the WebUI’s 15 locale bundles. `branding/runtime-locales.json` contains the pinned parsed core catalogs and reviewed display-leaf templates. Generation writes ignored `branding/generated-locales/*.yaml` files (JSON-form YAML) without needing an installed runtime. The launcher selects them through the runtime’s supported `HERMES_BUNDLED_LOCALES` packaging setting. User profile locale overlays and installed language packs keep their existing higher priority; their words are never renamed. Start verifies generated catalogs against the manifest and registry.
 
-The source overlay also covers reviewed descriptions in bundled plugin manifests and owned default channel messages. YAML/JSON source patches must preserve every unapproved parsed leaf, author, ID and environment setting. Actual third-party plugin titles, authors, external extension-gallery records, selected services and model names retain their identities. The optional external runtime dashboard is labeled as a separate component; this fork does not claim its independent interface is an Altur-Agent-branded dashboard. No gateway, channel, plugin dashboard or sidecar was activated during validation.
+The source overlay also covers reviewed descriptions in bundled plugin manifests and owned default channel messages. YAML/JSON source patches must preserve every unapproved parsed leaf, author, ID and environment setting. Actual third-party plugin titles, authors, external extension-gallery records, selected services and model names retain their identities. The optional external runtime dashboard is labeled as a separate component; this fork does not claim its independent interface is an Altru-branded dashboard. No gateway, channel, plugin dashboard or sidecar was activated during validation.
 
 ## Managed runtime and credential isolation
 
@@ -88,3 +135,47 @@ The local launcher sets the runtime’s supported `HERMES_MANAGED=altur-agent-we
 The launcher uses private Codex, Claude, and shared-auth roots below `.trial`, strips inherited provider credentials, and preserves HOME, PATH and certificate trust. It does not import live CLI credentials. The packaging layer owns permissions in managed mode: checkout-local trial state is private, new files use umask 077, and paths that escape the checkout are rejected. Existing profile contents and user personas are preserved.
 
 After regenerating source/assets, stop and restart the foreground development server, then reload existing tabs. The upstream server computes its versioned asset URLs at startup; a browser may keep the previous immutable JavaScript URL while that process is still running. Restarting computes the new source revision and requests fresh assets. Do not clear browser storage or conversation history. The generation command rebuilds branding; it does not install or supervise a service.
+
+
+## Change the UI name or logo
+
+Edit **`BRANDING.json`** at the repository root. Change `name` and/or `logo`
+(the path to your original SVG inside this repository), then run:
+
+```sh
+.venv/bin/python scripts/generate-branding.py
+```
+
+Install `requirements-branding.txt` in the isolated environment first if needed.
+Restart the WebUI and reload the browser. The command updates application-owned
+labels, all bundled localizations, login/share/export copy, runtime identity
+instructions, metadata, the complete icon family, and the shell cache revision.
+`branding/brand.json` is resolved output; do not edit its display fields directly.
+Technical identifiers and verified distribution destinations remain in that file.
+No user text, conversation history, credentials, storage keys, or profile names
+are rewritten. Branding is build-time configuration, not a public settings API.
+
+`publisher` sets the organization label. `description` supports `{name}` and
+`{publisher}`. Product branding is separate from the assistant's own identity.
+The server's `bot_name` in its WebUI state `settings.json` controls the default
+profile's assistant name, editable under Settings → Preferences. Explicit names
+such as Tom are shown unchanged; only an absent or blank name falls back to the
+manifest name. Non-default profiles keep their profile names. The assembled
+WebUI identity instruction uses the configured name unless a custom persona was
+supplied. No name is inferred by parsing conversation messages or persona prose.
+
+There is no forced brand-name mode. The former `assistant_name_mode` input is
+obsolete and ignored. Renaming the product does not migrate saved assistant
+names. Correct an installation's old product default in its server-side settings,
+without bulk-replacing user names, persona files, database contents or history.
+
+Keep SVGs self-contained, with a valid `viewBox`. `logo_framing` preserves the
+established portrait framing only while its `source` matches `logo`; a new SVG
+uses its own viewBox automatically. Change framing only to adjust deliberate
+padding. The original source artwork is never rewritten.
+
+The name/logo values are copied from the desktop brand, not synchronized with
+it. The desktop checkout is neither read nor modified by regeneration. Browser
+PWA launchers may refresh their installed title/icon later than page assets;
+reinstall the PWA if the operating system retains an old launcher icon. Do not
+clear conversation storage to refresh branding.

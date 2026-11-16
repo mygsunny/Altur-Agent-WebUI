@@ -33,7 +33,8 @@ const getComputedStyle=()=>({getPropertyValue:()=>''});
 $('btnDownload').onclick(); $('btnExportJSON').onclick(); exportSessionHTML();
 console.log(JSON.stringify(downloads));
 """)
-    assert result == ['altur-agent-example.md', 'altur-agent-example.json', 'altur-agent-example.html']
+    prefix = json.loads((ROOT / 'branding/brand.json').read_text())['distribution']['export_prefix']
+    assert result == [f'{prefix}-example.{ext}' for ext in ('md', 'json', 'html')]
 
 
 def test_manual_update_message_cannot_reinstall_upstream():
@@ -85,7 +86,7 @@ def test_new_profile_identity_uses_supported_soul_parameter(monkeypatch, tmp_pat
     monkeypatch.setattr(profiles, 'list_profiles_api', lambda: [])
     monkeypatch.setattr(profiles, '_validate_profile_model_selection', lambda *a: None)
     profiles.create_profile_api('fresh-brand')
-    assert captured and 'You are Altur-Agent' in captured[0][0]
+    assert captured and ('You are ' + json.loads((ROOT/'BRANDING.json').read_text())['name']) in captured[0][0]
 
 
 def test_help_moves_attribution_out_of_normal_product_guidance():

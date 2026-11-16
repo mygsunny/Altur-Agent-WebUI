@@ -1,12 +1,12 @@
-# Altur-Agent
+# Altru
 
-Altur-Agent by ArtemisProject is a branded fork of the existing Python and vanilla JavaScript WebUI. It retains chat, streaming, Stop, sessions, profiles, workspaces, attachments, tools, settings, themes, password/passkey authentication and optional SSO. It runs its own agent runtime in-process; it does not connect to the desktop application.
+Altru by ArtemisProject is a branded fork of the existing Python and vanilla JavaScript WebUI. It retains chat, streaming, Stop, sessions, profiles, workspaces, attachments, tools, settings, themes, password/passkey authentication and optional SSO. It runs its own agent runtime in-process; it does not connect to the desktop application.
 
-![Altur-Agent portrait](static/favicon-192.png)
+![Altru portrait](static/favicon-192.png)
 
 ## Local setup
 
-Use Python **3.14** for the pinned agent runtime. The WebUI contributor test runner uses a separate Python 3.11–3.13 environment. No global agent installer is needed. The isolated launcher targets macOS/POSIX; native Windows deployment is unverified.
+Use Python **3.14** for the pinned agent runtime. The WebUI test runner uses a separate Python 3.11–3.14 environment. No global agent installer is needed. The isolated launcher targets macOS/POSIX; native Windows deployment is unverified.
 
 ```sh
 git clone https://github.com/mygsunny/Altur-Agent-WebUI.git
@@ -33,16 +33,22 @@ The canonical definition is [`branding/brand.json`](branding/brand.json). The or
 
 This generates SVG/PNG/ICO icons, PWA metadata, catalogued application-owned literals, 17-language runtime defaults, and the reviewed source overlay in an existing private runtime before interpolation. It never filters user messages or model output. Restart the foreground server and reload open tabs after regeneration so versioned browser assets and backend metadata are refreshed. See [`docs/ALTUR.md`](docs/ALTUR.md) for the brand relationship, compatibility exceptions, runtime pin, upstream merge process and validation limits.
 
+## LAN deployment (macOS)
+
+The machines that serve Altru on the local network run a tagged release through launchd, using the Mac's own Hermes install. See [`deploy/macos/README.md`](deploy/macos/README.md); update with `deploy/macos/update.sh`. Fork release notes are in [`docs/ALTRU-CHANGELOG.md`](docs/ALTRU-CHANGELOG.md).
+
 ## Development checks
 
 ```sh
 ./scripts/test.sh tests/test_altur_*.py tests/test_onboarding_static.py tests/test_session_public_share.py tests/test_pwa_manifest_sw.py
 ```
 
-The documented test runner creates a separate `.venv` using Python 3.11–3.13. Keep the runtime environment under `.runtime/venv` separate. See [TESTING.md](TESTING.md) and [ARCHITECTURE.md](ARCHITECTURE.md) for the inherited application architecture and detailed feature tests.
+The documented test runner creates a separate `.venv` using Python 3.11–3.14. Keep the runtime environment under `.runtime/venv` separate. See [TESTING.md](TESTING.md) and [ARCHITECTURE.md](ARCHITECTURE.md) for the inherited application architecture and detailed feature tests.
 
-GitHub Actions, releases, deployment and application updates are disabled. Updates are manual and must retain this fork's branding. No support email or external documentation website has been configured; in-app help is bundled locally.
+CI runs on `altur-branding` and its pull requests (`.github/workflows/altru-tests.yml`); a weekly "Upstream check" workflow fails when `altur-branding` falls behind upstream. In-app application updates stay disabled; releases are `altru-v*` tags. Upstream merges are manual and must retain this fork's branding. No support email or external documentation website has been configured; in-app help is bundled locally.
 
 ## Provenance
 
-Based on [nesquena/hermes-webui](https://github.com/nesquena/hermes-webui), starting at `e40f042b6ec80199e06b7edf6e91a31beee2b812`, with its Git history preserved. The separate runtime is [Hermes Agent](https://github.com/NousResearch/hermes-agent), pinned to `bf0203a794a07aac3ff764972ab9087baa4e4f4e`. Original licensing and contributor credits remain in [LICENSE](LICENSE), [CONTRIBUTORS.md](CONTRIBUTORS.md), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The historical [upstream README](docs/UPSTREAM-README.md) is reference material, not this fork's installation procedure.
+Based on [nesquena/hermes-webui](https://github.com/nesquena/hermes-webui) (forked at `e40f042b6`, last merged 2026-11-15 at v0.52.679), with its Git history preserved. The separate runtime is [Hermes Agent](https://github.com/NousResearch/hermes-agent), pinned to `bf0203a794a07aac3ff764972ab9087baa4e4f4e`. Original licensing and contributor credits remain in [LICENSE](LICENSE), [CONTRIBUTORS.md](CONTRIBUTORS.md), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The historical [upstream README](docs/UPSTREAM-README.md) is reference material, not this fork's installation procedure.
+
+Change the product name and SVG logo in [`BRANDING.json`](BRANDING.json); see [branding regeneration](docs/ALTUR.md#change-the-ui-name-or-logo).

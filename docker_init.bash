@@ -432,7 +432,7 @@ rm -f $it || error_exit "Failed to delete test file in /app"
 
 ######## Environment variables (consume AFTER the load_env)
 
-echo ""; echo "== Checking required environment variables for Altur-Agent"
+echo ""; echo "== Checking required environment variables for Altru"
 
 echo ""; echo "-- HERMES_WEBUI_STATE_DIR: Where to store sessions, workspaces, and other state (default: ~/.hermes/webui)"
 if [ -z "${HERMES_WEBUI_STATE_DIR+x}" ]; then error_exit "HERMES_WEBUI_STATE_DIR not set"; fi; 
@@ -460,7 +460,7 @@ else
 fi
 
 echo ""; echo "==================="
-echo ""; echo "== Installing uv and creating a new virtual environment for Altur-Agent"
+echo ""; echo "== Installing uv and creating a new virtual environment for Altru"
 
 export PATH="/home/hermeswebui/.local/bin/:$PATH"
 if command -v uv &>/dev/null; then
@@ -584,7 +584,7 @@ install_staged_agent() {
 # normal install below still treats a failure as fatal). set -e does not apply
 # inside a function called as a condition, hence the explicit returns.
 install_venv_dependencies() {
-  echo ""; echo "== Installing Altur-Agent dependencies"
+  echo ""; echo "== Installing Altru dependencies"
   uv pip install -r requirements.txt --trusted-host pypi.org --trusted-host files.pythonhosted.org || return 1
   uv pip install -U pip setuptools --trusted-host pypi.org --trusted-host files.pythonhosted.org || return 1
   test -x /app/venv/bin/pip || return 1
@@ -895,7 +895,7 @@ export VIRTUAL_ENV=/app/venv
 test -d /app/venv
 test -f /app/venv/bin/activate
 
-echo "";echo "== Activating Altur-Agent's virtual environment"
+echo "";echo "== Activating Altru's virtual environment"
 source /app/venv/bin/activate || error_exit "Failed to activate the application virtual environment"
 test -x /app/venv/bin/python3
 
@@ -906,7 +906,7 @@ if [ -f /app/venv/.deps_installed ]; then
     echo ""; echo "== Dependencies already installed — skipping (fast restart)"
   fi
 else
-  install_venv_dependencies || error_exit "Failed to install Altur-Agent dependencies"
+  install_venv_dependencies || error_exit "Failed to install Altru dependencies"
 fi
 
 ensure_hindsight_client_docker_dependency
@@ -948,15 +948,91 @@ fi
 # always wins. A blank or whitespace-only value is unset, as server.py and
 # api/config.py treat it.
 select_staged_agent_for_git_checkout() {
-  local _src="$1" _stage="$2" _override="${HERMES_WEBUI_AGENT_DIR:-}"
+  local _src="$1" _stage="$2" _override="${HERMES_WEBUI_AGENT_DIR:-}" _verdict _timeout
+  local _lazy="${HERMES_DISABLE_LAZY_INSTALLS:-}"
   [ -z "${_override//[[:space:]]/}" ] || return 0
   # Only a PM launcher (Agent v0.21.6+) re-execs WebUI: hermes_bootstrap.py alone
   # is also in pre-PM Agents. managed_agent_startup._PM_LAUNCH_MARKERS lists the same files.
   [ -n "$_src" ] && [ -e "$_src/.git" ] || return 0
   [ -f "$_src/hermes_bootstrap.py" ] && [ -f "$_src/hermes_cli/venv_sync.py" ] \
     && [ -f "$_src/pm/environments.py" ] || return 0
+  # #8581/#8593: and only when that Agent's bootstrap would actually relaunch.
+  # hermes_cli/venv_sync.py prepare_launch() never does with
+  # HERMES_DISABLE_LAZY_INSTALLS set to 1/true/yes (lowercased, not trimmed) or
+  # without pyproject.toml. In every case it never relaunches, the mounted checkout
+  # runs exactly as on v0.52.544, keeping its .git for the in-app Agent update and
+  # taking mount edits on restart.
+  # Case-insensitive POSIX patterns rather than ${_lazy,,}: that expansion needs
+  # bash 4 (macOS /bin/bash is 3.2, so the test harness there died with "bad
+  # substitution"), and a command substitution would strip a trailing newline
+  # the Agent keeps (a "1\n" from a --from-file ConfigMap is not "disabled" to
+  # the Agent, so it relaunches: keep the stage).
+  case "$_lazy" in
+    1|[Tt][Rr][Uu][Ee]|[Yy][Ee][Ss]) return 0 ;;
+  esac
+  [ -f "$_src/pyproject.toml" ] || return 0
+  # Then ask whether this Agent's bootstrap would relaunch, mirroring Agent v0.22.5
+  # (identical in canary 20261028 and main): read_install_stamp() reads the whole stamp
+  # as utf-8-sig JSON where pm/paths.py install_root() puts it (HERMES_INSTALL_ROOT,
+  # which WebUI never changes, else beside the checkout), an OSError, ValueError or
+  # non-object reads as {}, and only an exact "self" relaunches. With no stamp file,
+  # step_adopt_blessed_checkout() adopts the checkout as "self" when it is writable and
+  # resolves to <HERMES_HOME>/hermes-agent or /usr/local/lib/hermes-agent. That one
+  # input is not fixed at boot: WebUI rewrites HERMES_HOME (init_profile_state(),
+  # profile switches) and its in-app update restarts with os.execv without docker_init,
+  # and no list of the homes it may reach held up in review (#8594 gate). So decide only
+  # on what no later HERMES_HOME can change: the stamp's content, and that a read-only
+  # stampless checkout is never adopted. A writable stampless checkout gets the stage
+  # wherever it is mounted, as on exp-v0.52.571. Prints "mount" only when the Agent will
+  # provably not relaunch (#8593); anything it cannot settle prefers the stage, because
+  # keeping a mount that does relaunch crash-loops (#8529) while an unneeded stage
+  # costs only the in-app Agent update.
+  _verdict=unknown
+  if command -v python3 >/dev/null 2>&1; then
+    _timeout=""
+    command -v timeout >/dev/null 2>&1 && _timeout="timeout 5"
+    _verdict="$($_timeout python3 -I -c 'import json, os, stat, sys
+from pathlib import Path
+root = Path(sys.argv[1])
+install_root = os.environ.get("HERMES_INSTALL_ROOT")
+stamp = (Path(install_root) if install_root else root) / "install-stamp.json"
+
+
+
+def verdict():
+    try:
+        st = stamp.stat()
+    except FileNotFoundError:
+        st = None
+    if st is not None:
+        if stat.S_ISDIR(st.st_mode):
+            return "mount"
+        if not stat.S_ISREG(st.st_mode) or st.st_size > 16 * 1024 * 1024:
+            return "unknown"
+        try:
+            data = json.loads(stamp.read_text(encoding="utf-8-sig"))
+        except ValueError:
+            return "mount"
+        if not isinstance(data, dict):
+            return "mount"
+        return "stage" if data.get("updateMechanism") == "self" else "mount"
+    if install_root:
+        return "unknown"
+    # Adoption writes the stamp into the checkout: a read-only one is never adopted.
+    return "stage" if os.access(root, os.W_OK) else "mount"
+
+
+try:
+    print(verdict())
+except Exception:
+    print("unknown")' "$_src" 2>/dev/null)" || _verdict=unknown
+  fi
+  [ "$_verdict" = mount ] && return 0
   [ -f "$_stage/run_agent.py" ] && [ ! -e "$_stage/.git" ] || return 0
   export HERMES_WEBUI_AGENT_DIR="$_stage"
+  if [ "$_verdict" != stage ]; then
+    echo "-- could not tell whether the Agent at $_src would relaunch; treating it as self-updating"
+  fi
   echo "-- $_src is a git checkout; running the staged copy at $_stage"
 }
 select_staged_agent_for_git_checkout "$_agent_src" "$_agent_stage"
@@ -970,8 +1046,8 @@ export HERMES_BUNDLED_LOCALES="/app/branding/generated-locales"
 export HERMES_MANAGED="altur-agent-webui"
 export GATEWAY_RELAY_DISPLAY_NAME="$(python3 -c 'import json; print(json.load(open("/app/branding/brand.json"))["assistant"]["display_name"])')"
 
-echo ""; echo "== Running Altur-Agent"
-cd /app; python server.py || error_exit "Altur-Agent failed or exited with an error"
+echo ""; echo "== Running Altru"
+cd /app; python server.py || error_exit "Altru failed or exited with an error"
 
 # we should never be here because the server should be running indefinitely, but if we are, we exit safely
 ok_exit "Clean exit"

@@ -31,11 +31,13 @@ hermes-webui = "bootstrap:main"
 
 [tool.setuptools]
 include-package-data = true
-packages = ["api", "static"]
+packages = ["api", "static", "branding"]
 py-modules = ["bootstrap", "server", "mcp_server"]
 
 [tool.setuptools.package-data]
 static = ["**/*"]
+# Altru: api/branding.py reads branding/brand.json at import time.
+branding = ["brand.json"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
