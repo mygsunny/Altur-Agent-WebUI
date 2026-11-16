@@ -8,6 +8,9 @@ Machine-specific values come from the environment (set them in the launchd plist
   ALTRU_HERMES_PROFILE  optional named profile (~/.hermes/profiles/<name>); the
                      WebUI then shows only that profile's chats (isolated mode)
   ALTRU_WEBUI_DATA   WebUI state dir (default ~/.local/share/hermes-webui-evaluation)
+  ALTRU_LAN_HTTPS_PORT, ALTRU_LAN_HTTPS_CERT, ALTRU_LAN_HTTPS_KEY
+                     optional extra HTTPS listener on the same host, next to
+                     plain HTTP (for moving devices to HTTPS without downtime)
 No installer, updater or gateway restart is performed.
 """
 import os
@@ -81,6 +84,42 @@ def _safe_get(handler, parsed):
     return _original_get(handler, parsed)
 server.handle_post = _safe_post
 server.handle_get = _safe_get
+
+
+def _install_https_listener():
+    """Serve the same app over HTTPS on a second port, beside plain HTTP.
+
+    Uses the server's own TLS support (QuietHTTPServer.ssl_context), so client
+    addresses, login rate limits and Secure cookies behave as with native TLS.
+    """
+    # Not ALTRU_WEBUI_TLS_*: the local Hermes runtime aliases every ALTRU_X to
+    # HERMES_X, and HERMES_WEBUI_TLS_* would switch the plain-HTTP port to TLS.
+    port = os.environ.get('ALTRU_LAN_HTTPS_PORT', '').strip()
+    cert = os.environ.get('ALTRU_LAN_HTTPS_CERT', '').strip()
+    key = os.environ.get('ALTRU_LAN_HTTPS_KEY', '').strip()
+    if not (port or cert or key):
+        return
+    if not (port.isdigit() and cert and key):
+        raise SystemExit('ALTRU_LAN_HTTPS_PORT, ALTRU_LAN_HTTPS_CERT and ALTRU_LAN_HTTPS_KEY must all be set.')
+    import ssl
+    import threading
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    context.load_cert_chain(cert, key)  # fail at startup, not on first request
+    base = server.QuietHTTPServer
+
+    class _WithHttpsListener(base):
+        def __init__(self, address, handler, *args, **kwargs):
+            super().__init__(address, handler, *args, **kwargs)
+            tls = base((address[0], int(port)), handler)
+            tls.ssl_context = context
+            threading.Thread(target=tls.serve_forever, name='altru-https', daemon=True).start()
+            print(f'  Altru also listening on https://{address[0]}:{port}', flush=True)
+
+    server.QuietHTTPServer = _WithHttpsListener
+
+
+_install_https_listener()
 (DATA/'server.pid').write_text(str(os.getpid())+'\n')
 print('[altru] Gateway completion draining, delegation wakeups and run resumption disabled.', flush=True)
 server.main()

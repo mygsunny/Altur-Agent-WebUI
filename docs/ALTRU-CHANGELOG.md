@@ -2,6 +2,14 @@
 
 Fork-only changes on `altur-branding`. Upstream changes are in `CHANGELOG.md`.
 
+## altru-v1.0.1 — 2026-11-16
+
+- Optional HTTPS listener on a second port beside plain HTTP
+  (`ALTRU_LAN_HTTPS_PORT/_CERT/_KEY`), so LAN devices can move to HTTPS without
+  downtime; `make-lan-cert.sh` names certificates per server so the CA key stays
+  on one machine.
+- Rail icon order: a failed save now shows an error message.
+
 ## altru-v1.0.0 — 2026-11-16
 
 First tagged release; what the LAN machines run.

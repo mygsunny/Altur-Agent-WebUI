@@ -34,25 +34,34 @@ installs requirements into `.venv` and restarts the service.
 | `ALTRU_WEBUI_PORT` | Port, default 8787. |
 | `ALTRU_HERMES_PROFILE` | Optional named profile (`~/.hermes/profiles/<name>`). Pins the UI to that profile and hides the others (.26 uses `miaaa`); unset, the sidebar "Show N from other profiles" link shows every profile. |
 | `ALTRU_WEBUI_DATA` | State directory, default `~/.local/share/hermes-webui-evaluation`. |
-| `HERMES_WEBUI_TLS_CERT`, `HERMES_WEBUI_TLS_KEY` | Serve HTTPS with this certificate and key (see below). |
+| `ALTRU_LAN_HTTPS_PORT`, `ALTRU_LAN_HTTPS_CERT`, `ALTRU_LAN_HTTPS_KEY` | Extra HTTPS listener beside plain HTTP (see below). |
 
 State (settings, auth keys, sessions) lives in the state directory and is never in git.
 
 ## HTTPS on the LAN
 
-Without TLS the login password and session cookie cross the network in plain text.
+Over plain HTTP the login password and session cookie cross the network in clear
+text. The launcher can serve the same app over HTTPS on a second port while plain
+HTTP keeps working, so devices can move over one at a time.
 
-1. On one server, issue a certificate for its LAN address:
-   `deploy/macos/make-lan-cert.sh <LAN IP>`. This also creates the private
-   "Altru LAN CA" in `~/.local/share/altru-tls/` the first time.
-2. For each other server, copy `ca.pem` and `ca.key` into its
-   `~/.local/share/altru-tls/` first, then run the script there, so every device
-   only has to trust one CA.
-3. Add `HERMES_WEBUI_TLS_CERT` and `HERMES_WEBUI_TLS_KEY` (paths printed by the
-   script) to the plist's `EnvironmentVariables`, then
-   `launchctl bootout gui/$(id -u)/org.artemisproject.altru-webui` and
-   `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/org.artemisproject.altru-webui.plist`.
-4. Trust `ca.pem` on every device that opens the WebUI, and switch bookmarks,
-   installed PWAs and any clients from `http://` to `https://`.
+1. On the machine that holds the CA (`~/.local/share/altru-tls/`, created on first
+   use), issue a certificate per server: `deploy/macos/make-lan-cert.sh <LAN IP>`.
+   It writes `<LAN IP>.pem` and `<LAN IP>.key`; copy only those two files to the
+   other server's `~/.local/share/altru-tls/` (mode 600). The CA key stays put.
+2. Add to the plist's `EnvironmentVariables` and reload the service
+   (`launchctl bootout gui/$(id -u)/org.artemisproject.altru-webui`, wait for the
+   old process to exit, then `launchctl bootstrap gui/$(id -u) <plist>`):
+   `ALTRU_LAN_HTTPS_PORT` = `8443`, `ALTRU_LAN_HTTPS_CERT` / `ALTRU_LAN_HTTPS_KEY` =
+   the two files.
+3. Trust `ca.pem` on every device (macOS: Keychain Access, System keychain, Always
+   Trust; iPhone/iPad: install it as a profile, then enable it under Settings >
+   General > About > Certificate Trust Settings), then open
+   `https://<LAN IP>:8443`.
+4. When every device uses HTTPS, go HTTPS-only: remove the three
+   `ALTRU_LAN_HTTPS_*` settings and set `HERMES_WEBUI_TLS_CERT` and
+   `HERMES_WEBUI_TLS_KEY` to the same files instead. The main port (8787) then
+   serves HTTPS only, and the 8443 listener is no longer needed.
 
-Switching a server to HTTPS changes its address; plain `http://` stops working.
+Do not name these settings `ALTRU_WEBUI_TLS_*`: the Hermes runtime on these Macs
+copies every `ALTRU_X` variable to `HERMES_X`, and `HERMES_WEBUI_TLS_*` switches the
+main port itself to TLS.
