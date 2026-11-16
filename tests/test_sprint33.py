@@ -87,14 +87,14 @@ def test_acknowledgement_save_failure_uses_i18n_toast():
     assert "Failed to update acknowledgement" not in body
 
 
-def test_save_settings_password_change_preflights_current_password_before_api():
+def test_save_settings_password_change_sends_optional_current_password_only_when_present():
     src = read("static/panels.js")
     match = re.search(r"async function saveSettings\([^)]*\)\{(.*?)\n\}", src, re.DOTALL)
     assert match, "saveSettings() not found"
     body = match.group(1)
     assert "currentPwField=$('settingsCurrentPassword')" in body
-    assert "showToast(t('current_password_required'))" in body
-    assert body.index("showToast(t('current_password_required'))") < body.index("_enqueueSettingsPost(")
+    assert "showToast(t('current_password_required'))" not in body
+    assert "if(currentPw) payload._current_password=currentPw;" in body
 
 
 def test_disable_auth_typed_confirm_locales_show_literal_phrase():

@@ -96,11 +96,9 @@ def test_dedicated_change_uses_existing_authenticated_save_path():
     assert result['toasts'][-1] == 'settings_saved_pw_updated'
 
 
-def test_signed_in_change_does_not_require_current_password():
-    # A valid signed-in session may rotate the password without re-entering
-    # the current one; the server still requires it for unauthenticated
-    # callers and for disabling authentication (api/routes.py).
+def test_dedicated_change_allows_blank_current_password_when_signed_in():
     result = run_case('missing-current')
+    assert result['count'] == 2 and not result['currentFocused']  # save + auth-status refresh
     assert result['newSent'] and not result['hasCurrent']
     assert result['toasts'][-1] == 'settings_saved_pw_updated'
 
