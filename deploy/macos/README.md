@@ -34,5 +34,25 @@ installs requirements into `.venv` and restarts the service.
 | `ALTRU_WEBUI_PORT` | Port, default 8787. |
 | `ALTRU_HERMES_PROFILE` | Optional named profile (`~/.hermes/profiles/<name>`). Pins the UI to that profile and hides the others. |
 | `ALTRU_WEBUI_DATA` | State directory, default `~/.local/share/hermes-webui-evaluation`. |
+| `HERMES_WEBUI_TLS_CERT`, `HERMES_WEBUI_TLS_KEY` | Serve HTTPS with this certificate and key (see below). |
 
 State (settings, auth keys, sessions) lives in the state directory and is never in git.
+
+## HTTPS on the LAN
+
+Without TLS the login password and session cookie cross the network in plain text.
+
+1. On one server, issue a certificate for its LAN address:
+   `deploy/macos/make-lan-cert.sh <LAN IP>`. This also creates the private
+   "Altru LAN CA" in `~/.local/share/altru-tls/` the first time.
+2. For each other server, copy `ca.pem` and `ca.key` into its
+   `~/.local/share/altru-tls/` first, then run the script there, so every device
+   only has to trust one CA.
+3. Add `HERMES_WEBUI_TLS_CERT` and `HERMES_WEBUI_TLS_KEY` (paths printed by the
+   script) to the plist's `EnvironmentVariables`, then
+   `launchctl bootout gui/$(id -u)/org.artemisproject.altru-webui` and
+   `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/org.artemisproject.altru-webui.plist`.
+4. Trust `ca.pem` on every device that opens the WebUI, and switch bookmarks,
+   installed PWAs and any clients from `http://` to `https://`.
+
+Switching a server to HTTPS changes its address; plain `http://` stops working.
