@@ -2636,5 +2636,23 @@
       "template": "@@PRODUCT@@ can read and write real agent state, sessions, workspaces,\n",
       "rendered": "Altru can read and write real agent state, sessions, workspaces,\n"
     }
+  ],
+  "api/memory_profile_scope.py": [
+    {
+      "template": "        \"Memory is off: this version of @@PRODUCT@@ cannot keep memory separate per \"\n",
+      "rendered": "        \"Memory is off: this version of Altru cannot keep memory separate per \"\n"
+    },
+    {
+      "template": "        \"profile. Update @@PRODUCT@@ to turn it back on.\"\n",
+      "rendered": "        \"profile. Update Altru to turn it back on.\"\n"
+    },
+    {
+      "template": "        \"Memory providers are off: this version of @@PRODUCT@@ cannot keep them separate \"\n",
+      "rendered": "        \"Memory providers are off: this version of Altru cannot keep them separate \"\n"
+    },
+    {
+      "template": "        \"across profiles. Built-in memory still works. Update @@PRODUCT@@ to turn them back on.\"\n",
+      "rendered": "        \"across profiles. Built-in memory still works. Update Altru to turn them back on.\"\n"
+    }
   ]
 }

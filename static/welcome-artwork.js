@@ -22,11 +22,11 @@
     const photo = host && host.querySelector('.welcome-photo');
     if (!photo) return;
     const target = matchMedia('(max-width: 768px)').matches ? saved.welcome_artwork_height_mobile : saved.welcome_artwork_height_desktop;
-    const viewport = window.visualViewport ? visualViewport.height : innerHeight;
+    const viewport = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     const groupForBudget = host.querySelector('.welcome-group');
     const messages = (host.closest('.messages') || host).getBoundingClientRect();
     const composerTop = document.querySelector('.composer-wrap')?.getBoundingClientRect().top ?? viewport;
-    const viewportTopForBudget = window.visualViewport ? visualViewport.offsetTop : 0;
+    const viewportTopForBudget = window.visualViewport ? window.visualViewport.offsetTop : 0;
     // Cache by vertical geometry, not width or wrapped text. A width-only resize
     // must retain the selected height even if suggestions wrap differently.
     const key = [viewport,viewportTopForBudget,target,saved.welcome_artwork].join(':');
@@ -52,7 +52,7 @@
     const previous = parseFloat(group.style.getPropertyValue('--welcome-offset')) || 0;
     const area = (host.closest('.messages') || host).getBoundingClientRect();
     const composer = document.querySelector('.composer-wrap');
-    const viewportTop = window.visualViewport ? visualViewport.offsetTop : 0;
+    const viewportTop = window.visualViewport ? window.visualViewport.offsetTop : 0;
     const minimum = Math.max(area.top,viewportTop) + 8 - (rect.top - previous);
     const maximum = Math.min(area.bottom,composer ? composer.getBoundingClientRect().top : viewport + viewportTop,viewport + viewportTop) - 8 - (rect.bottom - previous);
     const wanted = matchMedia('(max-width: 768px)').matches ? saved.welcome_offset_mobile : saved.welcome_offset_desktop;
@@ -90,8 +90,8 @@
         photo.className = 'welcome-photo';
         const image = document.createElement('img');
         image.addEventListener('load',layout);
-        // Resized WebP copies of welcome-feast.png (5600x1586, kept as the
-        // untouched original). Artwork is sized by height, so derive the
+        // Resized WebP copies of welcome-feast.png (5600x1586 original, attached
+        // to the altru-v1.0.0 GitHub release as source artwork). Artwork is sized by height, so derive the
         // displayed width from the saved target height and let srcset pick
         // the smallest copy that is sharp at this screen's pixel density.
         const target = matchMedia('(max-width: 768px)').matches ? saved.welcome_artwork_height_mobile : saved.welcome_artwork_height_desktop;
@@ -144,7 +144,7 @@
   };
   window.addEventListener('resize', layout);
   if (window.visualViewport) {
-    visualViewport.addEventListener('resize',layout);
-    visualViewport.addEventListener('scroll',layout);
+    window.visualViewport.addEventListener('resize',layout);
+    window.visualViewport.addEventListener('scroll',layout);
   }
 })();
