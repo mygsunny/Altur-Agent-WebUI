@@ -14,4 +14,5 @@ Update later:
 
 State (settings.json, auth keys, sessions) lives in ~/.local/share/hermes-webui-evaluation
 and is never in git. The launchd plist sets ALTRU_WEBUI_HOST to the machine's LAN IP,
-and ALTRU_HERMES_PROFILE when the Mac runs Hermes under a named profile (.26 uses miaaa).
+ALTRU_HERMES_PROFILE pins the UI to one profile and hides the others (not used on .8 or .26;
+use the sidebar "Show N from other profiles" link to see every profile).
