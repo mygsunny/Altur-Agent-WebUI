@@ -67,12 +67,12 @@ def private_backup(state, profile, tree, document, data, extension):
     try:
         try:
             out = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=fd)
-        except FileExistsError:
+        except FileExistsError as exists:
             check = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=fd)
             with os.fdopen(check, 'rb') as stream:
                 info = os.fstat(stream.fileno())
                 if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_uid != os.getuid() or stream.read(len(data)+1) != data:
-                    raise ValueError('Unsafe backup')
+                    raise ValueError('Unsafe backup') from exists
                 os.fchmod(stream.fileno(), 0o600)
             return
         with os.fdopen(out, 'wb') as stream:

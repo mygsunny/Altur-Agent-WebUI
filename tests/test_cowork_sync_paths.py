@@ -1,4 +1,3 @@
-import base64
 import os
 import stat
 import pytest

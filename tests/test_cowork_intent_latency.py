@@ -9,7 +9,7 @@ def test_model_json_and_schema_failures_have_separate_safe_stages(monkeypatch):
  import api.routes as routes
  body={'document_id':'d','utterance_id':'u','text':'synthetic','context':{'kind':'document'}}
  for answer,stage in [('not JSON','model-json'),('{"document_id":"wrong"}','model-schema')]:
-  monkeypatch.setattr(routes,'_llm_update_summary',lambda *a,**k:answer)
+  monkeypatch.setattr(routes,'_llm_update_summary',lambda *a,_answer=answer,**k:_answer)
   with pytest.raises(cowork.ModelResponseError) as failure:cowork.infer_intent(body,'default')
   assert str(failure.value)==stage
 
