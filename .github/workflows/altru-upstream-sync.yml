@@ -1,8 +1,10 @@
-name: Upstream sync
+name: Upstream check
 
-# Weekly: fast-forward `master` to nesquena/hermes-webui and open (or refresh)
-# a tracking issue saying how far `altur-branding` is behind. Merging is a
-# reviewed, manual step: see docs/ALTUR.md "Upstream updates".
+# Weekly: compare altur-branding with upstream nesquena/hermes-webui. The run
+# FAILS when altur-branding is behind, so GitHub notifies the repo owner.
+# Merging is a reviewed, manual step: see docs/ALTUR.md "Upstream updates".
+# (Updating `master` needs workflow-file permission the built-in token does not
+# have; sync it with `gh repo sync mygsunny/Altur-Agent-WebUI --branch master`.)
 
 on:
   schedule:
@@ -10,34 +12,20 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  issues: write
+  contents: read
 
 jobs:
-  sync:
+  check:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      REPO: ${{ github.repository }}
     steps:
-      - name: Fast-forward master from upstream
-        run: gh api -X POST "repos/$REPO/merge-upstream" -f branch=master
-
-      - name: Open or refresh the upstream-merge issue
+      - name: Compare altur-branding with upstream master
         run: |
-          behind=$(gh api "repos/$REPO/compare/altur-branding...master" -q .ahead_by)
-          echo "altur-branding is $behind upstream commits behind master" >> "$GITHUB_STEP_SUMMARY"
-          title="Upstream merge due"
-          existing=$(gh issue list -R "$REPO" --state open --search "in:title \"$title\"" --json number -q '.[0].number')
-          if [ "$behind" -eq 0 ]; then
-            [ -z "$existing" ] || gh issue close "$existing" -R "$REPO" --comment "altur-branding is up to date with upstream."
-            exit 0
-          fi
-          body="\`master\` (upstream hermes-webui) is $behind commits ahead of \`altur-branding\`.
-
-          Merge on a branch following docs/ALTUR.md \"Upstream updates\": keep Altru naming when resolving conflicts, run scripts/generate-branding.py and the test suite, open a pull request, then tag a release."
-          if [ -n "$existing" ]; then
-            gh issue edit "$existing" -R "$REPO" --body "$body"
-          else
-            gh issue create -R "$REPO" --title "$title" --body "$body"
+          owner="${GITHUB_REPOSITORY%%/*}"
+          behind=$(gh api "repos/nesquena/hermes-webui/compare/${owner}:altur-branding...master" -q .ahead_by)
+          echo "altur-branding is $behind upstream commits behind nesquena/hermes-webui master." | tee -a "$GITHUB_STEP_SUMMARY"
+          if [ "$behind" -gt 0 ]; then
+            echo "::error::altur-branding is $behind commits behind upstream. Merge it on a branch following docs/ALTUR.md (Upstream updates)."
+            exit 1
           fi
