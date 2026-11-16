@@ -58,9 +58,11 @@ when it is configured the UI remains locked rather than changing that credential
 
 ## Upstream updates
 
-`.github/workflows/altru-upstream-sync.yml` runs weekly (and on demand). It
-fast-forwards `master` from upstream and opens or refreshes an "Upstream merge due"
-issue saying how far behind `altur-branding` is. Merging is manual and reviewed:
+`.github/workflows/altru-upstream-sync.yml` ("Upstream check") runs weekly and on
+demand. It compares `altur-branding` with upstream and fails when it is behind, so
+GitHub emails the owner. Keep `master` mirrored with
+`gh repo sync mygsunny/Altur-Agent-WebUI --branch master` (the built-in workflow
+token cannot update upstream's workflow files). Merging is manual and reviewed:
 
 1. Branch from `altur-branding` (for example `chore/upstream-sync-YYYY-MM`).
 2. `git fetch upstream` and `git merge upstream/master`.

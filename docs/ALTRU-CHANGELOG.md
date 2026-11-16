@@ -19,4 +19,4 @@ First tagged release; what the LAN machines run.
   `ALTRU_HERMES_PROFILE`.
 - Merged upstream hermes-webui through v0.52.679 (2026-11-15).
 - Export files are named `altru-<session>.*`.
-- CI on `altur-branding` (Python 3.12 and 3.14) and a weekly upstream-sync issue.
+- CI on `altur-branding` (Python 3.12 and 3.14) and a weekly upstream check.
