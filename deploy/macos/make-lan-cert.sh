@@ -4,10 +4,11 @@
 #
 # Usage: make-lan-cert.sh <LAN IP or hostname> [more names...]
 #
+# Writes <first name>.pem / <first name>.key next to the CA, so one machine can
+# issue certificates for every server and the CA key never has to be copied.
 # Browsers trust the certificate only after ca.pem is trusted on each device
 # (macOS: Keychain Access > System > Always Trust; iOS: install profile, then
-# Settings > General > About > Certificate Trust Settings). Copy the CA to other
-# servers instead of creating a second one, so devices trust one CA for all.
+# Settings > General > About > Certificate Trust Settings).
 set -eu
 [ $# -ge 1 ] || { echo "usage: $0 <LAN IP or hostname> [more names...]" >&2; exit 1; }
 DIR="${ALTRU_TLS_DIR:-$HOME/.local/share/altru-tls}"
@@ -26,14 +27,15 @@ for name in "$@"; do
     *) SAN="${SAN:+$SAN,}IP:$name" ;;
   esac
 done
-openssl req -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -keyout server.key -out server.csr \
+OUT="$1"
+openssl req -newkey ec -pkeyopt ec_paramgen_curve:P-256 -nodes -keyout "$OUT.key" -out "$OUT.csr" \
   -subj "/CN=$1" 2>/dev/null
-printf 'subjectAltName=%s\nextendedKeyUsage=serverAuth\nkeyUsage=critical,digitalSignature\n' "$SAN" > server.ext
+printf 'subjectAltName=%s\nextendedKeyUsage=serverAuth\nkeyUsage=critical,digitalSignature\n' "$SAN" > "$OUT.ext"
 # 825 days is the longest validity Apple platforms accept for TLS server certs.
-openssl x509 -req -in server.csr -CA ca.pem -CAkey ca.key -CAcreateserial -out server.pem \
-  -days 825 -extfile server.ext 2>/dev/null
-rm -f server.csr server.ext
-chmod 600 server.key server.pem ca.key
+openssl x509 -req -in "$OUT.csr" -CA ca.pem -CAkey ca.key -CAcreateserial -out "$OUT.pem" \
+  -days 825 -extfile "$OUT.ext" 2>/dev/null
+rm -f "$OUT.csr" "$OUT.ext"
+chmod 600 "$OUT.key" "$OUT.pem" ca.key
 echo "Server certificate for $SAN:"
-echo "  HERMES_WEBUI_TLS_CERT=$DIR/server.pem"
-echo "  HERMES_WEBUI_TLS_KEY=$DIR/server.key"
+echo "  ALTRU_LAN_HTTPS_CERT=$DIR/$OUT.pem"
+echo "  ALTRU_LAN_HTTPS_KEY=$DIR/$OUT.key"
