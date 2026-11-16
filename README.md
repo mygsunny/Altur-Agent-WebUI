@@ -45,7 +45,7 @@ The machines that serve Altru on the local network run a tagged release through 
 
 The documented test runner creates a separate `.venv` using Python 3.11–3.14. Keep the runtime environment under `.runtime/venv` separate. See [TESTING.md](TESTING.md) and [ARCHITECTURE.md](ARCHITECTURE.md) for the inherited application architecture and detailed feature tests.
 
-CI runs on `altur-branding` and its pull requests (`.github/workflows/altru-tests.yml`); a weekly workflow syncs `master` and opens an "Upstream merge due" issue. In-app application updates stay disabled; releases are `altru-v*` tags. Upstream merges are manual and must retain this fork's branding. No support email or external documentation website has been configured; in-app help is bundled locally.
+CI runs on `altur-branding` and its pull requests (`.github/workflows/altru-tests.yml`); a weekly "Upstream check" workflow fails when `altur-branding` falls behind upstream. In-app application updates stay disabled; releases are `altru-v*` tags. Upstream merges are manual and must retain this fork's branding. No support email or external documentation website has been configured; in-app help is bundled locally.
 
 ## Provenance
 
