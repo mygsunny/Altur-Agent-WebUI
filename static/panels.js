@@ -8649,7 +8649,7 @@ function _moveTabOrderPanel(sourcePanel,targetPanel){
     return api('/api/settings',{method:'POST',body:JSON.stringify({tab_order:order})});
   }).catch(function(error){
     console.error('Could not save navigation order',error);
-    if(typeof toast==='function') toast('Could not save navigation order. Please try again.','error');
+    if(typeof showToast==='function') showToast('Could not save navigation order. Please try again.',4000,'error');
   });
   return true;
 }
