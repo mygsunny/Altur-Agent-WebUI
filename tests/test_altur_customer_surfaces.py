@@ -33,7 +33,8 @@ const getComputedStyle=()=>({getPropertyValue:()=>''});
 $('btnDownload').onclick(); $('btnExportJSON').onclick(); exportSessionHTML();
 console.log(JSON.stringify(downloads));
 """)
-    assert result == ['altur-agent-example.md', 'altur-agent-example.json', 'altur-agent-example.html']
+    prefix = json.loads((ROOT / 'branding/brand.json').read_text())['distribution']['export_prefix']
+    assert result == [f'{prefix}-example.{ext}' for ext in ('md', 'json', 'html')]
 
 
 def test_manual_update_message_cannot_reinstall_upstream():

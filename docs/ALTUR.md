@@ -22,10 +22,11 @@ scripts/start-altur.py binds 127.0.0.1, requires an explicit valid runtime check
 
 ## Login password
 
-To change the WebUI login password, open Settings → System, enter the current
-password and the explicitly labeled New password, then select Change password.
-The action uses the existing authenticated settings endpoint and current-password
-verification. General Save Settings also applies a populated new-password field;
+To change the WebUI login password, open Settings → System, enter the explicitly
+labeled New password, then select Change password. A signed-in session does not
+need to re-enter the current password; if the current password is typed it is
+still verified. Unauthenticated callers, disabling authentication and going
+passwordless always require the current password. General Save Settings also applies a populated new-password field;
 if only the current-password field is populated, its confirmation explicitly says
 the password was unchanged. No password value or hash is returned to the browser.
 The new labels use the existing English fallback in locales without a translation.
