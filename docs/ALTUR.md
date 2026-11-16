@@ -88,6 +88,17 @@ the old registry/pin are still available, restore only the known overlay with
 update the file hashes and expression registry, then rerun setup, generation and
 runtime safety tests. An unreviewed pin must fail closed.
 
+## Running the tests on the Macs
+
+Use a Python 3.12 or 3.14 virtualenv with `requirements.txt`, `requirements-dev.txt`,
+`requests` and `psutil`, and put a `uv` binary on `PATH` (Hermes ships one under
+`~/.hermes/tools/uv-*/`). Set `HERMES_WEBUI_PYTHON` to that virtualenv's python.
+For the Node browser tests (`node tests/*.browser.cjs`), point `PLAYWRIGHT_MODULE` at
+an installed `playwright` package and set `HERMES_DISABLE_LAZY_INSTALLS=1` so the
+HTTP fixture does not try to install runtime dependencies. A handful of upstream
+tests assume Linux; they are listed as macOS-only, non-strict expected failures in
+`tests/altru_known_divergences.py`.
+
 ## Production deployment (current)
 
 The LAN machines run `deploy/macos/` (launchd + `run-webui.py`) against the
