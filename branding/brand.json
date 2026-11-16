@@ -30,7 +30,7 @@
     "documentation": "static/altur-help.html",
     "support": null,
     "automatic_updates": false,
-    "export_prefix": "altur-agent"
+    "export_prefix": "altru"
   },
   "upstream": {
     "repository": "https://github.com/nesquena/hermes-webui",
@@ -56,6 +56,6 @@
     }
   },
   "ui": {
-    "revision": "da1ff6e6e0df"
+    "revision": "39cbfc47bbfe"
   }
 }
