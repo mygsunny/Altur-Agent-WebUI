@@ -15,7 +15,7 @@ class ArtworkSettingsTests(unittest.TestCase):
                     if isinstance(target, ast.Name) and isinstance(node.value, ast.Dict) and target.id in ('_SETTINGS_DEFAULTS', '_SETTINGS_ENUM_VALUES', '_SETTINGS_INT_RANGES'):
                         values[target.id] = {
                             k.value: ast.literal_eval(v)
-                            for k, v in zip(node.value.keys, node.value.values)
+                            for k, v in zip(node.value.keys, node.value.values, strict=True)
                             if isinstance(k, ast.Constant) and isinstance(k.value, str)
                             and k.value.startswith('welcome_')
                         }
