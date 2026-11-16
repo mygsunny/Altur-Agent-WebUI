@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Altru WebUI launcher for a Mac that already runs Hermes (portable copy of the
-original evaluate-local.py from the .8 deployment).
+"""Altru WebUI launcher for a Mac that already runs Hermes (see README.md here).
 
 Machine-specific values come from the environment (set them in the launchd plist):
   ALTRU_WEBUI_HOST   bind address (default 127.0.0.1; a LAN address requires persisted auth)

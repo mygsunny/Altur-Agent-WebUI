@@ -90,8 +90,8 @@
         photo.className = 'welcome-photo';
         const image = document.createElement('img');
         image.addEventListener('load',layout);
-        // Resized WebP copies of welcome-feast.png (5600x1586, kept as the
-        // untouched original). Artwork is sized by height, so derive the
+        // Resized WebP copies of welcome-feast.png (5600x1586 original, attached
+        // to the altru-v1.0.0 GitHub release as source artwork). Artwork is sized by height, so derive the
         // displayed width from the saved target height and let srcset pick
         // the smallest copy that is sharp at this screen's pixel density.
         const target = matchMedia('(max-width: 768px)').matches ? saved.welcome_artwork_height_mobile : saved.welcome_artwork_height_desktop;
