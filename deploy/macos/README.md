@@ -13,4 +13,5 @@ Update later:
     cd ~/.local/opt/Altur-Agent-WebUI && git pull && launchctl kickstart -k gui/$(id -u)/org.artemisproject.altru-webui
 
 State (settings.json, auth keys, sessions) lives in ~/.local/share/hermes-webui-evaluation
-and is never in git. The launchd plist sets ALTRU_WEBUI_HOST to the machine's LAN IP.
+and is never in git. The launchd plist sets ALTRU_WEBUI_HOST to the machine's LAN IP,
+and ALTRU_HERMES_PROFILE when the Mac runs Hermes under a named profile (.26 uses miaaa).

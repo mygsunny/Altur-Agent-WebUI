@@ -6,6 +6,8 @@ Machine-specific values come from the environment (set them in the launchd plist
   ALTRU_WEBUI_HOST   bind address (default 127.0.0.1; a LAN address requires persisted auth)
   ALTRU_WEBUI_PORT   port (default 8787)
   HERMES_HOME        Hermes home (default ~/.hermes)
+  ALTRU_HERMES_PROFILE  optional named profile (~/.hermes/profiles/<name>); the
+                     WebUI then shows only that profile's chats (isolated mode)
   ALTRU_WEBUI_DATA   WebUI state dir (default ~/.local/share/hermes-webui-evaluation)
 No installer, updater or gateway restart is performed.
 """
@@ -17,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 HOME = Path(os.environ.get('HERMES_HOME') or Path.home()/'.hermes')
 DATA = Path(os.environ.get('ALTRU_WEBUI_DATA') or Path.home()/'.local/share/hermes-webui-evaluation')
 HOST = os.environ.get('ALTRU_WEBUI_HOST', '127.0.0.1')
+PROFILE = os.environ.get('ALTRU_HERMES_PROFILE', '').strip()
 PORT = os.environ.get('ALTRU_WEBUI_PORT', '8787')
 DATA.mkdir(parents=True, exist_ok=True, mode=0o700)
 # Deliberately override inherited profile/network/installer choices.
@@ -24,6 +27,12 @@ os.environ.update(HERMES_HOME=str(HOME), HERMES_WEBUI_AGENT_DIR=str(HOME/'hermes
     HERMES_WEBUI_STATE_DIR=str(DATA), HERMES_WEBUI_HOST=HOST, HERMES_WEBUI_PORT=PORT,
     HERMES_WEBUI_AUTO_INSTALL='0', HERMES_DISABLE_LAZY_INSTALLS='1', HERMES_SKIP_CHMOD='1',
     HERMES_WEBUI_SKIP_ONBOARDING='1', PYTHONDONTWRITEBYTECODE='1')
+if PROFILE:
+    if PROFILE != Path(PROFILE).name or not (HOME/'profiles'/PROFILE).is_dir():
+        raise SystemExit(f'Hermes profile not found: {HOME/"profiles"/PROFILE}')
+    # Serve one named profile; the agent code stays in the base home.
+    os.environ.update(HERMES_HOME=str(HOME/'profiles'/PROFILE), HERMES_BASE_HOME=str(HOME),
+        HERMES_WEBUI_ISOLATED_PROFILE='1')
 os.environ.pop('HERMES_RUNTIME_DIR', None)
 os.environ.pop('HERMES_WEBUI_SETTINGS_FILE', None)
 # Settings owns authentication. Never allow an inherited environment override.
