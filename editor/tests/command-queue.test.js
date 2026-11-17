@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {Controller} from '../src/controller.js';
+const turn=()=>new Promise(r=>setImmediate(r));
+test('mixed typed and finalized speech capture immutable FIFO entries while first is delayed',async()=>{
+ const requests=[],commits=[],finish=[],updates=[];const c=new Controller(body=>{requests.push(body);return new Promise(r=>finish.push(r))},()=>{},()=>{},items=>updates.push(items));c.open('d',{context:()=>({version:commits.length}),apply:op=>commits.push(op.text)});
+ const first=c.submit('typed first','a');const second=c.transcript('spoken second','b',true);const third=c.transcript('spoken third','c',true);await c.transcript('spoken second duplicate','b',true);c.transcript('new partial prompt','partial',false);
+ assert.equal(requests.length,1);assert.deepEqual(c.items.map(x=>[x.text,x.status]),[['typed first','Running'],['spoken second','Waiting'],['spoken third','Waiting']]);
+ for(let i=0;i<3;i++){finish[i]({document_id:'d',utterance_id:['a','b','c'][i],operations:[{type:'document.append',text:['first','second','third'][i]}]});await turn();}
+ await Promise.all([first,second,third]);assert.deepEqual(requests.map(x=>x.text),['typed first','spoken second','spoken third']);assert.deepEqual(requests.map(x=>x.context.version),[0,1,2]);assert.deepEqual(commits,['first','second','third']);
+});
+test('timeout advances queue, sends no retry and ignores late model completion',async()=>{
+ let finish;const calls=[],commits=[],reports=[];const c=new Controller(body=>{calls.push(body);return new Promise(r=>finish=r)},t=>reports.push(t));c.inferenceTimeout=10;c.open('d',{context:()=>({}),apply:op=>commits.push(op)});const first=c.submit('slow command','a');const second=c.submit('dependent command','b');const firstFinish=finish;await first;assert.equal(c.items[0].status,'Failed');assert.equal(c.items[1].status,'Running');firstFinish({document_id:'d',utterance_id:'a',operations:[{type:'undo'}]});await turn();assert.equal(commits.length,0);assert.equal(calls.length,2);assert.ok(reports.some(t=>/timed out/.test(t)));c.stop();await second;
+});
+test('clarification pauses dependent items and overflow is explicit backpressure',async()=>{let finish;const reports=[];const c=new Controller(()=>new Promise(r=>finish=r),t=>reports.push(t));c.queueLimit=2;c.open('d',{context:()=>({}),apply(){assert.fail('must clarify')}});const a=c.submit('ambiguous','a'),b=c.transcript('dependent','b',true);assert.equal(c.submit('overflow','c'),undefined);assert.ok(reports.at(-1).includes('queue full'));finish({document_id:'d',utterance_id:'a',operations:[],clarification:'Which target?'});await a;assert.deepEqual(c.items.map(i=>i.status),['Clarification','Paused']);c.stop();await b;});
+test('Stop and document switch cancel active and waiting entries',async()=>{
+ let finish;let commits=0,calls=0;const c=new Controller(()=>{calls++;return new Promise(r=>finish=r)},()=>{});c.open('d',{context:()=>({}),apply:()=>commits++});const a=c.submit('first','a'),b=c.submit('second','b');c.open('new',{context:()=>({}),apply:()=>commits++});finish({document_id:'d',utterance_id:'a',operations:[{type:'undo'}]});await Promise.all([a,b]);assert.equal(calls,1);assert.equal(commits,0);assert.ok(c.items.every(x=>x.status==='Canceled'));
+});

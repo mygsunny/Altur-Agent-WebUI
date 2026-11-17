@@ -1,5 +1,19 @@
 # Hermes Web UI: Developer and Architecture Guide
 
+## Optional Co-work editor boundary
+
+The optional lazy `static/cowork/` bundle is built only from `editor/`; the existing
+shell remains Python + vanilla JS with no root frontend build. Univer OSS owns
+spreadsheet models/history, Tiptap/ProseMirror owns document models/history, and
+`editor/src/controller.js` binds tool-free configured-model intentions to document
+identity and synchronous targeted native transactions. `api/cowork.py` owns
+profile-scoped SQLite snapshots/current+prior versions, revision CAS, writer
+leases and strict intent validation. Existing Handler authentication and POST
+CSRF gates apply; no arbitrary filesystem or executable-command endpoint exists.
+See [the trial guide](docs/cowork.md) for exact versions, API/ownership contracts,
+conversion limits, isolated harness and blocked real inference/STT acceptance.
+This optional module does not start or resume gateway/background consumers.
+
 > This document is the canonical reference for anyone (human or agent) working on the
 > Hermes Web UI. It covers the exact current state of the code, every design decision and
 > quirk discovered during development, and a phased architecture improvement roadmap that
